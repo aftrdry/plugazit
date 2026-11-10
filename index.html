@@ -61,21 +61,21 @@
       backdrop-filter: blur(16px);
     }
 
-    /* 원본 PlugAzit.png 로고 */
+    /* 흰색 박스 잔상 제거 blend-mode 로고 스타일 */
     .logo-container {
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
-      height: 70px;
-      overflow: hidden;
+      height: 45px;
     }
     .brand-logo-img {
-      height: 65px;
+      height: 42px;
       width: auto;
       display: block;
       object-fit: contain;
-      pointer-events: none;
-      -webkit-user-drag: none;
+      mix-blend-mode: screen;
     }
-    [data-theme="light"] .brand-logo-img { filter: invert(1); }
+    [data-theme="light"] .brand-logo-img {
+      mix-blend-mode: multiply;
+    }
 
     nav { display: flex; gap: 1rem; align-items: center; }
 
@@ -88,7 +88,6 @@
       color: var(--text-primary); background: var(--card-bg);
     }
 
-    /* 디스코드/트위터 아이콘 버튼 스타일 */
     .social-link-btn {
       color: var(--text-secondary); padding: 0.5rem 0.7rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem;
       transition: all 0.2s ease; text-decoration: none; display: flex; align-items: center; gap: 0.4rem;
@@ -232,7 +231,7 @@
 </head>
 <body>
 
-  <!-- Header (디스코드 및 트위터/X 링크 포함) -->
+  <!-- Header -->
   <header>
     <a href="#" class="logo-container" onclick="showPage('deals'); return false;">
       <img src="PlugAzit.png" alt="PlugAzit" class="brand-logo-img" />
@@ -243,7 +242,6 @@
       <button class="nav-tab-link" id="navCommBtn" onclick="showPage('community')">Community</button>
       <button class="nav-tab-link" id="navAdminBtn" style="display:none; color: var(--accent-gold);" onclick="showPage('admin')">Admin Center</button>
       
-      <!-- 디스코드 & 트위터 소셜 링크 -->
       <a href="https://discord.gg" target="_blank" class="social-link-btn" title="공식 디스코드 커뮤니티">Discord</a>
       <a href="https://x.com/plugazit" target="_blank" class="social-link-btn" title="공식 트위터(X)">Twitter</a>
 
