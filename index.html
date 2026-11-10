@@ -350,7 +350,7 @@
     </div>
   </div>
 
-  <!-- 회원가입 모달 (닉네임 필드 포함) -->
+  <!-- 회원가입 모달 -->
   <div class="modal-overlay" id="signupModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('signupModal')">×</button>
@@ -400,7 +400,7 @@
     </div>
   </div>
 
-  <!-- 약관 팝업 모달 -->
+  <!-- 이용약관 팝업 모달 -->
   <div class="modal-overlay" id="termsModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('termsModal')">×</button>
@@ -643,34 +643,50 @@
       location.reload();
     }
 
-    // 마이페이지 조회 & 업데이트
+    // 마이페이지 안정화 로직 적용
     async function openMyPageModal() {
       openModal('myPageModal');
 
       if (!supabaseClient) {
         document.getElementById('myPageEmail').value = 'aftrdry@outlook.kr';
         document.getElementById('myPageNickname').value = '@aftrdry';
+        document.getElementById('myPageDaw').value = 'Logic Pro';
         return;
       }
 
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (!session) return;
-
-      const user = session.user;
-      document.getElementById('myPageEmail').value = user.email;
-
-      // Supabase profiles 테이블에서 사용자 데이터 가져오기
-      const { data, error } = await supabaseClient
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (data) {
-        document.getElementById('myPageNickname').value = data.nickname || '';
-        if (data.main_daw) {
-          document.getElementById('myPageDaw').value = data.main_daw;
+      try {
+        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+        
+        if (sessionError || !session) {
+          alert('로그인이 필요한 서비스입니다.');
+          closeModal('myPageModal');
+          openModal('loginModal');
+          return;
         }
+
+        const user = session.user;
+        document.getElementById('myPageEmail').value = user.email || '';
+
+        const { data, error } = await supabaseClient
+          .from('profiles')
+          .select('nickname, main_daw')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('프로필 로드 에러:', error.message);
+        }
+
+        if (data) {
+          document.getElementById('myPageNickname').value = data.nickname || '';
+          if (data.main_daw) {
+            document.getElementById('myPageDaw').value = data.main_daw;
+          }
+        } else {
+          document.getElementById('myPageNickname').value = user.user_metadata?.nickname || '';
+        }
+      } catch (err) {
+        console.error('마이페이지 연동 오류:', err);
       }
     }
 
