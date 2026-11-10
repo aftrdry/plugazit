@@ -22,8 +22,11 @@
       --text-secondary: #909892;
       --modal-bg: #161917;
       --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --logo-blend: screen;
+      --logo-filter: invert(1);
     }
 
+    /* Sand Beige & Deep Walnut Tone */
     [data-theme="light"] {
       --bg-color: #f5f2eb;
       --header-bg: rgba(245, 242, 235, 0.92);
@@ -36,6 +39,8 @@
       --text-primary: #1a1d1b;
       --text-secondary: #6e736f;
       --modal-bg: #ffffff;
+      --logo-blend: multiply;
+      --logo-filter: none;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,23 +66,21 @@
       backdrop-filter: blur(16px);
     }
 
-    /* 원본 PlugAzit.png 로고 복원 및 하단 선 침범 잔상 방지 컨테이너 */
     .logo-container {
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
-      height: 70px;
-      overflow: hidden;
     }
+
+    /* 로고 마우스 오버 툴팁(Ps 현상) 및 잔상 방지 */
     .brand-logo-img {
-      height: 65px;
+      height: 110px;
       width: auto;
       display: block;
       object-fit: contain;
+      mix-blend-mode: var(--logo-blend);
+      filter: var(--logo-filter);
       pointer-events: none;
       -webkit-user-drag: none;
-    }
-    /* 라이트모드 전환 시 원본 이미지의 흰색 글자만 검은색으로 반전 */
-    [data-theme="light"] .brand-logo-img {
-      filter: invert(1);
+      transition: filter 0.3s ease, mix-blend-mode 0.3s ease;
     }
 
     nav { display: flex; gap: 1.2rem; align-items: center; }
@@ -102,7 +105,10 @@
     }
     [data-theme="light"] .toggle-knob { transform: translateX(22px); }
 
-    #authNav, #userNav { display: flex; gap: 0.8rem; align-items: center; }
+    /* Auth Buttons */
+    #authNav, #userNav {
+      display: flex; gap: 0.8rem; align-items: center;
+    }
 
     .nav-btn {
       background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);
@@ -113,6 +119,7 @@
 
     .container { max-width: 1280px; margin: 0 auto; padding: 2.5rem 2.5rem; flex: 1; width: 100%; }
 
+    /* Hero Slogan Section */
     .hero-slogan-section {
       padding: 1.5rem 0 2.2rem 0;
       border-bottom: 1px solid var(--border-color);
@@ -122,8 +129,12 @@
       font-size: 2.5rem; font-weight: 900; letter-spacing: -0.03em;
       color: var(--text-primary); margin-bottom: 0.6rem;
     }
-    .hero-subtitle { font-size: 1.05rem; color: var(--text-primary); font-weight: 600; line-height: 1.6; }
-    .hero-subtitle .sub-line { display: block; color: var(--text-primary); font-weight: 600; }
+    .hero-subtitle {
+      font-size: 1.05rem; color: var(--text-primary); font-weight: 600; line-height: 1.6;
+    }
+    .hero-subtitle .sub-line {
+      display: block; color: var(--text-primary); font-weight: 600;
+    }
 
     .category-section { margin-bottom: 2.5rem; }
     .main-cat-bar {
@@ -135,7 +146,9 @@
       color: var(--text-secondary); padding: 0.6rem 1.4rem; border-radius: 6px;
       font-size: 0.88rem; font-weight: 600; cursor: pointer; whitespace: nowrap; transition: all 0.2s ease;
     }
-    .cat-chip.active, .cat-chip:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+    .cat-chip.active, .cat-chip:hover {
+      background: var(--accent-color); color: #fff; border-color: var(--accent-color);
+    }
     .cat-chip.affiliate { margin-left: auto; border-color: var(--accent-gold); color: var(--accent-gold); }
     .cat-chip.affiliate:hover { background: var(--accent-gold); color: #fff; }
 
@@ -145,7 +158,9 @@
       color: var(--text-secondary); padding: 0.35rem 0.95rem; border-radius: 20px;
       font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
     }
-    .sub-chip.active, .sub-chip:hover { background: var(--card-hover); color: var(--text-primary); border-color: var(--text-primary); }
+    .sub-chip.active, .sub-chip:hover {
+      background: var(--card-hover); color: var(--text-primary); border-color: var(--text-primary);
+    }
 
     .deals-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 2rem; margin-bottom: 4rem;
@@ -161,7 +176,9 @@
     .deal-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 0.3rem; color: var(--text-primary); text-decoration: none; line-height: 1.35; }
     .sub-cat-tag { font-size: 0.78rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.8rem; }
 
-    .description-text { font-size: 0.88rem; color: var(--text-primary); margin-bottom: 1rem; line-height: 1.5; font-weight: 500; }
+    .description-text {
+      font-size: 0.88rem; color: var(--text-primary); margin-bottom: 1rem; line-height: 1.5; font-weight: 500;
+    }
 
     .price-box { margin: 0.8rem 0 1.2rem 0; padding: 1rem; background: var(--bg-color); border-radius: 6px; border: 1px solid var(--border-color); }
     .original-price { text-decoration: line-through; color: var(--text-secondary); font-size: 0.85rem; margin-right: 0.5rem; }
@@ -185,6 +202,7 @@
     .comm-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.6rem; border-radius: 10px; margin-bottom: 1.2rem; }
     .comm-author { font-weight: 700; color: var(--accent-gold); margin-right: 0.6rem; }
 
+    /* Footer 및 이용약관 팝업 링크 스타일 */
     footer {
       border-top: 1px solid var(--border-color); padding: 2.5rem 2rem; text-align: center;
       color: var(--text-secondary); font-size: 0.82rem; margin-top: auto; background: var(--card-bg);
@@ -192,12 +210,15 @@
     }
     footer a { color: var(--text-primary); text-decoration: none; font-weight: 600; }
     footer a:hover { color: var(--accent-gold); }
-    .footer-links { margin-top: 0.6rem; display: flex; justify-content: center; gap: 1.2rem; font-size: 0.78rem; }
+    .footer-links {
+      margin-top: 0.6rem; display: flex; justify-content: center; gap: 1.2rem; font-size: 0.78rem;
+    }
     .footer-links button {
       background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: color 0.2s;
     }
     .footer-links button:hover { color: var(--accent-gold); text-decoration: underline; }
 
+    /* Modal Overlay */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 2000;
@@ -218,6 +239,7 @@
     }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent-gold); }
 
+    /* 약관 팝업 내부 텍스트 박스 스타일 */
     .terms-popup-content {
       font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7; background: var(--bg-color);
       padding: 1.2rem; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 0.8rem;
@@ -228,7 +250,7 @@
 </head>
 <body>
 
-  <!-- Header (원본 PlugAzit.png 로고 적용) -->
+  <!-- Header with Clean Brand Logo -->
   <header>
     <a href="#" class="logo-container" onclick="showPage('deals'); return false;">
       <img src="PlugAzit.png" alt="PlugAzit" class="brand-logo-img" />
@@ -248,14 +270,14 @@
         <button class="nav-btn" onclick="openModal('signupModal')">회원가입</button>
       </div>
       <div id="userNav" style="display:none;">
-        <button class="nav-btn" onclick="openMyPageModal()">마이페이지</button>
+        <button class="nav-btn" onclick="openModal('myPageModal')">마이페이지</button>
         <button class="nav-btn" onclick="handleLogout()">로그아웃</button>
       </div>
     </nav>
   </header>
 
   <div class="container">
-    <!-- Hero Slogan -->
+    <!-- Hero Slogan Section -->
     <div class="hero-slogan-section">
       <h1 class="hero-title">Right Near, Your Azit.</h1>
       <p class="hero-subtitle">
@@ -275,8 +297,10 @@
           <button class="cat-chip" onclick="setMainCategory('free', this)">100% FREE</button>
           <button class="cat-chip affiliate" onclick="filterCategory('affiliate', this)">브랜드 제휴 문의</button>
         </div>
+
         <div class="sub-cat-bar" id="subCatBar"></div>
       </div>
+
       <div class="deals-grid" id="dealsContainer"></div>
     </div>
 
@@ -295,6 +319,11 @@
           <span class="comm-author">@aftrdry</span> <span style="font-size:0.8rem; color:var(--text-secondary);">오늘 20:15</span>
           <h4 style="margin:0.5rem 0 0.3rem 0; font-size:1.1rem;">FabFilter Pro-Q 3 Dynamic EQ 보컬 마스킹 잡는 팁</h4>
           <p style="font-size:0.92rem; color:var(--text-secondary);">저음역 보컬과 베이스 붕붕거림 잡을 때 Sidechain 연동 후 250Hz 영역 Dynamic EQ 적용하면 투명하고 깔끔해집니다.</p>
+        </div>
+        <div class="comm-card">
+          <span class="comm-author">@Producer_K</span> <span style="font-size:0.8rem; color:var(--text-secondary);">어제 18:40</span>
+          <h4 style="margin:0.5rem 0 0.3rem 0; font-size:1.1rem;">soothe2 대신 쓸 수 있는 보컬 서스테인 처리 플러그인 추천</h4>
+          <p style="font-size:0.92rem; color:var(--text-secondary);">Waves Silk Vocal과 Gullfoss 조합도 꽤 쓸만하네요. 불쾌한 부밍음 제어에 확실합니다.</p>
         </div>
       </div>
     </div>
@@ -328,7 +357,7 @@
     </div>
   </div>
 
-  <!-- FOOTER -->
+  <!-- FOOTER (하단 법적 고지 팝업 트리거 링크 배치) -->
   <footer>
     <p>© 2026 PlugAzit. All rights reserved.  |  
        Contact: <a href="mailto:aftrdry@outlook.kr">aftrdry@outlook.kr</a>
@@ -339,29 +368,26 @@
   </footer>
 
   <!-- MODALS -->
-
-  <!-- 로그인 모달 -->
   <div class="modal-overlay" id="loginModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('loginModal')">×</button>
       <h3 style="margin-bottom:1.5rem; font-weight:800;">로그인</h3>
       <form onsubmit="handleLoginSubmit(event)">
-        <div class="form-group"><label>이메일 계정</label><input type="email" id="loginEmail" required placeholder="email@domain.com"></div>
-        <div class="form-group"><label>비밀번호</label><input type="password" id="loginPassword" required placeholder="••••••••"></div>
+        <div class="form-group"><label>이메일 계정</label><input type="email" required placeholder="email@domain.com"></div>
+        <div class="form-group"><label>비밀번호</label><input type="password" required placeholder="••••••••"></div>
         <button type="submit" class="btn-buy" style="margin-top:1rem;">로그인</button>
       </form>
     </div>
   </div>
 
-  <!-- 회원가입 모달 -->
+  <!-- 회원가입 모달: 깔끔한 동의 체크박스만 유지 -->
   <div class="modal-overlay" id="signupModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('signupModal')">×</button>
       <h3 style="margin-bottom:1.5rem; font-weight:800;">회원가입</h3>
       <form onsubmit="handleSignupSubmit(event)">
-        <div class="form-group"><label>프로듀서 닉네임</label><input type="text" id="signupNickname" required placeholder="예: @aftrdry"></div>
-        <div class="form-group"><label>이메일 계정</label><input type="email" id="signupEmail" required placeholder="email@domain.com"></div>
-        <div class="form-group"><label>비밀번호</label><input type="password" id="signupPassword" required placeholder="••••••••"></div>
+        <div class="form-group"><label>이메일 계정</label><input type="email" required placeholder="email@domain.com"></div>
+        <div class="form-group"><label>비밀번호</label><input type="password" required placeholder="••••••••"></div>
         <div class="form-group" style="margin-top: 1.5rem;">
           <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:normal;">
             <input type="checkbox" id="termsCheck" required style="width:auto;"> [필수] 이용약관 및 개인정보 처리방침에 동의합니다.
@@ -372,38 +398,7 @@
     </div>
   </div>
 
-  <!-- 마이페이지 모달 -->
-  <div class="modal-overlay" id="myPageModal">
-    <div class="modal-box">
-      <button class="modal-close" onclick="closeModal('myPageModal')">×</button>
-      <h3 style="margin-bottom:1.5rem; font-weight:800; color:var(--accent-gold);">⚙️ 프로필 설정 (마이페이지)</h3>
-      <form onsubmit="handleProfileUpdateSubmit(event)">
-        <div class="form-group">
-          <label>이메일 계정</label>
-          <input type="email" id="myPageEmail" disabled style="opacity:0.6; cursor:not-allowed;">
-        </div>
-        <div class="form-group">
-          <label>프로듀서 닉네임</label>
-          <input type="text" id="myPageNickname" required placeholder="@aftrdry">
-        </div>
-        <div class="form-group">
-          <label>주 사용 DAW (메인 작업 프로그램)</label>
-          <select id="myPageDaw">
-            <option value="Logic Pro">Logic Pro</option>
-            <option value="Cubase">Cubase</option>
-            <option value="Ableton Live">Ableton Live</option>
-            <option value="FL Studio">FL Studio</option>
-            <option value="Studio One">Studio One</option>
-            <option value="Pro Tools">Pro Tools</option>
-            <option value="Reaper">Reaper</option>
-          </select>
-        </div>
-        <button type="submit" class="btn-buy" style="margin-top:1.5rem;">프로필 정보 저장</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 이용약관 팝업 모달 -->
+  <!-- 이용약관 및 법적 고지 팝업 (모달) 창 -->
   <div class="modal-overlay" id="termsModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('termsModal')">×</button>
@@ -411,8 +406,10 @@
       <div class="terms-popup-content">
         <h4>서비스 목적</h4>
         <p>PlugAzit는 프로듀서들을 위한 VST 딜 큐레이션 및 정보 공유 아지트입니다.</p>
+        
         <h4>세일 정보 및 제휴 마케팅 안내</h4>
         <p>제공되는 모든 세일 정보와 가격은 각 브랜드 공식 스토어 정책에 따르며, 제휴 링크를 통한 구매 시 소정의 수수료를 제공받을 수 있습니다.</p>
+
         <h4>책임 한계</h4>
         <p>본 사이트에서 안내하는 가격 및 할인율은 각 브랜드의 사정에 따라 예고 없이 변경될 수 있으므로, 최종 결제 전 공식 스토어의 가격을 반드시 확인하시기 바랍니다.</p>
       </div>
@@ -432,12 +429,11 @@
     </div>
   </div>
 
-  <!-- JavaScript Logic & Supabase Integration -->
+  <!-- JavaScript Logic & VST Deals Dataset -->
   <script>
     const SUPABASE_URL = "https://pxmkzyhayxsvbbftncwy.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_J0LQJ-qjr5ISX1jRKaQ7-A_GwABw8XP";
     let supabaseClient = null;
-
     if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
@@ -489,7 +485,7 @@
       { brand: "Output", title: "Arcade 2.0 Loop Synth", cat: "synth", sub: "Sample Library", desc: "매일 업로드되는 고품질 루프 샘플을 자신의 키보드 키에 맞게 실시간 조성 변환하여 아이디어를 스케치하는 가상악기입니다.", original: 120, discountPrice: 60, discountRate: "50% OFF", code: "ARCADE-50", perk: "실시간 클라우드 기반 샘플 라이브러리 구독", storeUrl: "https://output.com" },
       { brand: "Plugin Alliance", title: "Brainworx bx_console SSL 4000 E", cat: "mixing", sub: "Mastering Chain", desc: "전설적인 SSL 4000 E 콘솔 채널 스트립의 EQ, 콤프레서, 게이트 아날로그 회로를 정밀 모델링한 플러그인입니다.", original: 349, discountPrice: 39, discountRate: "88% OFF", code: "PA-SSL-SALE", perk: "SSL 콘솔 특유의 Punchy한 아날로그 채널 믹싱", storeUrl: "https://www.plugin-alliance.com" },
       { brand: "LennarDigital", title: "Sylenth1 Synthesizer", cat: "synth", sub: "Analog/Synth", desc: "가벼운 CPU 점유율과 따뜻한 아날로그 VCF 필터 성능으로 댄스 및 EDM 사운드의 뼈대를 담당하는 웜 신티사이저입니다.", original: 159, discountPrice: 139, discountRate: "12% OFF", code: "SYLENTH139", perk: "아날로그 감성의 초경량 사운드 엔진 탑재", storeUrl: "https://www.lennardigital.com" },
-      { brand: "Softube", title: "Console 1 Empirical Labs Mike-E", cat: "mixing", sub: "Compressor/Limiter", desc: "펀치감 넘치는 새츄레이션과 강력한 콤프레션을 결합하여 드럼과 보컬에 아날로그 질감을 더해주는 컴프레서입니다.", original: 199, discountPrice: 99, discountRate: "50% OFF", code: "SOFTUBE-MIKE", perk: "강렬한 드럼 펀치감 및 새츄레이션 선사", storeUrl: "https://softube.com" },
+      { brand: "Softube", title: "Console 1 Empirical Labs Mike-E", cat: "mixing", sub: "Compressor/Limiter", desc: "펀치감 넘치는 새츄레이션과 강력한 콤프레션을 결합하여 드럼과 보컬에 아날로그 질감을 더해주는 컴프레서입니다.", original: 199, discountPrice: 99, discountRate: "50% OFF", code: "SOFTUBE-MIKE", perk: "강렬한 드럼 펀치감 및 새츄레이션 선사", storeUrl: "https://www.softube.com" },
       { brand: "Vital Audio", title: "Vital Spectral Synth", cat: "free", sub: "Free Synths", desc: "시각적인 스펙트럼 변조 연출과 파형 드로잉을 무상으로 지원하는 고성능 비주얼 웨이브테이블 신티사이저입니다.", original: 80, discountPrice: 0, discountRate: "100% FREE", code: "VITAL-FREE", perk: "풀 비주얼 스펙트럼 웨이브테이블 무료 제공", storeUrl: "https://vital.audio" }
     ];
 
@@ -573,155 +569,39 @@
       }
     }
 
-    // --- Supabase 인증 및 데이터 연동 함수들 ---
-
     async function checkUserSession() {
       if (!supabaseClient) return;
       const { data: { session } } = await supabaseClient.auth.getSession();
-      updateUIAuthStatus(session?.user);
-    }
-
-    function updateUIAuthStatus(user) {
-      document.getElementById('authNav').style.display = user ? 'none' : 'flex';
-      document.getElementById('userNav').style.display = user ? 'flex' : 'none';
+      document.getElementById('authNav').style.display = session?.user ? 'none' : 'flex';
+      document.getElementById('userNav').style.display = session?.user ? 'flex' : 'none';
       const adminBtn = document.getElementById('navAdminBtn');
-      if(adminBtn && user) adminBtn.style.display = 'block';
-    }
-
-    async function handleLoginSubmit(e) {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
-
-      if (!supabaseClient) {
-        closeModal('loginModal');
-        updateUIAuthStatus({ email });
-        alert('환영합니다, 프로듀서님!');
-        return;
-      }
-
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) {
-        alert('로그인 실패: ' + error.message);
-      } else {
-        closeModal('loginModal');
-        updateUIAuthStatus(data.user);
-        alert('성공적으로 로그인되었습니다!');
-      }
-    }
-
-    async function handleSignupSubmit(e) {
-      e.preventDefault();
-      const nickname = document.getElementById('signupNickname').value;
-      const email = document.getElementById('signupEmail').value;
-      const password = document.getElementById('signupPassword').value;
-
-      if (!supabaseClient) {
-        closeModal('signupModal');
-        alert('회원가입이 완료되었습니다! (' + nickname + '님)');
-        return;
-      }
-
-      const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { nickname }
-        }
-      });
-
-      if (error) {
-        alert('회원가입 실패: ' + error.message);
-      } else {
-        closeModal('signupModal');
-        alert('가입 완료! 이메일 인증을 확인하시거나 바로 로그인해 주세요.');
-      }
+      if(adminBtn && session?.user) adminBtn.style.display = 'block';
     }
 
     async function handleLogout() {
       if (supabaseClient) {
         await supabaseClient.auth.signOut();
-      }
-      alert('로그아웃 되었습니다.');
-      location.reload();
-    }
-
-    // 마이페이지 안전 오픈 로직
-    async function openMyPageModal() {
-      openModal('myPageModal');
-
-      if (!supabaseClient) {
-        document.getElementById('myPageEmail').value = 'aftrdry@outlook.kr';
-        document.getElementById('myPageNickname').value = '@aftrdry';
-        document.getElementById('myPageDaw').value = 'Logic Pro';
-        return;
-      }
-
-      try {
-        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-        
-        if (sessionError || !session) {
-          alert('로그인이 필요한 서비스입니다.');
-          closeModal('myPageModal');
-          openModal('loginModal');
-          return;
-        }
-
-        const user = session.user;
-        document.getElementById('myPageEmail').value = user.email || '';
-
-        const { data, error } = await supabaseClient
-          .from('profiles')
-          .select('nickname, main_daw')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (error) {
-          console.error('프로필 로드 에러:', error.message);
-        }
-
-        if (data) {
-          document.getElementById('myPageNickname').value = data.nickname || '';
-          if (data.main_daw) {
-            document.getElementById('myPageDaw').value = data.main_daw;
-          }
-        } else {
-          document.getElementById('myPageNickname').value = user.user_metadata?.nickname || '';
-        }
-      } catch (err) {
-        console.error('마이페이지 연동 오류:', err);
+        alert('로그아웃 되었습니다.');
+        location.reload();
       }
     }
 
-    async function handleProfileUpdateSubmit(e) {
+    function handleLoginSubmit(e) {
       e.preventDefault();
-      const nickname = document.getElementById('myPageNickname').value;
-      const main_daw = document.getElementById('myPageDaw').value;
+      closeModal('loginModal');
+      document.getElementById('authNav').style.display = 'none';
+      document.getElementById('userNav').style.display = 'flex';
+      const adminBtn = document.getElementById('navAdminBtn');
+      if(adminBtn) adminBtn.style.display = 'block';
+      alert('환영합니다, 프로듀서님!');
+    }
 
-      if (!supabaseClient) {
-        alert('프로필 수정이 반영되었습니다.');
-        closeModal('myPageModal');
-        return;
-      }
-
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (!session) return;
-
-      const { error } = await supabaseClient
-        .from('profiles')
-        .update({
-          nickname,
-          main_daw,
-          updated_at: new Date()
-        })
-        .eq('id', session.user.id);
-
-      if (error) {
-        alert('프로필 업데이트 실패: ' + error.message);
-      } else {
-        alert('프로필 정보가 성공적으로 저장되었습니다!');
-        closeModal('myPageModal');
-      }
+    function handleSignupSubmit(e) {
+      e.preventDefault();
+      const chk = document.getElementById('termsCheck');
+      if(chk && !chk.checked) { alert('이용약관 및 개인정보 처리방침에 동의해주세요.'); return; }
+      closeModal('signupModal');
+      alert('회원가입이 완료되었습니다!');
     }
 
     function handlePostSubmit(e) {
