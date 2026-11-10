@@ -22,7 +22,6 @@
       --text-secondary: #909892;
       --modal-bg: #161917;
       --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-      /* 다크모드: 흰 배경 지우고 글자만 반전(흰색) */
       --logo-blend: screen;
       --logo-filter: invert(1);
     }
@@ -40,7 +39,6 @@
       --text-primary: #1a1d1b;
       --text-secondary: #6e736f;
       --modal-bg: #ffffff;
-      /* 라이트모드: 흰 배경 지우고 글자만 투명 렌더링(검은색) */
       --logo-blend: multiply;
       --logo-filter: none;
     }
@@ -51,13 +49,13 @@
       color: var(--text-primary);
       font-family: var(--font-sans);
       line-height: 1.65;
-      padding-top: 90px;
+      padding-top: 100px;
       letter-spacing: -0.02em;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     header {
-      position: fixed; top: 0; left: 0; width: 100%; height: 85px;
+      position: fixed; top: 0; left: 0; width: 100%; height: 90px;
       background: var(--header-bg);
       border-bottom: 1px solid var(--border-color);
       display: flex; justify-content: space-between; align-items: center;
@@ -69,9 +67,9 @@
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
     }
 
-    /* 원본 로고 이미지 글자 셰이프만 100% 또렷하게 렌더링 */
+    /* 로고 크기 대폭 확대 및 시각적 대비 극대화 */
     .brand-logo-img {
-      height: 48px;
+      height: 72px;
       width: auto;
       display: block;
       object-fit: contain;
@@ -84,7 +82,7 @@
 
     .nav-tab-link {
       background: transparent; border: none; color: var(--text-secondary);
-      font-size: 0.92rem; font-weight: 600; cursor: pointer; padding: 0.5rem 1rem;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer; padding: 0.5rem 1rem;
       border-radius: 6px; transition: all 0.2s ease;
     }
     .nav-tab-link.active, .nav-tab-link:hover {
@@ -109,7 +107,7 @@
 
     .nav-btn {
       background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);
-      font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 0.5rem 1.1rem;
+      font-size: 0.88rem; font-weight: 600; cursor: pointer; padding: 0.55rem 1.2rem;
       border-radius: 6px; transition: all 0.2s ease;
     }
     .nav-btn:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
@@ -218,7 +216,7 @@
 </head>
 <body>
 
-  <!-- Header with Perfect Raw Image Blending Logo -->
+  <!-- Header with Large Crisp PlugÂzit Image Logo -->
   <header>
     <a href="#" class="logo-container" onclick="showPage('deals'); return false;">
       <img src="PlugAzit.png" alt="PlugÂzit" class="brand-logo-img" />
