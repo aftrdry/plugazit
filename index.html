@@ -40,8 +40,7 @@
       --text-secondary: #6e736f;
       --modal-bg: #ffffff;
       --logo-blend: multiply;
-      /* 라이트모드에서 흰색 테두리/잔상이 남지 않도록 순수 블랙으로 강제 렌더링 */
-      --logo-filter: brightness(0); 
+      --logo-filter: none;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -71,7 +70,7 @@
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
     }
 
-    /* 로고 마우스 오버 툴팁(Ps 현상) 및 라이트모드 흰색 경계선 완벽 박멸 */
+    /* 로고 마우스 오버 툴팁(Ps 현상) 및 잔상 방지 */
     .brand-logo-img {
       height: 110px;
       width: auto;
@@ -240,6 +239,7 @@
     }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent-gold); }
 
+    /* 약관 팝업 내부 텍스트 박스 스타일 */
     .terms-popup-content {
       font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7; background: var(--bg-color);
       padding: 1.2rem; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 0.8rem;
@@ -357,7 +357,7 @@
     </div>
   </div>
 
-  <!-- FOOTER -->
+  <!-- FOOTER (하단 법적 고지 팝업 트리거 링크 배치) -->
   <footer>
     <p>© 2026 PlugAzit. All rights reserved.  |  
        Contact: <a href="mailto:aftrdry@outlook.kr">aftrdry@outlook.kr</a>
@@ -380,6 +380,7 @@
     </div>
   </div>
 
+  <!-- 회원가입 모달: 깔끔한 동의 체크박스만 유지 -->
   <div class="modal-overlay" id="signupModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('signupModal')">×</button>
@@ -397,6 +398,7 @@
     </div>
   </div>
 
+  <!-- 이용약관 및 법적 고지 팝업 (모달) 창 -->
   <div class="modal-overlay" id="termsModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('termsModal')">×</button>
