@@ -52,6 +52,9 @@
       padding-top: 110px;
       letter-spacing: -0.02em;
       transition: background-color 0.3s ease, color 0.3s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     header {
@@ -67,7 +70,6 @@
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
     }
 
-    /* 브랜드 로고 시원하게 대폭 확대 */
     .brand-logo-img {
       height: 110px;
       width: auto;
@@ -112,7 +114,7 @@
     }
     .nav-btn:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
 
-    .container { max-width: 1280px; margin: 0 auto; padding: 2.5rem 2.5rem; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 2.5rem 2.5rem; flex: 1; width: 100%; }
 
     /* Hero Slogan Section */
     .hero-slogan-section {
@@ -194,6 +196,7 @@
     .comm-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.6rem; border-radius: 10px; margin-bottom: 1.2rem; }
     .comm-author { font-weight: 700; color: var(--accent-gold); margin-right: 0.6rem; }
 
+    /* Modal Overlay & Legal Terms Window */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 2000;
@@ -201,8 +204,9 @@
     }
     .modal-overlay.active { display: flex; }
     .modal-box {
-      background: var(--modal-bg); border: 1px solid var(--border-color); width: 100%; max-width: 440px;
+      background: var(--modal-bg); border: 1px solid var(--border-color); width: 100%; max-width: 460px;
       border-radius: 12px; padding: 2.2rem; position: relative; color: var(--text-primary);
+      max-height: 85vh; overflow-y: auto;
     }
     .modal-close { position: absolute; top: 1.2rem; right: 1.2rem; background: none; border: none; color: var(--text-secondary); font-size: 1.4rem; cursor: pointer; }
     .form-group { margin-bottom: 1.2rem; }
@@ -212,6 +216,12 @@
       border-radius: 6px; color: var(--text-primary); font-size: 0.95rem; outline: none; transition: border-color 0.2s;
     }
     .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-gold); }
+
+    .legal-text-content {
+      font-size: 0.83rem; color: var(--text-secondary); line-height: 1.7; background: var(--bg-color);
+      padding: 1.2rem; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 1rem;
+    }
+    .legal-text-content h4 { color: var(--text-primary); margin: 0.8rem 0 0.4rem 0; font-size: 0.9rem; }
   </style>
 </head>
 <body>
@@ -291,6 +301,24 @@
     </div>
   </div>
 
+  <!-- LEGAL FOOTER SECTION (운영권 독점 및 공정위 고지 준수 법적 보호막) -->
+  <footer style="padding: 2.2rem 3rem; background: var(--header-bg); border-top: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.8rem; line-height: 1.65; margin-top: auto;">
+    <div style="max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 0.9rem;">
+      <div style="display: flex; gap: 1.6rem; font-weight: 600;">
+        <a href="#" onclick="openModal('termsModal'); return false;" style="color: var(--accent-gold); text-decoration: none;">이용약관</a>
+        <a href="#" onclick="openModal('privacyModal'); return false;" style="color: var(--accent-gold); text-decoration: none;">개인정보처리방침</a>
+        <a href="mailto:aftrdry@outlook.kr" style="color: var(--text-primary); text-decoration: none;">제휴 및 서비스 문의</a>
+      </div>
+      <p style="margin: 0; color: var(--text-secondary);">
+        <strong>PlugAzit (플러그아지트)</strong> | 운영자: 박건후 | 연락처: aftrdry@outlook.kr / aftrdry@outlook.com<br/>
+        Copyright © 2026 PlugAzit. All rights reserved. 본 서비스의 상표, 웹 UI/UX 레이아웃, 큐레이션 데이터베이스 및 고유 브랜드 콘텐츠에 대한 독점적 지식재산권은 PlugAzit에 있으며, 무단 복제·크롤링 및 무단 전재를 엄격히 금합니다.
+      </p>
+      <p style="margin: 0; opacity: 0.85; font-size: 0.76rem;">
+        ※ <strong>Affiliate Disclosure:</strong> PlugAzit는 글로벌 공식 소프트웨어 스토어와의 제휴(Affiliate)를 통해 일부 링크로 구매 시 수수료를 지급받을 수 있으며, 이는 이용자의 최종 구매 금액에 일체의 영향을 주지 않습니다.
+      </p>
+    </div>
+  </footer>
+
   <!-- Modals -->
   <div class="modal-overlay" id="loginModal">
     <div class="modal-box">
@@ -323,7 +351,14 @@
           <label>비밀번호</label>
           <input type="password" id="signupPassword" placeholder="8자리 이상" required autocomplete="new-password" />
         </div>
-        <button type="submit" class="btn-buy" style="margin-top:0.8rem;">회원가입</button>
+        <!-- 법적 규정 동의 필수 체크박스 -->
+        <div class="form-group" style="margin: 1rem 0 1.2rem 0;">
+          <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.78rem; cursor: pointer; color: var(--text-primary); font-weight: 500; line-height: 1.4;">
+            <input type="checkbox" id="signupTermsAgree" required style="width: auto; margin-top: 2px; cursor: pointer;">
+            <span><a href="#" onclick="openModal('termsModal'); return false;" style="color: var(--accent-gold);">이용약관</a> 및 <a href="#" onclick="openModal('privacyModal'); return false;" style="color: var(--accent-gold);">개인정보처리방침</a>의 모든 내용을 확인하였으며 이에 동의합니다. (필수)</span>
+          </label>
+        </div>
+        <button type="submit" class="btn-buy">회원가입 완료</button>
       </form>
     </div>
   </div>
@@ -331,7 +366,11 @@
   <div class="modal-overlay" id="postModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('postModal')">×</button>
-      <h3 style="margin-bottom:1.5rem; font-weight:800;">글쓰기</h3>
+      <h3 style="margin-bottom:1.5rem; font-weight:800;">노하우 공유하기</h3>
+      <!-- 저작권 및 불법 크랙 공유 금지 가이드라인 -->
+      <div style="font-size: 0.76rem; color: var(--text-secondary); background: var(--bg-color); padding: 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 1.2rem; line-height: 1.5;">
+        ⚠️ <strong>커뮤니티 운영 원칙:</strong> 타인의 저작권을 침해하는 불법 크랙(Crack) 공유 및 무단 비방 게시글은 예고 없이 삭제 조치되며, 등록된 게시글에 대한 법적 책임은 작성자 본인에게 있습니다.
+      </div>
       <form id="postForm">
         <div class="form-group">
           <label>제목</label>
@@ -343,6 +382,41 @@
         </div>
         <button type="submit" class="btn-buy">등록하기</button>
       </form>
+    </div>
+  </div>
+
+  <!-- LEGAL TERMS MODAL (이용약관 모달) -->
+  <div class="modal-overlay" id="termsModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('termsModal')">×</button>
+      <h3 style="font-weight:800;">서비스 이용약관</h3>
+      <div class="legal-text-content">
+        <h4>제1조 (목적 및 독점적 권리)</h4>
+        본 약관은 PlugAzit(이하 "회사")가 제공하는 VST 큐레이션 및 커뮤니티 서비스의 이용 조건 및 절차를 규정합니다. PlugAzit가 제공하는 상표, 서비스 UX/UI 디자인, DB 및 정보 큐레이션에 관한 독점적 권리는 회사에 속합니다.
+        <h4>제2조 (무단 크롤링 및 수집 금지)</h4>
+        이용자는 회사의 사전 승인 없이 서비스 내 데이터를 크롤링, 스크래핑, 캡처하여 상업적으로 이용하거나 제3자에게 제공할 수 없습니다.
+        <h4>제3조 (회원의 의무 및 게시물 면책)</h4>
+        1. 회원은 타인의 저작권, 상표권 등 지식재산권을 침해하는 내용을 게시해서는 안 됩니다.<br/>
+        2. 불법 복제 소프트웨어(크랙) 다운로드 링크 및 명예훼손 게시물은 통보 없이 삭제되며, 관련 법적 책임은 게시자 본인에게 귀속됩니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- LEGAL PRIVACY MODAL (개인정보처리방침 모달) -->
+  <div class="modal-overlay" id="privacyModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('privacyModal')">×</button>
+      <h3 style="font-weight:800;">개인정보처리방침</h3>
+      <div class="legal-text-content">
+        <h4>1. 개인정보 수집 항목 및 목적</h4>
+        PlugAzit는 회원 가입 및 서비스 이용을 위해 최소한의 개인정보를 수집합니다.
+        - 수집 항목: 이메일 주소, 비밀번호(암호화 저장), 서비스 이용 기록<br/>
+        - 수집 목적: 회원 식별, 서비스 관련 알림 전달, 유저 관리
+        <h4>2. 보유 및 이용 기간</h4>
+        회원 탈퇴 요청 시 수집된 개인정보는 지체 없이 파기되며, 법령에 의해 보존할 필요가 있는 경우 지정된 기간 동안 안전하게 보관됩니다.
+        <h4>3. 개인정보의 보호 및 제3자 제공</h4>
+        회사는 이용자의 동의 없이 개인정보를 외부에 제공하지 않으며, Supabase 보완 인증 프레임워크를 통해 철저히 암호화 관리합니다.
+      </div>
     </div>
   </div>
 
