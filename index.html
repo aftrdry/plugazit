@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    /* Dark Theme: Architectural Dark Wood & Deep Olive Tone */
+    /* Architectural Dark Wood & Deep Charcoal Tone */
     :root {
       --bg-color: #101211;
       --header-bg: rgba(16, 18, 17, 0.92);
@@ -21,10 +21,11 @@
       --text-primary: #f2f0eb;
       --text-secondary: #909892;
       --modal-bg: #161917;
+      --logo-filter: invert(1); /* 다크모드 시 로고 반전(흰색) */
       --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     }
 
-    /* Light Theme: Sand Beige & Deep Walnut Tone */
+    /* Sand Beige & Deep Walnut Tone */
     [data-theme="light"] {
       --bg-color: #f5f2eb;
       --header-bg: rgba(245, 242, 235, 0.92);
@@ -37,6 +38,7 @@
       --text-primary: #1a1d1b;
       --text-secondary: #6e736f;
       --modal-bg: #ffffff;
+      --logo-filter: none; /* 라이트모드 시 원본 검은색 */
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -62,7 +64,10 @@
     .logo-container {
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
     }
-    .logo-svg { height: 34px; width: auto; color: var(--text-primary); }
+    .logo-img {
+      height: 38px; width: auto; display: block;
+      filter: var(--logo-filter); transition: filter 0.3s ease;
+    }
 
     nav { display: flex; gap: 1rem; align-items: center; }
 
@@ -95,7 +100,6 @@
 
     .container { max-width: 1280px; margin: 0 auto; padding: 2.5rem 2.5rem; }
 
-    /* Clean Category Navigation */
     .category-section { margin-bottom: 2.5rem; }
     .main-cat-bar {
       display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.8rem;
@@ -122,7 +126,6 @@
       background: var(--card-hover); color: var(--text-primary); border-color: var(--text-primary);
     }
 
-    /* Minimal Architectural Grid Cards */
     .deals-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 2rem; margin-bottom: 4rem;
     }
@@ -159,12 +162,10 @@
     }
     .btn-buy:hover { background: var(--accent-hover); }
 
-    /* Community Page */
     #communityView { display: none; }
     .comm-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.6rem; border-radius: 10px; margin-bottom: 1.2rem; }
     .comm-author { font-weight: 700; color: var(--accent-gold); margin-right: 0.6rem; }
 
-    /* Modal Form */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 2000;
@@ -187,15 +188,10 @@
 </head>
 <body>
 
-  <!-- Header with Authentic PlugÂzit Vector Logo -->
+  <!-- Header with Original Logo Image File -->
   <header>
     <a href="#" class="logo-container" onclick="showPage('deals'); return false;">
-      <svg class="logo-svg" viewBox="0 0 290 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Exact PlugÂzit Logo Path Render -->
-        <text x="0" y="44" font-family="'Pretendard', sans-serif" font-weight="900" font-size="44" fill="currentColor">Plug</text>
-        <path d="M126 12 L137 2 L148 12 L144 14 L137 7 L130 14 Z" fill="currentColor"/>
-        <text x="120" y="44" font-family="'Pretendard', sans-serif" font-weight="900" font-size="44" fill="currentColor">Âzit</text>
-      </svg>
+      <img src="PlugAzit.png" alt="PlugÂzit" class="logo-img" />
     </a>
 
     <nav>
@@ -354,7 +350,7 @@
         title: "Pro-Q 3 Equalizer", 
         cat: "mixing", sub: "EQ", 
         desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.",
-        original: 179, discountPrice: 134, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 완벽 지원", storeUrl: "https://www.fabfilter.com" 
+        original: 179, discountPrice: 134, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 지원", storeUrl: "https://www.fabfilter.com" 
       },
       { 
         brand: "oeksound", 
@@ -367,15 +363,15 @@
         brand: "Soundtoys", 
         title: "Soundtoys 5.4 Bundle", 
         cat: "fx", sub: "Modulation", 
-        desc: "Decapitator(새츄레이션), Echoboy(딜레이) 등 아날로그 감성의 특색 있는 사운드 질감을 만드는 21가지 최고급 이펙터 플러그인 모음입니다.",
+        desc: "Decapitator(새츄레이션), Echoboy(딜레이) 등 아날로그 감성의 특색 있는 사운드 질감을 만드는 21가지 최고급 이펙터 모음입니다.",
         original: 499, discountPrice: 249, discountRate: "50% OFF", code: "SOUNDTOYS-DEAL", perk: "21개 대표 사운드 디자이닝 이펙터 전체 포함", storeUrl: "https://www.soundtoys.com" 
       },
       { 
         brand: "Universal Audio", 
         title: "UAD Spark 1 Year Pass", 
         cat: "mixing", sub: "Compressor/Limiter", 
-        desc: "DSP 하드웨어 없이도 1176, LA-2A, Studer 테이프 머신 등 전설적인 아날로그 하드웨어의 명음기를 컴퓨터에서 직접 구동할 수 있습니다.",
-        original: 199, discountPrice: 99, discountRate: "50% OFF", code: "UAD-SPARK-50", perk: "전설적 아날로그 믹싱 기기 네이티브 풀 지원", storeUrl: "https://www.uaudio.com" 
+        desc: "DSP 하드웨어 없이 1176, LA-2A, Studer 테이프 머신 등 전설적인 아날로그 하드웨어의 명음기를 컴퓨터에서 네이티브 구동합니다.",
+        original: 199, discountPrice: 99, discountRate: "50% OFF", code: "UAD-SPARK-50", perk: "전설적 아날로그 믹싱 기기 네이티브 지원", storeUrl: "https://www.uaudio.com" 
       },
       { 
         brand: "Arturia", 
@@ -388,7 +384,7 @@
         brand: "Native Instruments", 
         title: "Komplete 14 Standard", 
         cat: "synth", sub: "Sample Library", 
-        desc: "Kontakt 7 샘플러 플랫폼을 기반으로 웅장한 시네마틱 오케스트라, 드럼, 신스 사운드까지 보유한 통합 제작 번들입니다.",
+        desc: "Kontakt 7 샘플러를 기반으로 웅장한 시네마틱 오케스트라, 드럼, 신스 사운드까지 보유한 통합 제작 번들입니다.",
         original: 599, discountPrice: 299, discountRate: "50% OFF", code: "BF-SEASON", perk: "Kontakt 7 및 수만 가지 시네마틱 샘플 수록", storeUrl: "https://www.native-instruments.com" 
       },
       { 
@@ -402,8 +398,92 @@
         brand: "Xfer Records", 
         title: "Serum VST Synth", 
         cat: "synth", sub: "Analog/Synth", 
-        desc: "직관적인 렌더링 파형 편집과 압도적인 사운드 메이킹 성능으로 EDM, 팝, 트랩 전 장르에서 일렉트로닉 신스를 이끄는 툴입니다.",
+        desc: "직관적인 렌더링 파형 편집과 압도적인 사운드 메이킹 성능으로 EDM, 팝, 트랩 전 장르에서 일렉트로닉 신스를 이끄는 대표작입니다.",
         original: 189, discountPrice: 149, discountRate: "21% OFF", code: "SERUM-PROMO", perk: "웨이브테이블 신티사이저 글로벌 시그니처 툴", storeUrl: "https://xferrecords.com" 
+      },
+      { 
+        brand: "Celemony", 
+        title: "Melodyne 5 assistant", 
+        cat: "fx", sub: "Pitch/Vocal", 
+        desc: "보컬의 음정과 타이밍을 음질 손상 없이 정밀하게 수정하는 글로벌 표준 보컬 피치 보정 플러그인입니다.",
+        original: 249, discountPrice: 149, discountRate: "40% OFF", code: "MELODYNE40", perk: "자연스러운 보컬 피치 및 타임 보정 업계 표준", storeUrl: "https://www.celemony.com" 
+      },
+      { 
+        brand: "Spectrasonics", 
+        title: "Omnisphere 2.8", 
+        cat: "synth", sub: "Cinematic/Orchestral", 
+        desc: "영화 음악, 앰비언트, 팝 프로듀싱에 독보적인 대규모 하이브리드 파형 엔진 기반의 대형 몬스터 신티사이저입니다.",
+        original: 499, discountPrice: 399, discountRate: "20% OFF", code: "OMNI-PROD", perk: "시네마틱 및 팝 프로듀싱 필수 대형 신스 번들", storeUrl: "https://www.spectrasonics.net" 
+      },
+      { 
+        brand: "Slate Digital", 
+        title: "Virtual Tape Machines", 
+        cat: "mixing", sub: "Saturation/Tape", 
+        desc: "아날로그 마스터 테이프 릴의 특유한 따뜻함과 Harmonic Distortion 질감을 디지털 트랙에 부여하는 플러그인입니다.",
+        original: 149, discountPrice: 49, discountRate: "67% OFF", code: "SLATE-TAPE", perk: "아날로그 마스터 테이프 특유의 따뜻한 새츄레이션", storeUrl: "https://slatedigital.com" 
+      },
+      { 
+        brand: "Waves Audio", 
+        title: "Horizon Bundle", 
+        cat: "mixing", sub: "Compressor/Limiter", 
+        desc: "L2 Ultramaximizer, Vocal Rider 등 80개 이상의 필수 믹싱 및 마스터링 프로세서를 한 번에 제공하는 스테디셀러 패키지입니다.",
+        original: 3999, discountPrice: 249, discountRate: "93% OFF", code: "CREATE80", perk: "80개 이상 핵심 믹싱 플러그인 동시 포함", storeUrl: "https://www.waves.com" 
+      },
+      { 
+        brand: "Valhalla DSP", 
+        title: "Valhalla VintageVerb", 
+        cat: "fx", sub: "Reverb/Delay", 
+        desc: "1970~80년대 하드웨어 리버브의 울림을 완벽히 재현하여 공간감을 만들어내는 프로듀서 필수 리버브 플러그인입니다.",
+        original: 50, discountPrice: 50, discountRate: "BEST VALUE", code: "DIRECT-BUY", perk: "부드럽고 자연스러운 아날로그 공간감 제공", storeUrl: "https://valhalladsp.com" 
+      },
+      { 
+        brand: "Cableguys", 
+        title: "ShaperBox 3 Bundle", 
+        cat: "fx", sub: "Modulation", 
+        desc: "Volume, Filter, Time 모듈레이션을 자유로운 커스텀 드로잉으로 조작하여 사이드체인과 트렌디한 리듬을 연출합니다.",
+        original: 99, discountPrice: 89, discountRate: "10% OFF", code: "SHAPER3-DEAL", perk: "사이드체인 및 모듈레이션 사운드 디자인 최적화", storeUrl: "https://www.cableguys.com" 
+      },
+      { 
+        brand: "Spitfire Audio", 
+        title: "LABS Series", 
+        cat: "free", sub: "Free Synths", 
+        desc: "고품질로 믹싱된 피아노, 핑거기타, 시네마틱 스트링 등을 무상으로 제공하는 독립 가상악기 컬렉션입니다.",
+        original: 49, discountPrice: 0, discountRate: "100% FREE", code: "SPITFIRE-LABS", perk: "무료 시네마틱 및 아쿠스틱 오케스트라 사운드", storeUrl: "https://labs.spitfireaudio.com" 
+      },
+      { 
+        brand: "Output", 
+        title: "Arcade 2.0 Loop Synth", 
+        cat: "synth", sub: "Sample Library", 
+        desc: "매일 업로드되는 고품질 루프 샘플을 자신의 키보드 키에 맞게 실시간 조성 변환하여 아이디어를 스케치하는 가상악기입니다.",
+        original: 120, discountPrice: 60, discountRate: "50% OFF", code: "ARCADE-50", perk: "실시간 클라우드 기반 샘플 라이브러리 구독", storeUrl: "https://output.com" 
+      },
+      { 
+        brand: "Plugin Alliance", 
+        title: "Brainworx bx_console SSL 4000 E", 
+        cat: "mixing", sub: "Mastering Chain", 
+        desc: "전설적인 SSL 4000 E 콘솔 채널 스트립의 EQ, 콤프레서, 게이트 아날로그 회로를 정밀 모델링한 플러그인입니다.",
+        original: 349, discountPrice: 39, discountRate: "88% OFF", code: "PA-SSL-SALE", perk: "SSL 콘솔 특유의 Punchy한 아날로그 채널 믹싱", storeUrl: "https://www.plugin-alliance.com" 
+      },
+      { 
+        brand: "LennarDigital", 
+        title: "Sylenth1 Synthesizer", 
+        cat: "synth", sub: "Analog/Synth", 
+        desc: "가벼운 CPU 점유율과 따뜻한 아날로그 VCF 필터 성능으로 댄스 및 EDM 사운드의 뼈대를 담당하는 웜 신티사이저입니다.",
+        original: 159, discountPrice: 139, discountRate: "12% OFF", code: "SYLENTH139", perk: "아날로그 감성의 초경량 사운드 엔진 탑재", storeUrl: "https://www.lennardigital.com" 
+      },
+      { 
+        brand: "Softube", 
+        title: "Console 1 Empirical Labs Mike-E", 
+        cat: "mixing", sub: "Compressor/Limiter", 
+        desc: "펀치감 넘치는 새츄레이션과 강력한 콤프레션을 결합하여 드럼과 보컬에 아날로그 질감을 더해주는 컴프레서입니다.",
+        original: 199, discountPrice: 99, discountRate: "50% OFF", code: "SOFTUBE-MIKE", perk: "강렬한 드럼 펀치감 및 새츄레이션 선사", storeUrl: "https://www.softube.com" 
+      },
+      { 
+        brand: "Vital Audio", 
+        title: "Vital Spectral Synth", 
+        cat: "free", sub: "Free Synths", 
+        desc: "시각적인 스펙트럼 변조 연출과 파형 드로잉을 무상으로 지원하는 고성능 비주얼 웨이브테이블 신티사이저입니다.",
+        original: 80, discountPrice: 0, discountRate: "100% FREE", code: "VITAL-FREE", perk: "풀 비주얼 스펙트럼 웨이브테이블 무료 제공", storeUrl: "https://vital.audio" 
       }
     ];
 
