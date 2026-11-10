@@ -61,20 +61,21 @@
       backdrop-filter: blur(16px);
     }
 
-    /* 로고 크기 확실하게 확대 */
+    /* 로고 사이즈 고정 및 다크/라이트모드 필터 역반전 수정 */
     .logo-container {
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
       height: 90px;
     }
     .brand-logo-img {
-      height: 80px; /* 로고 시원하게 확대 */
+      height: 80px;
       width: auto;
       display: block;
       object-fit: contain;
+      filter: invert(1); /* 기본(다크모드): 흰 배경 이미지 -> 어둡게 반전하여 사이트 다크톤과 동화 */
     }
-    /* 라이트모드일 때만 검은 글씨로 반전 */
+    /* 라이트모드 전환 시 원본(흰 배경/검은 글씨) 그대로 적용 */
     [data-theme="light"] .brand-logo-img {
-      filter: invert(1);
+      filter: none;
     }
 
     nav { display: flex; gap: 1rem; align-items: center; }
