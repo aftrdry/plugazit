@@ -1,744 +1,371 @@
 <!DOCTYPE html>
 <html lang="ko" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlugAzit — 믹싱, VST 딜 큐레이션 및 프로듀서 아지트</title>
-    
-    <!-- Supabase JS Client SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlugAzit — 믹싱, VST 딜 큐레이션 &amp; 노하우 허브</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  
+  <!-- Supabase JS SDK CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <style>
-        :root[data-theme="dark"] {
-            --bg-color: #0a0b0d;
-            --card-bg: #12141a;
-            --hero-bg: #111319;
-            --border-color: #1e222d;
-            --text-primary: #eceef2;
-            --text-secondary: #8a919e;
-            --accent-blue: #3b82f6;
-            --accent-green: #10b981;
-            --accent-amber: #f59e0b;
-            --header-bg: rgba(10, 11, 13, 0.9);
-            --logo-filter: invert(1);
-            --modal-bg: #161922;
-            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-            --font-sans: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Segoe UI', sans-serif;
-        }
+  <style>
+    :root {
+      --bg-color: #0b0f19;
+      --card-bg: #131927;
+      --border-color: #1f293d;
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --accent-color: #3b82f6;
+      --accent-hover: #2563eb;
+      --modal-bg: #161e2e;
+      --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
 
-        :root[data-theme="light"] {
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --hero-bg: #edf2f7;
-            --border-color: #e2e8f0;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --accent-blue: #2563eb;
-            --accent-green: #059669;
-            --accent-amber: #d97706;
-            --header-bg: rgba(248, 250, 252, 0.9);
-            --logo-filter: none;
-            --modal-bg: #ffffff;
-            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-            --font-sans: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Segoe UI', sans-serif;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 0 1.5rem 3rem 1.5rem;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+    }
+    .logo { font-size: 1.5rem; font-weight: 800; color: #fff; cursor: pointer; text-decoration: none; }
+    .logo span { color: var(--accent-color); }
+    nav { display: flex; gap: 1rem; align-items: center; }
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { color: #fff; background-color: var(--card-bg); }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            font-family: var(--font-sans);
-            line-height: 1.6;
-            padding: 0 1.5rem 3rem 1.5rem;
-            max-width: 1080px;
-            margin: 0 auto;
-            transition: background-color 0.3s, color 0.3s;
-        }
+    /* Main Banner */
+    .hero { text-align: center; padding: 3rem 1rem; }
+    .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; }
+    .hero p { color: var(--text-secondary); max-width: 600px; margin: 0 auto 2rem auto; font-size: 1.05rem; }
+    .social-btns { display: flex; justify-content: center; gap: 1rem; }
+    .btn-social {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      text-decoration: none;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+    .btn-discord { background-color: #5865F2; }
+    .btn-twitter { background-color: #1DA1F2; }
 
-        header {
-            position: sticky;
-            top: 0;
-            background: var(--header-bg);
-            backdrop-filter: blur(12px);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            margin-bottom: 2.5rem;
-            border-bottom: 1px solid var(--border-color);
-            z-index: 100;
-        }
+    /* Deals Table */
+    .section-title { font-size: 1.3rem; font-weight: 700; margin: 2rem 0 1rem 0; display: flex; justify-content: space-between; align-items: center; }
+    .table-container { width: 100%; overflow-x: auto; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); }
+    th { color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
+    tr:last-child td { border-bottom: none; }
+    .tag { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+    .tag-free { background-color: rgba(16, 185, 129, 0.2); color: #10B981; }
+    .tag-discount { background-color: rgba(245, 158, 11, 0.2); color: #F59E0B; }
+    .deal-link { color: var(--text-primary); text-decoration: none; font-weight: 600; }
+    .deal-link:hover { color: var(--accent-color); }
 
-        .brand-logo {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            background: transparent;
-            padding: 0;
-            border: none;
-            cursor: pointer;
-        }
-
-        .brand-logo img {
-            height: 64px;
-            width: auto;
-            object-fit: contain;
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            filter: var(--logo-filter);
-            transition: filter 0.3s, transform 0.2s;
-        }
-
-        .brand-logo:hover img { transform: scale(1.02); }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        .nav-link-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 0.88rem;
-            font-weight: 500;
-            padding: 0.4rem 0.7rem;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-
-        .nav-link-btn:hover {
-            color: var(--text-primary);
-            background: rgba(0, 0, 0, 0.05);
-        }
-
-        .theme-toggle {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            transition: all 0.2s;
-        }
-
-        .theme-toggle:hover { border-color: var(--text-secondary); }
-
-        .hero {
-            position: relative;
-            margin-bottom: 3.5rem;
-            padding: 3rem 2.5rem;
-            border-radius: 12px;
-            background-color: var(--hero-bg);
-            border: 1px solid var(--border-color);
-            transition: background-color 0.3s;
-        }
-
-        .hero h1 {
-            font-size: 2.8rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 1rem;
-            line-height: 1.2;
-            color: var(--text-primary);
-        }
-
-        .hero p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            max-width: 760px;
-            margin-bottom: 2rem;
-            word-break: keep-all;
-        }
-
-        .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.4rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            font-family: var(--font-mono);
-        }
-
-        .btn-discord { background: #5865F2; color: #ffffff; }
-        .btn-discord:hover { background: #4752C4; }
-        .btn-twitter { background: #1DA1F2; color: #ffffff; }
-        .btn-twitter:hover { background: #0c85d0; }
-
-        .category-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 0.4rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .category-nav {
-            display: flex;
-            gap: 0.4rem;
-        }
-
-        .nav-btn {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-family: var(--font-sans);
-            font-weight: 600;
-            font-size: 0.92rem;
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            border-radius: 7px;
-            transition: all 0.2s;
-            text-align: center;
-        }
-
-        .nav-btn.active {
-            background: var(--accent-blue);
-            color: #ffffff;
-        }
-
-        .nav-btn:hover:not(.active) {
-            color: var(--text-primary);
-            background: rgba(0, 0, 0, 0.04);
-        }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.2rem;
-        }
-
-        .section-title {
-            font-family: var(--font-mono);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-secondary);
-        }
-
-        .deal-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 3rem;
-        }
-
-        .deal-table th, .deal-table td {
-            padding: 1rem 1.2rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.9rem;
-        }
-
-        .deal-table th {
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            background: rgba(0, 0, 0, 0.03);
-        }
-
-        .deal-table tr:last-child td { border-bottom: none; }
-
-        .tag {
-            display: inline-block;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            padding: 0.15rem 0.4rem;
-            border-radius: 3px;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .tag-hot { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
-        .tag-free { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); }
-
-        .code-box {
-            font-family: var(--font-mono);
-            background: rgba(0, 0, 0, 0.06);
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            font-size: 0.8rem;
-            color: var(--accent-blue);
-        }
-
-        .buy-link {
-            color: var(--accent-blue);
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .buy-link:hover { text-decoration: underline; }
-
-        .grid-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 1.8rem;
-            border-radius: 8px;
-        }
-
-        .card h3 { font-size: 1.15rem; margin-bottom: 0.6rem; }
-        .card p { color: var(--text-secondary); font-size: 0.92rem; word-break: keep-all; }
-        .card .meta { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-blue); margin-top: 1rem; }
-
-        .quote-box {
-            border-left: 3px solid var(--accent-blue);
-            background: var(--card-bg);
-            padding: 1.5rem 1.8rem;
-            border-radius: 0 8px 8px 0;
-            margin-top: 2rem;
-            margin-bottom: 4rem;
-        }
-
-        .quote-box blockquote { font-size: 1.05rem; font-style: italic; margin-bottom: 0.5rem; }
-        .quote-box cite { font-family: var(--font-mono); color: var(--text-secondary); font-size: 0.8rem; font-style: normal; }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-overlay.active { display: flex; }
-
-        .modal {
-            background: var(--modal-bg);
-            border: 1px solid var(--border-color);
-            padding: 2.2rem;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 400px;
-            position: relative;
-            color: var(--text-primary);
-        }
-
-        .modal h2 { font-size: 1.4rem; margin-bottom: 1.2rem; }
-        .modal-close { position: absolute; top: 1.2rem; right: 1.2rem; background: none; border: none; color: var(--text-secondary); font-size: 1.2rem; cursor: pointer; }
-
-        .form-group { margin-bottom: 1.2rem; }
-        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--text-secondary); }
-        .form-group input { width: 100%; padding: 0.75rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); }
-        .form-btn { width: 100%; padding: 0.75rem; background: var(--accent-blue); color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
-
-        footer {
-            border-top: 1px solid var(--border-color);
-            padding-top: 2.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            flex-wrap: wrap;
-            gap: 1.5rem;
-        }
-
-        footer img { height: 32px; filter: var(--logo-filter); }
-        footer a { color: var(--text-secondary); text-decoration: none; margin-left: 1rem; }
-        footer a:hover { color: var(--text-primary); }
-    </style>
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: var(--modal-bg);
+      border: 1px solid var(--border-color);
+      width: 100%;
+      max-width: 400px;
+      border-radius: 12px;
+      padding: 2rem;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 1.25rem; right: 1.25rem;
+      background: none; border: none;
+      color: var(--text-secondary);
+      font-size: 1.5rem; cursor: pointer;
+    }
+    .modal-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 1.5rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+    .form-group input {
+      width: 100%; padding: 0.75rem;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px; color: #fff;
+      font-size: 0.95rem;
+    }
+    .btn-submit {
+      width: 100%; padding: 0.8rem;
+      background: var(--accent-color);
+      border: none; border-radius: 6px;
+      color: #fff; font-weight: 700;
+      font-size: 1rem; cursor: pointer;
+    }
+    .btn-submit:hover { background: var(--accent-hover); }
+  </style>
 </head>
 <body>
 
-    <header>
-        <a href="javascript:void(0)" class="brand-logo" onclick="goHome()">
-            <img src="PlugAzit.png" alt="PlugAzit Logo">
-        </a>
-        <div class="header-right">
-            <!-- 로그인 여부에 따라 버튼 동적 구성 -->
-            <button class="nav-link-btn" id="loginBtn" onclick="openModal('loginModal')">로그인</button>
-            <button class="nav-link-btn" id="signupBtn" onclick="openModal('signupModal')">회원가입</button>
-            <button class="nav-link-btn" id="logoutBtn" onclick="handleLogout()" style="display:none;">로그아웃</button>
-            <button class="nav-link-btn" onclick="openModal('mypageModal')">마이페이지</button>
-            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">☀️ LIGHT</button>
-        </div>
-    </header>
+  <!-- Header -->
+  <header>
+    <a href="#" class="logo">Plug<span>Azit</span></a>
+    <nav>
+      <div id="authNav">
+        <button class="nav-btn" onclick="openModal('loginModal')">로그인</button>
+        <button class="nav-btn" onclick="openModal('signupModal')">회원가입</button>
+      </div>
+      <div id="userNav" style="display:none;">
+        <span id="userEmailSpan" style="font-size:0.9rem; color:var(--text-secondary); margin-right:0.5rem;"></span>
+        <button class="nav-btn" onclick="handleLogout()">로그아웃</button>
+      </div>
+    </nav>
+  </header>
 
-    <main>
-        <section class="hero">
-            <h1>Sail the Wave of Sound.</h1>
-            <p>
-                PlugAzit은 급변하는 AI와 시류의 파도 속에서도 자신만의 예술적 지향점을 향해 항해하는 프로듀서들을 위한 
-                글로벌 VST 딜 큐레이션, 실사용 필드 리뷰 및 기술 노하우 허브입니다.
-            </p>
-            <div class="btn-group">
-                <a href="https://discord.gg/DWXe2pH9m" class="btn btn-discord" target="_blank">
-                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-                    디스코드 아지트 입장
-                </a>
-                <a href="https://x.com/plugazit" class="btn btn-twitter" target="_blank">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    공식 X (트위터) 팔로우
-                </a>
-            </div>
-        </section>
-
-        <div class="category-container">
-            <nav class="category-nav">
-                <button class="nav-btn active" id="btn-plugins" onclick="switchTab('plugins')">플러그인 & 가상악기 딜</button>
-                <button class="nav-btn" id="btn-reviews" onclick="switchTab('reviews')">실사용 리뷰 (Field Review)</button>
-                <button class="nav-btn" id="btn-community" onclick="switchTab('community')">디스코드 & 커뮤니티</button>
-            </nav>
-        </div>
-
-        <div id="tab-plugins" class="tab-content active">
-            <div class="section-header">
-                <div class="section-title">GLOBAL VST CURATION & HOT DEALS</div>
-                <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary);">AI 실시간 수집 중</span>
-            </div>
-            <table class="deal-table">
-                <thead>
-                    <tr>
-                        <th>구분</th>
-                        <th>제품명 / 브랜드</th>
-                        <th>할인가 (USD)</th>
-                        <th>혜택 / 링크</th>
-                    </tr>
-                </thead>
-                <!-- Supabase 실시간 수집 데이터 동적 바인딩 영역 -->
-                <tbody id="deal-table-body">
-                    <tr>
-                        <td colspan="4" style="text-align:center; padding:2rem; color:var(--text-secondary);">
-                            핫딜 데이터를 불러오는 중입니다...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div id="tab-reviews" class="tab-content">
-            <div class="section-header">
-                <div class="section-title">PRODUCER FIELD REVIEWS</div>
-            </div>
-            <div class="grid-cards">
-                <div class="card">
-                    <h3>아날로그 텍스처 수집: Casio CT-310 (1984) 분석</h3>
-                    <p>80년대 로파이 톤과 빈티지 건반 아날로그 질감을 트랙 믹스에 자연스럽게 녹이는 레코딩 세션 노하우 리뷰.</p>
-                    <div class="meta">#Hardware #VintageSynth #FieldReview</div>
-                </div>
-                <div class="card">
-                    <h3>Soundtoys Decapitator 믹싱 실사용 팁</h3>
-                    <p>드럼 버스 saturation 세팅과 보컬에 아날로그 온기를 더하는 주파수 쉐이핑 기법 디테일 가이드.</p>
-                    <div class="meta">#Mixing #PluginReview #Saturation</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-community" class="tab-content">
-            <div class="section-header">
-                <div class="section-title">GLOBAL PRODUCER NETWORK</div>
-            </div>
-            <div class="grid-cards">
-                <div class="card">
-                    <h3>디스코드 볼트 (`# hot-deals`)</h3>
-                    <p>AI 알리미가 글로벌 세일 및 우회 할인 정보를 실시간 타임라인으로 전달하는 프라이빗 커뮤니티 공간.</p>
-                    <div class="meta" style="color:var(--accent-green)">● 디스코드 연동 완료</div>
-                </div>
-                <div class="card">
-                    <h3>트랙 피드백 & 세션 매칭</h3>
-                    <p>자작곡 믹싱 피드백 교환, 해외 프로듀서와의 공동 작업 및 세션 세팅 룸 운영 중.</p>
-                    <div class="meta" style="color:var(--accent-green)">● 커뮤니티 전용</div>
-                </div>
-            </div>
-        </div>
-
-        <section class="quote-box">
-            <blockquote>"부족함을 채우기 위한 노력이 사람을 아름답게 한다."</blockquote>
-            <cite>— PlugAzit Philosophy</cite>
-        </section>
-    </main>
-
-    <!-- 로그인 모달 -->
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
-            <h2>로그인</h2>
-            <div class="form-group">
-                <label>이메일</label>
-                <input type="email" id="loginEmail" placeholder="example@domain.com">
-            </div>
-            <div class="form-group">
-                <label>비밀번호</label>
-                <input type="password" id="loginPassword" placeholder="••••••••">
-            </div>
-            <button class="form-btn" onclick="handleLogin()">로그인</button>
-        </div>
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Sail the Wave of Sound.</h1>
+    <p>PlugAzit은 급변하는 AI와 시류 속에서도 자신만의 예술적 지향점을 향해 항해하는 프로듀서들을 위한 글로벌 VST 딜 큐레이션 허브입니다.</p>
+    <div class="social-btns">
+      <a href="https://discord.gg" target="_blank" class="btn-social btn-discord">디스코드 아지트 입장</a>
+      <a href="https://x.com" target="_blank" class="btn-social btn-twitter">공식 X (트위터) 팔로우</a>
     </div>
+  </section>
 
-    <!-- 회원가입 모달 -->
-    <div class="modal-overlay" id="signupModal">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal('signupModal')">✕</button>
-            <h2>회원가입</h2>
-            <div class="form-group">
-                <label>이름 / 닉네임</label>
-                <input type="text" id="signupNickname" placeholder="프로듀서 닉네임">
-            </div>
-            <div class="form-group">
-                <label>이메일 계정</label>
-                <input type="email" id="signupEmail" placeholder="example@domain.com">
-            </div>
-            <div class="form-group">
-                <label>비밀번호 설정</label>
-                <input type="password" id="signupPassword" placeholder="8자 이상 입력">
-            </div>
-            <button class="form-btn" onclick="handleSignup()">회원가입 완료</button>
-        </div>
+  <!-- Hot Deals Section -->
+  <section>
+    <div class="section-title">
+      <span>GLOBAL VST CURATION &amp; HOT DEALS</span>
+      <span style="font-size:0.8rem; color:var(--text-secondary);">Supabase 실시간 수집</span>
     </div>
-
-    <!-- 마이페이지 모달 -->
-    <div class="modal-overlay" id="mypageModal">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal('mypageModal')">✕</button>
-            <h2>마이페이지</h2>
-            <p style="color:var(--text-secondary); margin-bottom:1.2rem; font-size:0.9rem;">
-                북마크한 VST 세일 목록 및 커뮤니티 활동 내역을 확인합니다.
-            </p>
-            <div style="padding:1rem; background:var(--bg-color); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem;">
-                ● 접속 계정: <span id="userProfileEmail">Guest Producer</span><br>
-                ● 스크랩한 딜: 0개
-            </div>
-        </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>제품명 / 브랜드</th>
+            <th>할인가</th>
+            <th>혜택 / 코드</th>
+          </tr>
+        </thead>
+        <tbody id="dealsTableBody">
+          <tr><td colspan="4" style="text-align:center; color:var(--text-secondary);">핫딜 목록을 불러오는 중입니다...</td></tr>
+        </tbody>
+      </table>
     </div>
+  </section>
 
-    <footer>
-        <a href="javascript:void(0)" onclick="goHome()" style="text-decoration:none;">
-            <img src="PlugAzit.png" alt="PlugAzit Logo">
-        </a>
-        <div>
-            © 2026 PlugAzit. All rights reserved.
-            <a href="mailto:aftrdry@outlook.kr">Contact (aftrdry@outlook.kr)</a>
-            <a href="https://x.com/plugazit" target="_blank">X (Twitter)</a>
-            <a href="https://discord.gg/DWXe2pH9m" target="_blank">Discord</a>
+  <!-- Login Modal -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+      <div class="modal-title">로그인</div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">이메일</label>
+          <input type="email" id="loginEmail" placeholder="example@domain.com" required />
         </div>
-    </footer>
+        <div class="form-group">
+          <label for="loginPassword">비밀번호</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-submit">로그인</button>
+      </form>
+    </div>
+  </div>
 
-    <script>
-        // ==========================================
-        // 1. Supabase 초기화 설정
-        // ==========================================
-        const SUPABASE_URL = "https://pxmkzyhayxsvbbftncwy.supabase.co";
-        // ★ Supabase 대시보드의 Publishable Key(sb_publishable_...)를 입력하세요.
-        const SUPABASE_ANON_KEY = "sb_publishable_J0LQJ-qjr5ISX1jRKaQ7-A_GwABw8XP";
+  <!-- Signup Modal -->
+  <div class="modal-overlay" id="signupModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('signupModal')">&times;</button>
+      <div class="modal-title">회원가입</div>
+      <form id="signupForm">
+        <div class="form-group">
+          <label for="signupEmail">이메일</label>
+          <input type="email" id="signupEmail" placeholder="example@domain.com" required />
+        </div>
+        <div class="form-group">
+          <label for="signupPassword">비밀번호</label>
+          <input type="password" id="signupPassword" placeholder="8자리 이상 입력" required />
+        </div>
+        <button type="submit" class="btn-submit">가입하기</button>
+      </form>
+    </div>
+  </div>
 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  <!-- JavaScript -->
+  <script>
+    // 1. Supabase 클라이언트 초기화 (사용자 프로젝트 키)
+    const SUPABASE_URL = 'https://tnqymkxlvhslszwxtzms.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRucXlta3hsdmhzbHN6d3h0em1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyNzcyNzEsImV4cCI6MjA1Njg1MzI3MX0.YOUR_KEY_HERE';
+    
+    let supabaseClient = null;
+    if (typeof supabase !== 'undefined') {
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
 
-        // ==========================================
-        // 2. DB 핫딜 데이터 실시간 불러오기 & 화면 연동
-        // ==========================================
-        async function fetchAndRenderDeals() {
-            const tableBody = document.getElementById('deal-table-body');
-            
-            const { data: deals, error } = await supabaseClient
-                .from('deals')
-                .select(`
-                    id,
-                    sale_price,
-                    discount_rate,
-                    affiliate_url,
-                    coupon_code,
-                    plugins (
-                        name,
-                        brand,
-                        category,
-                        regular_price
-                    )
-                `)
-                .order('id', { ascending: false });
+    // Modal Control Functions
+    function openModal(id) {
+      document.getElementById(id)?.classList.add('active');
+    }
+    function closeModal(id) {
+      document.getElementById(id)?.classList.remove('active');
+    }
 
-            if (error) {
-                console.error("데이터 로드 실패:", error);
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="4" style="text-align:center; padding:2rem; color:var(--text-secondary);">
-                            데이터를 불러오는 중 오류가 발생했거나 최신 수집 데이터가 없습니다.
-                        </td>
-                    </tr>`;
-                return;
-            }
+    // 2. 핫딜 목록 불러오기
+    async function fetchAndRenderDeals() {
+      const tbody = document.getElementById('dealsTableBody');
+      if (!tbody) return;
 
-            if (!deals || deals.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="4" style="text-align:center; padding:2rem; color:var(--text-secondary);">
-                            현재 등록된 핫딜 데이터가 없습니다.
-                        </td>
-                    </tr>`;
-                return;
-            }
+      if (!supabaseClient) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Supabase SDK 로드 실패</td></tr>';
+        return;
+      }
 
-            tableBody.innerHTML = deals.map(deal => {
-                const plugin = deal.plugins || {};
-                const isFree = deal.sale_price === 0 || deal.discount_rate === 100;
-                const tagClass = isFree ? 'tag-free' : 'tag-hot';
-                const tagText = isFree ? '100% FREE' : `${deal.discount_rate || 0}% OFF`;
-                const priceText = isFree ? '$0 (FREE)' : `$${deal.sale_price}`;
-                const codeOrLink = deal.coupon_code 
-                    ? `<span class="code-box">${deal.coupon_code}</span>` 
-                    : `<a href="${deal.affiliate_url || '#'}" target="_blank" class="buy-link">GET DEAL ↗</a>`;
+      try {
+        const { data: deals, error } = await supabaseClient.from('deals').select('*').order('created_at', { ascending: false });
 
-                return `
-                    <tr>
-                        <td><span class="tag ${tagClass}">${tagText}</span></td>
-                        <td>
-                            <strong>${plugin.name || '알 수 없는 제품'}</strong><br>
-                            <small style="color:var(--text-secondary)">${plugin.brand || 'General Vendor'}</small>
-                        </td>
-                        <td>${priceText}</td>
-                        <td>${codeOrLink}</td>
-                    </tr>
-                `;
-            }).join('');
+        if (error || !deals || deals.length === 0) {
+          // 백업 샘플 데이터 렌더링
+          tbody.innerHTML = `
+            <tr>
+              <td><span class="tag tag-discount">50% OFF</span></td>
+              <td><a href="#" class="deal-link">Native Instruments Komplete 14</a></td>
+              <td>~$175</td>
+              <td>BF-SEASON</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-free">100% FREE</span></td>
+              <td><a href="#" class="deal-link">Arturia Analog Lab Play</a></td>
+              <td>$0 (무료)</td>
+              <td>DIRECT-DOWNLOAD</td>
+            </tr>
+          `;
+          return;
         }
 
-        // ==========================================
-        // 3. Auth (회원가입, 로그인, 로그아웃) 연동
-        // ==========================================
-        async function handleSignup() {
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const nickname = document.getElementById('signupNickname').value;
+        tbody.innerHTML = deals.map(deal => `
+          <tr>
+            <td><span class="tag ${deal.discount?.includes('100%') ? 'tag-free' : 'tag-discount'}">${deal.discount || 'HOT'}</span></td>
+            <td><a href="${deal.link || '#'}" target="_blank" class="deal-link">${deal.title}</a></td>
+            <td>${deal.price || 'Free'}</td>
+            <td>${deal.promo_code || 'DIRECT-LINK'}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error('Fetch error:', err);
+      }
+    }
 
-            if (!email || !password) {
-                alert("이메일과 비밀번호를 입력해 주세요.");
-                return;
-            }
+    // 3. 사용자 세션 상태 확인
+    async function checkUserSession() {
+      if (!supabaseClient) return;
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      
+      const authNav = document.getElementById('authNav');
+      const userNav = document.getElementById('userNav');
+      const userEmailSpan = document.getElementById('userEmailSpan');
 
-            const { data, error } = await supabaseClient.auth.signUp({
-                email,
-                password,
-                options: { data: { nickname } }
-            });
+      if (session && session.user) {
+        if (authNav) authNav.style.display = 'none';
+        if (userNav) userNav.style.display = 'flex';
+        if (userEmailSpan) userEmailSpan.textContent = session.user.email;
+      } else {
+        if (authNav) authNav.style.display = 'flex';
+        if (userNav) userNav.style.display = 'none';
+      }
+    }
 
-            if (error) {
-                alert("회원가입 실패: " + error.message);
-            } else {
-                alert("가입 요청 완료! 인증 메일을 확인해 주세요.");
-                closeModal('signupModal');
-            }
-        }
+    // 4. 로그아웃 처리
+    async function handleLogout() {
+      if (supabaseClient) {
+        await supabaseClient.auth.signOut();
+        alert('로그아웃 되었습니다.');
+        location.reload();
+      }
+    }
 
-        async function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
+    // 5. DOM 로드 완료 후 이벤트 바인딩
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchAndRenderDeals();
+      checkUserSession();
 
-            if (!email || !password) {
-                alert("이메일과 비밀번호를 입력해 주세요.");
-                return;
-            }
+      // 로그인 폼 제출 이벤트
+      const loginForm = document.getElementById('loginForm');
+      if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = document.getElementById('loginEmail')?.value;
+          const password = document.getElementById('loginPassword')?.value;
 
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          if (!supabaseClient) {
+            alert('Supabase 연동 오류가 발생했습니다.');
+            return;
+          }
 
-            if (error) {
-                alert("로그인 실패: " + error.message);
-            } else {
-                alert("로그인되었습니다!");
-                closeModal('loginModal');
-                checkUserSession();
-            }
-        }
-
-        async function handleLogout() {
-            await supabaseClient.auth.signOut();
-            alert("로그아웃되었습니다.");
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          if (error) {
+            alert('로그인 실패: ' + error.message);
+          } else {
+            alert('로그인에 성공했습니다!');
+            closeModal('loginModal');
             checkUserSession();
-        }
-
-        async function checkUserSession() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            const loginBtn = document.getElementById('loginBtn');
-            const signupBtn = document.getElementById('signupBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const userProfileEmail = document.getElementById('userProfileEmail');
-
-            if (session) {
-                loginBtn.style.display = 'none';
-                signupBtn.style.display = 'none';
-                logoutBtn.style.display = 'inline-block';
-                userProfileEmail.innerText = session.user.email;
-            } else {
-                loginBtn.style.display = 'inline-block';
-                signupBtn.style.display = 'inline-block';
-                logoutBtn.style.display = 'none';
-                userProfileEmail.innerText = 'Guest Producer';
-            }
-        }
-
-        // ==========================================
-        // 4. 기존 UI 제어 스크립트 (테마, 탭, 모달)
-        // ==========================================
-        function toggleTheme() {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            html.setAttribute('data-theme', newTheme);
-            document.getElementById('themeToggle').innerText = newTheme === 'dark' ? 'LIGHT' : 'DARK';
-            localStorage.setItem('plugazit-theme', newTheme);
-        }
-
-        const savedTheme = localStorage.getItem('plugazit-theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        document.getElementById('themeToggle').innerText = savedTheme === 'dark' ? 'LIGHT' : 'DARK';
-
-        function switchTab(tabName) {
-            const tabs = document.querySelectorAll('.tab-content');
-            const btns = document.querySelectorAll('.nav-btn');
-
-            tabs.forEach(tab => tab.classList.remove('active'));
-            btns.forEach(btn => btn.classList.remove('active'));
-
-            const targetTab = document.getElementById('tab-' + tabName);
-            const targetBtn = document.getElementById('btn-' + tabName);
-            
-            if (targetTab) targetTab.classList.add('active');
-            if (targetBtn) targetBtn.classList.add('active');
-        }
-
-        function goHome() {
-            switchTab('plugins');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-        // 초기 실행
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchAndRenderDeals();
-            checkUserSession();
+          }
         });
-    </script>
+      }
+
+      // 회원가입 폼 제출 이벤트
+      const signupForm = document.getElementById('signupForm');
+      if (signupForm) {
+        signupForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = document.getElementById('signupEmail')?.value;
+          const password = document.getElementById('signupPassword')?.value;
+
+          if (!supabaseClient) {
+            alert('Supabase 연동 오류가 발생했습니다.');
+            return;
+          }
+
+          const { data, error } = await supabaseClient.auth.signUp({ email, password });
+          if (error) {
+            alert('회원가입 실패: ' + error.message);
+          } else {
+            alert('회원가입 완료! 이메일 인증을 확인해 주세요.');
+            closeModal('signupModal');
+          }
+        });
+      }
+    });
+  </script>
 </body>
 </html>
