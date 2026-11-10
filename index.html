@@ -22,6 +22,9 @@
       --text-secondary: #909892;
       --modal-bg: #161917;
       --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      /* 다크모드: 흰 배경 지우고 글자만 반전(흰색) */
+      --logo-blend: screen;
+      --logo-filter: invert(1);
     }
 
     /* Sand Beige & Deep Walnut Tone */
@@ -37,6 +40,9 @@
       --text-primary: #1a1d1b;
       --text-secondary: #6e736f;
       --modal-bg: #ffffff;
+      /* 라이트모드: 흰 배경 지우고 글자만 투명 렌더링(검은색) */
+      --logo-blend: multiply;
+      --logo-filter: none;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -63,12 +69,15 @@
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
     }
 
-    /* Slim, Modern & Seamless Vector Logo */
-    .brand-logo-svg {
-      height: 38px;
+    /* 원본 로고 이미지 글자 셰이프만 100% 또렷하게 렌더링 */
+    .brand-logo-img {
+      height: 48px;
       width: auto;
-      color: var(--text-primary);
       display: block;
+      object-fit: contain;
+      mix-blend-mode: var(--logo-blend);
+      filter: var(--logo-filter);
+      transition: filter 0.3s ease, mix-blend-mode 0.3s ease;
     }
 
     nav { display: flex; gap: 1.2rem; align-items: center; }
@@ -93,7 +102,7 @@
     }
     [data-theme="light"] .toggle-knob { transform: translateX(22px); }
 
-    /* Auth Buttons with proper spacing */
+    /* Auth Buttons */
     #authNav, #userNav {
       display: flex; gap: 0.8rem; align-items: center;
     }
@@ -209,19 +218,10 @@
 </head>
 <body>
 
-  <!-- Header with Redesigned Ultra-Slim Geometric Vector Logo -->
+  <!-- Header with Perfect Raw Image Blending Logo -->
   <header>
     <a href="#" class="logo-container" onclick="showPage('deals'); return false;">
-      <svg class="brand-logo-svg" viewBox="0 0 240 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Plug Text (Slim Geometric Typography - Weight 500 style) -->
-        <text x="0" y="38" font-family="'Century Gothic', 'Inter', system-ui, -apple-system, sans-serif" font-weight="500" font-size="40" letter-spacing="-1px" fill="currentColor">Plug</text>
-        
-        <!-- Roof Emblem (Sharp & Slim Geometry) -->
-        <path d="M101 13 L110 5 L119 13 L116 15 L110 9.5 L104 15 Z" fill="currentColor"/>
-        
-        <!-- Azit Text (Tight & Natural Spacing) -->
-        <text x="94" y="38" font-family="'Century Gothic', 'Inter', system-ui, -apple-system, sans-serif" font-weight="500" font-size="40" letter-spacing="-1px" fill="currentColor">Âzit</text>
-      </svg>
+      <img src="PlugAzit.png" alt="PlugÂzit" class="brand-logo-img" />
     </a>
 
     <nav>
