@@ -8,34 +8,34 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    /* Dark Theme: Deep Wood, Dark Olive & Charcoal Atmosphere */
+    /* Dark Theme: Architectural Dark Wood & Deep Olive Tone */
     :root {
-      --bg-color: #121413;            /* 차분한 다크 모스 차콜 */
-      --header-bg: rgba(18, 20, 19, 0.88);
-      --card-bg: #1a1d1b;            /* 짙은 우드/올리브 톤 카드 */
-      --card-hover: #222623;
-      --border-color: #2a2f2b;        /* 절제된 미니멀 프레임 */
-      --accent-color: #586948;        /* 올리브 포레스트 그린 */
-      --accent-hover: #6a7e57;
-      --accent-gold: #c2a677;         /* 샌드 웜 골드 */
-      --text-primary: #e8e6e1;       /* 따뜻한 웜 오프화이트 */
-      --text-secondary: #8a918b;     /* 편안한 세이지 그레이 */
-      --modal-bg: #181b19;
+      --bg-color: #101211;
+      --header-bg: rgba(16, 18, 17, 0.92);
+      --card-bg: #171a18;
+      --card-hover: #202421;
+      --border-color: #272d29;
+      --accent-color: #4a5a3a;
+      --accent-hover: #5d7049;
+      --accent-gold: #c2a878;
+      --text-primary: #f2f0eb;
+      --text-secondary: #909892;
+      --modal-bg: #161917;
       --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     }
 
-    /* Light Theme: Sand Beige, Warm Cream & Dark Walnut */
+    /* Light Theme: Sand Beige & Deep Walnut Tone */
     [data-theme="light"] {
-      --bg-color: #f4f1ea;            /* 온화한 크림 샌드 배경 */
-      --header-bg: rgba(244, 241, 234, 0.9);
+      --bg-color: #f5f2eb;
+      --header-bg: rgba(245, 242, 235, 0.92);
       --card-bg: #ffffff;
-      --card-hover: #eae5db;
-      --border-color: #dcd6c9;
-      --accent-color: #a88d5e;        /* 무광 매트 골드 */
-      --accent-hover: #8f764a;
-      --accent-gold: #2b302c;         /* 딥 월넛 포인트 */
-      --text-primary: #212422;
-      --text-secondary: #707571;
+      --card-hover: #ece7de;
+      --border-color: #ded8cb;
+      --accent-color: #9e8555;
+      --accent-hover: #856f43;
+      --accent-gold: #222623;
+      --text-primary: #1a1d1b;
+      --text-secondary: #6e736f;
       --modal-bg: #ffffff;
     }
 
@@ -44,10 +44,10 @@
       background-color: var(--bg-color);
       color: var(--text-primary);
       font-family: var(--font-sans);
-      line-height: 1.7;
+      line-height: 1.65;
       padding-top: 85px;
       letter-spacing: -0.02em;
-      transition: background-color 0.35s ease, color 0.35s ease;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     header {
@@ -56,23 +56,23 @@
       border-bottom: 1px solid var(--border-color);
       display: flex; justify-content: space-between; align-items: center;
       padding: 0 3rem; z-index: 1000;
-      backdrop-filter: blur(18px);
+      backdrop-filter: blur(16px);
     }
 
     .logo-container {
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
     }
-    .logo-svg { height: 30px; width: auto; }
+    .logo-svg { height: 34px; width: auto; color: var(--text-primary); }
 
-    nav { display: flex; gap: 1.2rem; align-items: center; }
+    nav { display: flex; gap: 1rem; align-items: center; }
 
     .nav-tab-link {
       background: transparent; border: none; color: var(--text-secondary);
-      font-size: 0.92rem; font-weight: 600; cursor: pointer; padding: 0.5rem 0.8rem;
-      border-radius: 6px; transition: all 0.25s ease;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer; padding: 0.5rem 0.9rem;
+      border-radius: 6px; transition: all 0.2s ease;
     }
     .nav-tab-link.active, .nav-tab-link:hover {
-      color: var(--accent-gold); background: var(--card-bg);
+      color: var(--text-primary); background: var(--card-bg);
     }
 
     .toggle-switch {
@@ -81,30 +81,30 @@
       cursor: pointer; transition: 0.3s; display: flex; align-items: center; padding: 2px; margin: 0 0.5rem;
     }
     .toggle-knob {
-      width: 18px; height: 18px; background: var(--accent-gold); border-radius: 50%;
-      transition: 0.3s transform cubic-bezier(0.16, 1, 0.3, 1); transform: translateX(0);
+      width: 18px; height: 18px; background: var(--text-primary); border-radius: 50%;
+      transition: 0.3s transform ease; transform: translateX(0);
     }
     [data-theme="light"] .toggle-knob { transform: translateX(22px); }
 
     .nav-btn {
       background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);
       font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 0.45rem 1rem;
-      border-radius: 6px; transition: all 0.25s ease;
+      border-radius: 6px; transition: all 0.2s ease;
     }
     .nav-btn:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
 
-    .container { max-width: 1280px; margin: 0 auto; padding: 3rem 2.5rem; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 2.5rem 2.5rem; }
 
-    /* Category Navigation */
-    .category-section { margin-bottom: 2.8rem; }
+    /* Clean Category Navigation */
+    .category-section { margin-bottom: 2.5rem; }
     .main-cat-bar {
       display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.8rem;
       border-bottom: 1px solid var(--border-color); margin-bottom: 1.2rem;
     }
     .cat-chip {
       background: var(--card-bg); border: 1px solid var(--border-color);
-      color: var(--text-secondary); padding: 0.6rem 1.4rem; border-radius: 8px;
-      font-size: 0.88rem; font-weight: 600; cursor: pointer; whitespace: nowrap; transition: all 0.25s ease;
+      color: var(--text-secondary); padding: 0.6rem 1.4rem; border-radius: 6px;
+      font-size: 0.88rem; font-weight: 600; cursor: pointer; whitespace: nowrap; transition: all 0.2s ease;
     }
     .cat-chip.active, .cat-chip:hover {
       background: var(--accent-color); color: #fff; border-color: var(--accent-color);
@@ -119,45 +119,49 @@
       font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
     }
     .sub-chip.active, .sub-chip:hover {
-      background: var(--card-hover); color: var(--accent-gold); border-color: var(--accent-gold);
+      background: var(--card-hover); color: var(--text-primary); border-color: var(--text-primary);
     }
 
-    /* Architectural Grid Cards */
+    /* Minimal Architectural Grid Cards */
     .deals-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 2rem; margin-bottom: 4rem;
     }
     .deal-card {
-      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;
-      padding: 1.8rem; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; justify-content: space-between;
+      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;
+      padding: 1.8rem; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; justify-content: space-between;
     }
-    .deal-card:hover { transform: translateY(-4px); background: var(--card-hover); border-color: var(--accent-gold); }
+    .deal-card:hover { transform: translateY(-3px); background: var(--card-hover); border-color: var(--accent-gold); }
     
-    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
     .brand-name { font-size: 0.78rem; color: var(--accent-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
     .deal-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 0.3rem; color: var(--text-primary); text-decoration: none; line-height: 1.35; }
-    .sub-cat-tag { font-size: 0.78rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 1rem; }
+    .sub-cat-tag { font-size: 0.78rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.8rem; }
 
-    .price-box { margin: 0.8rem 0 1.2rem 0; padding: 1rem; background: var(--bg-color); border-radius: 8px; border: 1px solid var(--border-color); }
+    .description-text {
+      font-size: 0.88rem; color: var(--text-primary); margin-bottom: 1rem; line-height: 1.5; font-weight: 500;
+    }
+
+    .price-box { margin: 0.8rem 0 1.2rem 0; padding: 1rem; background: var(--bg-color); border-radius: 6px; border: 1px solid var(--border-color); }
     .original-price { text-decoration: line-through; color: var(--text-secondary); font-size: 0.85rem; margin-right: 0.5rem; }
     .discount-price { font-size: 1.4rem; font-weight: 900; color: var(--text-primary); }
     .krw-price { font-size: 0.88rem; color: var(--accent-gold); font-weight: 700; margin-top: 0.2rem; }
 
     .tag-badge { padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.72rem; font-weight: 800; }
-    .tag-discount { background: rgba(194, 166, 119, 0.15); color: var(--accent-gold); }
-    .tag-free { background: rgba(88, 105, 72, 0.25); color: #8ba870; }
+    .tag-discount { background: rgba(194, 168, 120, 0.15); color: var(--accent-gold); }
+    .tag-free { background: rgba(74, 90, 58, 0.25); color: #8fa874; }
 
-    .perks-box { font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 1.4rem; line-height: 1.6; }
+    .perks-box { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1.4rem; line-height: 1.6; border-top: 1px solid var(--border-color); padding-top: 0.8rem; }
 
     .btn-buy {
-      width: 100%; padding: 0.85rem; background: var(--accent-color); border: none; border-radius: 8px;
+      width: 100%; padding: 0.85rem; background: var(--accent-color); border: none; border-radius: 6px;
       color: #fff; font-weight: 700; font-size: 0.92rem; cursor: pointer; text-align: center; text-decoration: none; display: block;
-      transition: background 0.25s ease;
+      transition: background 0.2s ease;
     }
     .btn-buy:hover { background: var(--accent-hover); }
 
     /* Community Page */
     #communityView { display: none; }
-    .comm-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.6rem; border-radius: 12px; margin-bottom: 1.2rem; }
+    .comm-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.6rem; border-radius: 10px; margin-bottom: 1.2rem; }
     .comm-author { font-weight: 700; color: var(--accent-gold); margin-right: 0.6rem; }
 
     /* Modal Form */
@@ -169,26 +173,28 @@
     .modal-overlay.active { display: flex; }
     .modal-box {
       background: var(--modal-bg); border: 1px solid var(--border-color); width: 100%; max-width: 440px;
-      border-radius: 14px; padding: 2.2rem; position: relative; color: var(--text-primary);
+      border-radius: 12px; padding: 2.2rem; position: relative; color: var(--text-primary);
     }
     .modal-close { position: absolute; top: 1.2rem; right: 1.2rem; background: none; border: none; color: var(--text-secondary); font-size: 1.4rem; cursor: pointer; }
     .form-group { margin-bottom: 1.2rem; }
     .form-group label { display: block; font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 600; }
     .form-group input, .form-group textarea {
       width: 100%; padding: 0.8rem 1rem; background: var(--bg-color); border: 1px solid var(--border-color);
-      border-radius: 8px; color: var(--text-primary); font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+      border-radius: 6px; color: var(--text-primary); font-size: 0.95rem; outline: none; transition: border-color 0.2s;
     }
     .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-gold); }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Header with Authentic PlugÂzit Vector Logo -->
   <header>
     <a href="#" class="logo-container" onclick="showPage('deals'); return false;">
-      <svg class="logo-svg" viewBox="0 0 240 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <text x="0" y="38" font-family="'Pretendard', sans-serif" font-weight="900" font-size="38" fill="currentColor">Plug</text>
-        <text x="95" y="38" font-family="'Pretendard', sans-serif" font-weight="900" font-size="38" fill="#c2a677">Azit</text>
+      <svg class="logo-svg" viewBox="0 0 290 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Exact PlugÂzit Logo Path Render -->
+        <text x="0" y="44" font-family="'Pretendard', sans-serif" font-weight="900" font-size="44" fill="currentColor">Plug</text>
+        <path d="M126 12 L137 2 L148 12 L144 14 L137 7 L130 14 Z" fill="currentColor"/>
+        <text x="120" y="44" font-family="'Pretendard', sans-serif" font-weight="900" font-size="44" fill="currentColor">Âzit</text>
       </svg>
     </a>
 
@@ -205,7 +211,7 @@
         <button class="nav-btn" onclick="openModal('signupModal')">회원가입</button>
       </div>
       <div id="userNav" style="display:none;">
-        <button class="nav-btn" onclick="openModal('myPageModal')">👤 마이페이지</button>
+        <button class="nav-btn" onclick="openModal('myPageModal')">마이페이지</button>
         <button class="nav-btn" onclick="handleLogout()">로그아웃</button>
       </div>
     </nav>
@@ -217,11 +223,11 @@
       <div class="category-section">
         <div class="main-cat-bar">
           <button class="cat-chip active" onclick="setMainCategory('all', this)">전체 딜 보기</button>
-          <button class="cat-chip" onclick="setMainCategory('mixing', this)">🎛️ 믹싱 & 마스터링</button>
-          <button class="cat-chip" onclick="setMainCategory('synth', this)">🎹 신디사이저 / 가상악기</button>
-          <button class="cat-chip" onclick="setMainCategory('fx', this)">🎚️ 이펙터 & 유틸리티</button>
-          <button class="cat-chip" onclick="setMainCategory('free', this)">🎁 100% FREE</button>
-          <button class="cat-chip affiliate" onclick="filterCategory('affiliate', this)">🤝 브랜드 제휴 문의</button>
+          <button class="cat-chip" onclick="setMainCategory('mixing', this)">믹싱 & 마스터링</button>
+          <button class="cat-chip" onclick="setMainCategory('synth', this)">신디사이저 / 가상악기</button>
+          <button class="cat-chip" onclick="setMainCategory('fx', this)">이펙터 & 유틸리티</button>
+          <button class="cat-chip" onclick="setMainCategory('free', this)">100% FREE</button>
+          <button class="cat-chip affiliate" onclick="filterCategory('affiliate', this)">브랜드 제휴 문의</button>
         </div>
 
         <div class="sub-cat-bar" id="subCatBar"></div>
@@ -234,10 +240,10 @@
     <div id="communityView">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
         <div>
-          <h2 style="font-weight:800; font-size:1.6rem;">💬 Producer Community</h2>
+          <h2 style="font-weight:800; font-size:1.6rem;">Producer Community</h2>
           <p style="color:var(--text-secondary); font-size:0.9rem;">사운드 믹싱 팁과 VST 활용 노하우를 자유롭게 나누세요.</p>
         </div>
-        <button class="btn-buy" style="width:auto; padding:0.65rem 1.4rem;" onclick="openModal('postModal')">✏️ 노하우 공유하기</button>
+        <button class="btn-buy" style="width:auto; padding:0.65rem 1.4rem;" onclick="openModal('postModal')">노하우 공유하기</button>
       </div>
       
       <div id="communityList">
@@ -343,18 +349,62 @@
     };
 
     const dealsData = [
-      { brand: "FabFilter", title: "Pro-Q 3 Equalizer", cat: "mixing", sub: "EQ", original: 179, discountPrice: 134, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 지원", storeUrl: "https://www.fabfilter.com" },
-      { brand: "oeksound", title: "soothe2 Resonance Suppressor", cat: "mixing", sub: "De-Esser/Dynamic", original: 219, discountPrice: 149, discountRate: "32% OFF", code: "SOOTHE2026", perk: "불쾌한 공명 사운드 자동 제어 툴", storeUrl: "https://oeksound.com" },
-      { brand: "Soundtoys", title: "Soundtoys 5.4 Bundle", cat: "fx", sub: "Modulation", original: 499, discountPrice: 249, discountRate: "50% OFF", code: "SOUNDTOYS-DEAL", perk: "Decapitator, Echoboy 등 21개 필수 이펙터 포함", storeUrl: "https://www.soundtoys.com" },
-      { brand: "Universal Audio", title: "UAD Spark 1 Year Pass", cat: "mixing", sub: "Compressor/Limiter", original: 199, discountPrice: 99, discountRate: "50% OFF", code: "UAD-SPARK-50", perk: "1176, LA-2A, Studer 테이프 머신 네이티브 구동", storeUrl: "https://www.uaudio.com" },
-      { brand: "Arturia", title: "Analog Lab Play", cat: "free", sub: "Free Synths", original: 99, discountPrice: 0, discountRate: "100% FREE", code: "DIRECT-DOWNLOAD", perk: "100가지 핵심 빈티지 신스 프리셋 무상 제공", storeUrl: "https://www.arturia.com" },
-      { brand: "Native Instruments", title: "Komplete 14 Standard", cat: "synth", sub: "Sample Library", original: 599, discountPrice: 299, discountRate: "50% OFF", code: "BF-SEASON", perk: "Kontakt 7 및 수만 가지 시네마틱 샘플 라이브러리", storeUrl: "https://www.native-instruments.com" },
-      { brand: "iZotope", title: "Ozone 11 Advanced", cat: "mixing", sub: "Mastering Chain", original: 399, discountPrice: 199, discountRate: "50% OFF", code: "OZONE11-SALE", perk: "AI 기반 마스터링 어시스턴트 지원", storeUrl: "https://www.izotope.com" },
-      { brand: "Xfer Records", title: "Serum VST Synth", cat: "synth", sub: "Analog/Synth", original: 189, discountPrice: 149, discountRate: "21% OFF", code: "SERUM-PROMO", perk: "웨이브테이블 신티사이저의 대표주자", storeUrl: "https://xferrecords.com" },
-      { brand: "Celemony", title: "Melodyne 5 assistant", cat: "fx", sub: "Pitch/Vocal", original: 249, discountPrice: 149, discountRate: "40% OFF", code: "MELODYNE40", perk: "보컬 피치 및 타임 보정 업계 표준", storeUrl: "https://www.celemony.com" },
-      { brand: "Spectrasonics", title: "Omnisphere 2.8", cat: "synth", sub: "Cinematic/Orchestral", original: 499, discountPrice: 399, discountRate: "20% OFF", code: "OMNI-PROD", perk: "영화 음악 및 팝 프로듀싱 필수 대형 신스 몬스터", storeUrl: "https://www.spectrasonics.net" },
-      { brand: "Slate Digital", title: "Virtual Tape Machines", cat: "mixing", sub: "Saturation/Tape", original: 149, discountPrice: 49, discountRate: "67% OFF", code: "SLATE-TAPE", perk: "아날로그 마스터 테이프 특유의 따뜻한 새츄레이션", storeUrl: "https://slatedigital.com" },
-      { brand: "Waves Audio", title: "Horizon Bundle", cat: "mixing", sub: "Compressor/Limiter", original: 3999, discountPrice: 249, discountRate: "93% OFF", code: "CREATE80", perk: "80개 이상 핵심 믹싱 플러그인 동시 포함", storeUrl: "https://www.waves.com" }
+      { 
+        brand: "FabFilter", 
+        title: "Pro-Q 3 Equalizer", 
+        cat: "mixing", sub: "EQ", 
+        desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.",
+        original: 179, discountPrice: 134, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 완벽 지원", storeUrl: "https://www.fabfilter.com" 
+      },
+      { 
+        brand: "oeksound", 
+        title: "soothe2 Resonance Suppressor", 
+        cat: "mixing", sub: "De-Esser/Dynamic", 
+        desc: "보컬이나 악기 트랙에서 발생하는 불쾌한 쏘는 소리와 피크 공명(Resonance) 사운드를 실시간으로 감지하여 부드럽게 억제하는 툴입니다.",
+        original: 219, discountPrice: 149, discountRate: "32% OFF", code: "SOOTHE2026", perk: "불쾌한 공명 사운드 자동 실시간 제어", storeUrl: "https://oeksound.com" 
+      },
+      { 
+        brand: "Soundtoys", 
+        title: "Soundtoys 5.4 Bundle", 
+        cat: "fx", sub: "Modulation", 
+        desc: "Decapitator(새츄레이션), Echoboy(딜레이) 등 아날로그 감성의 특색 있는 사운드 질감을 만드는 21가지 최고급 이펙터 플러그인 모음입니다.",
+        original: 499, discountPrice: 249, discountRate: "50% OFF", code: "SOUNDTOYS-DEAL", perk: "21개 대표 사운드 디자이닝 이펙터 전체 포함", storeUrl: "https://www.soundtoys.com" 
+      },
+      { 
+        brand: "Universal Audio", 
+        title: "UAD Spark 1 Year Pass", 
+        cat: "mixing", sub: "Compressor/Limiter", 
+        desc: "DSP 하드웨어 없이도 1176, LA-2A, Studer 테이프 머신 등 전설적인 아날로그 하드웨어의 명음기를 컴퓨터에서 직접 구동할 수 있습니다.",
+        original: 199, discountPrice: 99, discountRate: "50% OFF", code: "UAD-SPARK-50", perk: "전설적 아날로그 믹싱 기기 네이티브 풀 지원", storeUrl: "https://www.uaudio.com" 
+      },
+      { 
+        brand: "Arturia", 
+        title: "Analog Lab Play", 
+        cat: "free", sub: "Free Synths", 
+        desc: "빈티지 신티사이저와 클래식 건반 악기들의 최고급 프리셋 100가지를 무상으로 사용할 수 있는 가상악기 뷰어입니다.",
+        original: 99, discountPrice: 0, discountRate: "100% FREE", code: "DIRECT-DOWNLOAD", perk: "100가지 핵심 빈티지 신스 프리셋 무상 제공", storeUrl: "https://www.arturia.com" 
+      },
+      { 
+        brand: "Native Instruments", 
+        title: "Komplete 14 Standard", 
+        cat: "synth", sub: "Sample Library", 
+        desc: "Kontakt 7 샘플러 플랫폼을 기반으로 웅장한 시네마틱 오케스트라, 드럼, 신스 사운드까지 보유한 통합 제작 번들입니다.",
+        original: 599, discountPrice: 299, discountRate: "50% OFF", code: "BF-SEASON", perk: "Kontakt 7 및 수만 가지 시네마틱 샘플 수록", storeUrl: "https://www.native-instruments.com" 
+      },
+      { 
+        brand: "iZotope", 
+        title: "Ozone 11 Advanced", 
+        cat: "mixing", sub: "Mastering Chain", 
+        desc: "음원 마스터링 시 대역별 음압 보정, Stem Rebalance 및 AI Assistant 기반으로 곡의 완성도를 마감하는 완성형 마스터링 툴입니다.",
+        original: 399, discountPrice: 199, discountRate: "50% OFF", code: "OZONE11-SALE", perk: "AI 기반 종합 음압/마스터링 프로세싱", storeUrl: "https://www.izotope.com" 
+      },
+      { 
+        brand: "Xfer Records", 
+        title: "Serum VST Synth", 
+        cat: "synth", sub: "Analog/Synth", 
+        desc: "직관적인 렌더링 파형 편집과 압도적인 사운드 메이킹 성능으로 EDM, 팝, 트랩 전 장르에서 일렉트로닉 신스를 이끄는 툴입니다.",
+        original: 189, discountPrice: 149, discountRate: "21% OFF", code: "SERUM-PROMO", perk: "웨이브테이블 신티사이저 글로벌 시그니처 툴", storeUrl: "https://xferrecords.com" 
+      }
     ];
 
     let currentMainCat = 'all';
@@ -414,14 +464,15 @@
               </div>
               <a href="${d.storeUrl}" target="_blank" class="deal-title">${d.title}</a>
               <div class="sub-cat-tag"># ${d.sub}</div>
+              <div class="description-text">${d.desc}</div>
               <div class="price-box">
                 <span class="original-price">${origKrw}</span>
                 <span class="discount-price">$${d.discountPrice}</span>
                 <div class="krw-price">한화 추산: ${krw}</div>
               </div>
               <div class="perks-box">
-                💡 혜택: ${d.perk}<br/>
-                🔑 코드: <strong>${d.code}</strong>
+                혜택: ${d.perk}<br/>
+                프로모션 코드: <strong>${d.code}</strong>
               </div>
             </div>
             <a href="${d.storeUrl}" target="_blank" class="btn-buy">공식 스토어 딜 바로가기 ↗</a>
@@ -432,7 +483,7 @@
 
     function filterCategory(cat) {
       if (cat === 'affiliate') {
-        alert('🤝 제휴 문의: affiliate@plugazit.com 또는 공식 디스코드 채널로 부탁드립니다.');
+        alert('제휴 문의: affiliate@plugazit.com 또는 공식 디스코드 채널로 부탁드립니다.');
       }
     }
 
