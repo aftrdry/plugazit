@@ -202,15 +202,19 @@
     .comm-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.6rem; border-radius: 10px; margin-bottom: 1.2rem; }
     .comm-author { font-weight: 700; color: var(--accent-gold); margin-right: 0.6rem; }
 
-    /* Footer 단일 연락처 표기 복원 */
+    /* Footer 및 하단 법적 고지 스타일 */
     footer {
-      border-top: 1px solid var(--border-color); padding: 2rem 3rem; text-align: center;
-      color: var(--text-secondary); font-size: 0.85rem; margin-top: auto; background: var(--card-bg);
+      border-top: 1px solid var(--border-color); padding: 2.5rem 3rem; text-align: center;
+      color: var(--text-secondary); font-size: 0.82rem; margin-top: auto; background: var(--card-bg);
+      line-height: 1.7;
     }
     footer a { color: var(--text-primary); text-decoration: none; font-weight: 600; }
     footer a:hover { color: var(--accent-gold); }
+    .footer-legal-notice {
+      max-width: 800px; margin: 0.8rem auto 0 auto; color: var(--text-secondary); font-size: 0.78rem; opacity: 0.85;
+    }
 
-    /* Modal Overlay & Legal Terms Window */
+    /* Modal Overlay */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 2000;
@@ -218,7 +222,7 @@
     }
     .modal-overlay.active { display: flex; }
     .modal-box {
-      background: var(--modal-bg); border: 1px solid var(--border-color); width: 100%; max-width: 460px;
+      background: var(--modal-bg); border: 1px solid var(--border-color); width: 100%; max-width: 440px;
       border-radius: 12px; padding: 2.2rem; position: relative; color: var(--text-primary);
       max-height: 85vh; overflow-y: auto;
     }
@@ -230,12 +234,6 @@
       border-radius: 6px; color: var(--text-primary); font-size: 0.95rem; outline: none; transition: border-color 0.2s;
     }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent-gold); }
-
-    .legal-text-content {
-      font-size: 0.83rem; color: var(--text-secondary); line-height: 1.7; background: var(--bg-color);
-      padding: 1.2rem; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 1rem;
-    }
-    .legal-text-content h4 { color: var(--text-primary); margin: 0.8rem 0 0.4rem 0; font-size: 0.9rem; }
   </style>
 </head>
 <body>
@@ -267,7 +265,7 @@
   </header>
 
   <div class="container">
-    <!-- Hero Slogan Section (요청하신 병렬 대구 및 스타일 통일 반영) -->
+    <!-- Hero Slogan Section -->
     <div class="hero-slogan-section">
       <h1 class="hero-title">Right Near, Your Azit.</h1>
       <p class="hero-subtitle">
@@ -347,11 +345,14 @@
     </div>
   </div>
 
-  <!-- FOOTER (단일 연락처 단일화 복원) -->
+  <!-- FOOTER (법적 고지 및 연락처 통합 배치) -->
   <footer>
     <p>© 2026 PlugAzit. All rights reserved.  |  
        Contact: <a href="mailto:aftrdry@outlook.kr">aftrdry@outlook.kr</a>
     </p>
+    <div class="footer-legal-notice">
+      PlugAzit는 프로듀서들을 위한 VST 딜 큐레이션 및 정보 공유 아지트입니다. 제공되는 모든 세일 정보와 가격은 각 브랜드 공식 스토어 정책에 따르며, 제휴 링크를 통한 구매 시 소정의 수수료를 제공받을 수 있습니다.
+    </div>
   </footer>
 
   <!-- MODALS -->
@@ -367,6 +368,7 @@
     </div>
   </div>
 
+  <!-- 회원가입 모달: 체크박스만 깔끔하게 유지 -->
   <div class="modal-overlay" id="signupModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('signupModal')">×</button>
@@ -374,16 +376,12 @@
       <form onsubmit="handleSignupSubmit(event)">
         <div class="form-group"><label>이메일 계정</label><input type="email" required placeholder="email@domain.com"></div>
         <div class="form-group"><label>비밀번호</label><input type="password" required placeholder="••••••••"></div>
-        <div class="form-group">
+        <div class="form-group" style="margin-top: 1.5rem;">
           <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:normal;">
             <input type="checkbox" id="termsCheck" required style="width:auto;"> [필수] 이용약관 및 개인정보 처리방침에 동의합니다.
           </label>
         </div>
-        <div class="legal-text-content">
-          <h4>서비스 이용약관 및 법적 고지</h4>
-          <p>PlugAzit는 프로듀서들을 위한 VST 딜 큐레이션 및 정보 공유 아지트입니다. 제공되는 모든 세일 정보와 가격은 각 브랜드 공식 스토어 정책에 따르며, 제휴 링크를 통한 구매 시 소정의 수수료를 제공받을 수 있습니다.</p>
-        </div>
-        <button type="submit" class="btn-buy" style="margin-top:1.2rem;">가입 완료</button>
+        <button type="submit" class="btn-buy" style="margin-top:1.5rem;">가입 완료</button>
       </form>
     </div>
   </div>
@@ -400,7 +398,7 @@
     </div>
   </div>
 
-  <!-- JavaScript Logic & VST Deals Dataset 복원 -->
+  <!-- JavaScript Logic & VST Deals Dataset -->
   <script>
     const SUPABASE_URL = "https://pxmkzyhayxsvbbftncwy.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_J0LQJ-qjr5ISX1jRKaQ7-A_GwABw8XP";
@@ -570,7 +568,7 @@
     function handleSignupSubmit(e) {
       e.preventDefault();
       const chk = document.getElementById('termsCheck');
-      if(chk && !chk.checked) { alert('이용약관 및 법적 고지에 동의해주세요.'); return; }
+      if(chk && !chk.checked) { alert('이용약관 및 개인정보 처리방침에 동의해주세요.'); return; }
       closeModal('signupModal');
       alert('회원가입이 완료되었습니다!');
     }
