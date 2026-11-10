@@ -8,34 +8,34 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    /* Dark Theme Palette (Dark Wood, Deep Olive & Midnight Black) */
+    /* Dark Theme: Deep Wood, Dark Olive & Charcoal Atmosphere */
     :root {
-      --bg-color: #0d110e;
-      --header-bg: rgba(13, 17, 14, 0.88);
-      --card-bg: #151a17;
-      --card-hover: #1d2420;
-      --border-color: #26302a;
-      --accent-color: #556b2f; /* Deep Olive Green */
-      --accent-hover: #6b873b;
-      --accent-gold: #c5a059; /* Vintage Gold Accent */
-      --text-primary: #f0f2f0;
-      --text-secondary: #9aa49e;
-      --modal-bg: #141916;
+      --bg-color: #121413;            /* 차분한 다크 모스 차콜 */
+      --header-bg: rgba(18, 20, 19, 0.88);
+      --card-bg: #1a1d1b;            /* 짙은 우드/올리브 톤 카드 */
+      --card-hover: #222623;
+      --border-color: #2a2f2b;        /* 절제된 미니멀 프레임 */
+      --accent-color: #586948;        /* 올리브 포레스트 그린 */
+      --accent-hover: #6a7e57;
+      --accent-gold: #c2a677;         /* 샌드 웜 골드 */
+      --text-primary: #e8e6e1;       /* 따뜻한 웜 오프화이트 */
+      --text-secondary: #8a918b;     /* 편안한 세이지 그레이 */
+      --modal-bg: #181b19;
       --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     }
 
-    /* Light Theme Palette (Soft Cream, White & Matte Gold) */
+    /* Light Theme: Sand Beige, Warm Cream & Dark Walnut */
     [data-theme="light"] {
-      --bg-color: #f9f8f6;
-      --header-bg: rgba(249, 248, 246, 0.9);
+      --bg-color: #f4f1ea;            /* 온화한 크림 샌드 배경 */
+      --header-bg: rgba(244, 241, 234, 0.9);
       --card-bg: #ffffff;
-      --card-hover: #f3f0eb;
-      --border-color: #e6e1d7;
-      --accent-color: #c5a059; /* Matte Gold */
-      --accent-hover: #a8843f;
-      --accent-gold: #38423b;
-      --text-primary: #1c211e;
-      --text-secondary: #737a75;
+      --card-hover: #eae5db;
+      --border-color: #dcd6c9;
+      --accent-color: #a88d5e;        /* 무광 매트 골드 */
+      --accent-hover: #8f764a;
+      --accent-gold: #2b302c;         /* 딥 월넛 포인트 */
+      --text-primary: #212422;
+      --text-secondary: #707571;
       --modal-bg: #ffffff;
     }
 
@@ -44,10 +44,10 @@
       background-color: var(--bg-color);
       color: var(--text-primary);
       font-family: var(--font-sans);
-      line-height: 1.65;
-      padding-top: 80px;
-      letter-spacing: -0.015em;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      line-height: 1.7;
+      padding-top: 85px;
+      letter-spacing: -0.02em;
+      transition: background-color 0.35s ease, color 0.35s ease;
     }
 
     header {
@@ -55,27 +55,26 @@
       background: var(--header-bg);
       border-bottom: 1px solid var(--border-color);
       display: flex; justify-content: space-between; align-items: center;
-      padding: 0 2.5rem; z-index: 1000;
-      backdrop-filter: blur(16px);
+      padding: 0 3rem; z-index: 1000;
+      backdrop-filter: blur(18px);
     }
 
     .logo-container {
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
     }
-    .logo-svg { height: 32px; width: auto; }
+    .logo-svg { height: 30px; width: auto; }
 
-    nav { display: flex; gap: 1rem; align-items: center; }
+    nav { display: flex; gap: 1.2rem; align-items: center; }
 
     .nav-tab-link {
       background: transparent; border: none; color: var(--text-secondary);
-      font-size: 0.92rem; font-weight: 600; cursor: pointer; padding: 0.5rem 1rem;
-      border-radius: 8px; transition: all 0.2s ease;
+      font-size: 0.92rem; font-weight: 600; cursor: pointer; padding: 0.5rem 0.8rem;
+      border-radius: 6px; transition: all 0.25s ease;
     }
     .nav-tab-link.active, .nav-tab-link:hover {
       color: var(--accent-gold); background: var(--card-bg);
     }
 
-    /* Minimal Elegant Theme Switch */
     .toggle-switch {
       position: relative; width: 44px; height: 22px;
       background: var(--border-color); border-radius: 20px;
@@ -83,29 +82,29 @@
     }
     .toggle-knob {
       width: 18px; height: 18px; background: var(--accent-gold); border-radius: 50%;
-      transition: 0.3s transform ease; transform: translateX(0);
+      transition: 0.3s transform cubic-bezier(0.16, 1, 0.3, 1); transform: translateX(0);
     }
     [data-theme="light"] .toggle-knob { transform: translateX(22px); }
 
     .nav-btn {
       background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);
       font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 0.45rem 1rem;
-      border-radius: 8px; transition: all 0.2s ease;
+      border-radius: 6px; transition: all 0.25s ease;
     }
     .nav-btn:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
 
-    .container { max-width: 1240px; margin: 0 auto; padding: 2.5rem 2rem; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 3rem 2.5rem; }
 
     /* Category Navigation */
-    .category-section { margin-bottom: 2.5rem; }
+    .category-section { margin-bottom: 2.8rem; }
     .main-cat-bar {
       display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.8rem;
       border-bottom: 1px solid var(--border-color); margin-bottom: 1.2rem;
     }
     .cat-chip {
       background: var(--card-bg); border: 1px solid var(--border-color);
-      color: var(--text-secondary); padding: 0.55rem 1.3rem; border-radius: 10px;
-      font-size: 0.88rem; font-weight: 600; cursor: pointer; whitespace: nowrap; transition: all 0.2s ease;
+      color: var(--text-secondary); padding: 0.6rem 1.4rem; border-radius: 8px;
+      font-size: 0.88rem; font-weight: 600; cursor: pointer; whitespace: nowrap; transition: all 0.25s ease;
     }
     .cat-chip.active, .cat-chip:hover {
       background: var(--accent-color); color: #fff; border-color: var(--accent-color);
@@ -116,7 +115,7 @@
     .sub-cat-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; padding: 0.2rem 0; }
     .sub-chip {
       background: transparent; border: 1px solid var(--border-color);
-      color: var(--text-secondary); padding: 0.35rem 0.9rem; border-radius: 20px;
+      color: var(--text-secondary); padding: 0.35rem 0.95rem; border-radius: 20px;
       font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
     }
     .sub-chip.active, .sub-chip:hover {
@@ -125,61 +124,59 @@
 
     /* Architectural Grid Cards */
     .deals-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.8rem; margin-bottom: 4rem;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 2rem; margin-bottom: 4rem;
     }
     .deal-card {
-      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
-      padding: 1.8rem; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; justify-content: space-between;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;
+      padding: 1.8rem; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; justify-content: space-between;
     }
-    .deal-card:hover { transform: translateY(-3px); background: var(--card-hover); border-color: var(--accent-gold); }
+    .deal-card:hover { transform: translateY(-4px); background: var(--card-hover); border-color: var(--accent-gold); }
     
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
     .brand-name { font-size: 0.78rem; color: var(--accent-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
-    .deal-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.3rem; color: var(--text-primary); text-decoration: none; line-height: 1.35; }
+    .deal-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 0.3rem; color: var(--text-primary); text-decoration: none; line-height: 1.35; }
     .sub-cat-tag { font-size: 0.78rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 1rem; }
 
-    .price-box { margin: 0.8rem 0 1.2rem 0; padding: 0.9rem; background: var(--bg-color); border-radius: 10px; border: 1px solid var(--border-color); }
+    .price-box { margin: 0.8rem 0 1.2rem 0; padding: 1rem; background: var(--bg-color); border-radius: 8px; border: 1px solid var(--border-color); }
     .original-price { text-decoration: line-through; color: var(--text-secondary); font-size: 0.85rem; margin-right: 0.5rem; }
-    .discount-price { font-size: 1.35rem; font-weight: 900; color: var(--text-primary); }
+    .discount-price { font-size: 1.4rem; font-weight: 900; color: var(--text-primary); }
     .krw-price { font-size: 0.88rem; color: var(--accent-gold); font-weight: 700; margin-top: 0.2rem; }
 
-    .tag-badge { padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.72rem; font-weight: 800; }
-    .tag-discount { background: rgba(197, 160, 89, 0.15); color: var(--accent-gold); }
-    .tag-free { background: rgba(85, 107, 47, 0.2); color: #7ca843; }
+    .tag-badge { padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.72rem; font-weight: 800; }
+    .tag-discount { background: rgba(194, 166, 119, 0.15); color: var(--accent-gold); }
+    .tag-free { background: rgba(88, 105, 72, 0.25); color: #8ba870; }
 
     .perks-box { font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 1.4rem; line-height: 1.6; }
 
     .btn-buy {
-      width: 100%; padding: 0.85rem; background: var(--accent-color); border: none; border-radius: 10px;
+      width: 100%; padding: 0.85rem; background: var(--accent-color); border: none; border-radius: 8px;
       color: #fff; font-weight: 700; font-size: 0.92rem; cursor: pointer; text-align: center; text-decoration: none; display: block;
-      transition: background 0.2s ease;
+      transition: background 0.25s ease;
     }
     .btn-buy:hover { background: var(--accent-hover); }
 
     /* Community Page */
     #communityView { display: none; }
-    .comm-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 14px; margin-bottom: 1.2rem; }
+    .comm-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.6rem; border-radius: 12px; margin-bottom: 1.2rem; }
     .comm-author { font-weight: 700; color: var(--accent-gold); margin-right: 0.6rem; }
 
-    /* Modal Form Fixes for Input Lag */
+    /* Modal Form */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 2000;
-      backdrop-filter: blur(5px);
+      backdrop-filter: blur(6px);
     }
     .modal-overlay.active { display: flex; }
     .modal-box {
       background: var(--modal-bg); border: 1px solid var(--border-color); width: 100%; max-width: 440px;
-      border-radius: 18px; padding: 2.2rem; position: relative; color: var(--text-primary);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      border-radius: 14px; padding: 2.2rem; position: relative; color: var(--text-primary);
     }
     .modal-close { position: absolute; top: 1.2rem; right: 1.2rem; background: none; border: none; color: var(--text-secondary); font-size: 1.4rem; cursor: pointer; }
     .form-group { margin-bottom: 1.2rem; }
     .form-group label { display: block; font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 600; }
     .form-group input, .form-group textarea {
       width: 100%; padding: 0.8rem 1rem; background: var(--bg-color); border: 1px solid var(--border-color);
-      border-radius: 10px; color: var(--text-primary); font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+      border-radius: 8px; color: var(--text-primary); font-size: 0.95rem; outline: none; transition: border-color 0.2s;
     }
     .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-gold); }
   </style>
@@ -190,8 +187,8 @@
   <header>
     <a href="#" class="logo-container" onclick="showPage('deals'); return false;">
       <svg class="logo-svg" viewBox="0 0 240 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <text x="0" y="38" font-family="'Pretendard', sans-serif" font-weight="900" font-size="40" fill="currentColor">Plug</text>
-        <text x="100" y="38" font-family="'Pretendard', sans-serif" font-weight="900" font-size="40" fill="#c5a059">Azit</text>
+        <text x="0" y="38" font-family="'Pretendard', sans-serif" font-weight="900" font-size="38" fill="currentColor">Plug</text>
+        <text x="95" y="38" font-family="'Pretendard', sans-serif" font-weight="900" font-size="38" fill="#c2a677">Azit</text>
       </svg>
     </a>
 
@@ -238,7 +235,7 @@
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
         <div>
           <h2 style="font-weight:800; font-size:1.6rem;">💬 Producer Community</h2>
-          <p style="color:var(--text-secondary); font-size:0.9rem;">사운드 믹싱 팁과 VST 활용 노하우를 자유롭게 전해보세요.</p>
+          <p style="color:var(--text-secondary); font-size:0.9rem;">사운드 믹싱 팁과 VST 활용 노하우를 자유롭게 나누세요.</p>
         </div>
         <button class="btn-buy" style="width:auto; padding:0.65rem 1.4rem;" onclick="openModal('postModal')">✏️ 노하우 공유하기</button>
       </div>
@@ -427,7 +424,7 @@
                 🔑 코드: <strong>${d.code}</strong>
               </div>
             </div>
-            <a href="${d.storeUrl}" target="_blank" class="btn-buy">공식 스토어 딜 이동 ↗</a>
+            <a href="${d.storeUrl}" target="_blank" class="btn-buy">공식 스토어 딜 바로가기 ↗</a>
           </div>
         `;
       }).join('');
