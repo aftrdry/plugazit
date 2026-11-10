@@ -61,17 +61,24 @@
       backdrop-filter: blur(16px);
     }
 
+    /* 원본 PlugAzit.png 로고 복원 및 하단 선 침범 잔상 방지 컨테이너 */
     .logo-container {
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
-      height: 45px;
+      height: 70px;
+      overflow: hidden;
     }
-    .logo-svg {
-      height: 100%;
+    .brand-logo-img {
+      height: 65px;
       width: auto;
       display: block;
-      fill: var(--text-primary);
+      object-fit: contain;
+      pointer-events: none;
+      -webkit-user-drag: none;
     }
-    .logo-svg .accent-part { fill: var(--accent-gold); }
+    /* 라이트모드 전환 시 원본 이미지의 흰색 글자만 검은색으로 반전 */
+    [data-theme="light"] .brand-logo-img {
+      filter: invert(1);
+    }
 
     nav { display: flex; gap: 1.2rem; align-items: center; }
 
@@ -221,14 +228,10 @@
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Header (원본 PlugAzit.png 로고 적용) -->
   <header>
     <a href="#" class="logo-container" onclick="showPage('deals'); return false;">
-      <svg class="logo-svg" viewBox="0 0 320 70" xmlns="http://www.w3.org/2000/svg">
-        <text x="0" y="52" font-family="'Pretendard', sans-serif" font-size="52" font-weight="900" letter-spacing="-0.03em">Plug</text>
-        <path class="accent-part" d="M 160 16 L 180 32 L 200 16" fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="160" y="52" font-family="'Pretendard', sans-serif" font-size="52" font-weight="900" letter-spacing="-0.03em">Azit</text>
-      </svg>
+      <img src="PlugAzit.png" alt="PlugAzit" class="brand-logo-img" />
     </a>
 
     <nav>
@@ -643,7 +646,7 @@
       location.reload();
     }
 
-    // 마이페이지 안정화 로직 적용
+    // 마이페이지 안전 오픈 로직
     async function openMyPageModal() {
       openModal('myPageModal');
 
