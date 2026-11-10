@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PlugAzit — 믹싱, VST 딜 큐레이션 &amp; 노하우 허브</title>
+  <title>PlugAzit — Global VST Deals & Curation Hub</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-  
-  <!-- Supabase JS SDK CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
       --bg-color: #0b0f19;
       --card-bg: #131927;
+      --card-hover: #1c2538;
       --border-color: #1f293d;
       --text-primary: #f3f4f6;
       --text-secondary: #9ca3af;
@@ -22,124 +21,154 @@
       --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
     }
 
+    [data-theme="light"] {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --card-hover: #f1f5f9;
+      --border-color: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --accent-color: #2563eb;
+      --accent-hover: #1d4ed8;
+      --modal-bg: #ffffff;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background-color: var(--bg-color);
       color: var(--text-primary);
       font-family: var(--font-sans);
       line-height: 1.6;
-      padding: 0 1.5rem 3rem 1.5rem;
-      max-width: 1080px;
-      margin: 0 auto;
+      padding-top: 80px;
+      transition: background-color 0.3s, color 0.3s;
     }
 
-    /* Header */
+    /* Fixed Sticky Header */
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem 0;
+      position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+      background: var(--bg-color);
       border-bottom: 1px solid var(--border-color);
-      margin-bottom: 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 2rem; z-index: 999;
+      backdrop-filter: blur(8px);
     }
-    .logo { font-size: 1.5rem; font-weight: 800; color: #fff; cursor: pointer; text-decoration: none; }
+    .logo {
+      font-size: 1.8rem; font-weight: 900; color: var(--text-primary);
+      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 0.3rem;
+    }
     .logo span { color: var(--accent-color); }
     nav { display: flex; gap: 1rem; align-items: center; }
-    .nav-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      padding: 0.5rem 0.8rem;
-      border-radius: 6px;
-      transition: all 0.2s;
-    }
-    .nav-btn:hover { color: #fff; background-color: var(--card-bg); }
 
-    /* Main Banner */
-    .hero { text-align: center; padding: 3rem 1rem; }
-    .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; }
-    .hero p { color: var(--text-secondary); max-width: 600px; margin: 0 auto 2rem auto; font-size: 1.05rem; }
-    .social-btns { display: flex; justify-content: center; gap: 1rem; }
+    .theme-toggle {
+      background: var(--card-bg); border: 1px solid var(--border-color);
+      color: var(--text-primary); padding: 0.5rem 0.8rem; border-radius: 8px;
+      cursor: pointer; font-weight: 600; font-size: 0.85rem;
+    }
+
+    .nav-btn {
+      background: transparent; border: none; color: var(--text-secondary);
+      font-size: 0.95rem; font-weight: 600; cursor: pointer; padding: 0.5rem 0.8rem;
+      border-radius: 6px; transition: all 0.2s;
+    }
+    .nav-btn:hover { color: var(--text-primary); background-color: var(--card-bg); }
+
+    .container { max-width: 1140px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* Hero Section */
+    .hero { text-align: center; padding: 3rem 1rem 2rem 1rem; }
+    .hero h1 { font-size: 2.8rem; font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.02em; }
+    .hero p { color: var(--text-secondary); max-width: 650px; margin: 0 auto 2rem auto; font-size: 1.1rem; }
+    .social-btns { display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem; }
     .btn-social {
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      font-weight: 700;
-      text-decoration: none;
-      color: #fff;
-      font-size: 0.95rem;
+      padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 700;
+      text-decoration: none; color: #fff; font-size: 0.95rem;
     }
     .btn-discord { background-color: #5865F2; }
     .btn-twitter { background-color: #1DA1F2; }
 
-    /* Deals Table */
-    .section-title { font-size: 1.3rem; font-weight: 700; margin: 2rem 0 1rem 0; display: flex; justify-content: space-between; align-items: center; }
-    .table-container { width: 100%; overflow-x: auto; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); }
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-    th, td { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); }
-    th { color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
-    tr:last-child td { border-bottom: none; }
-    .tag { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
-    .tag-free { background-color: rgba(16, 185, 129, 0.2); color: #10B981; }
-    .tag-discount { background-color: rgba(245, 158, 11, 0.2); color: #F59E0B; }
-    .deal-link { color: var(--text-primary); text-decoration: none; font-weight: 600; }
-    .deal-link:hover { color: var(--accent-color); }
+    /* Category & Filters */
+    .category-bar {
+      display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 1rem; margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .cat-chip {
+      background: var(--card-bg); border: 1px solid var(--border-color);
+      color: var(--text-secondary); padding: 0.5rem 1.2rem; border-radius: 20px;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer; whitespace: nowrap; transition: 0.2s;
+    }
+    .cat-chip.active, .cat-chip:hover {
+      background: var(--accent-color); color: #fff; border-color: var(--accent-color);
+    }
+    .cat-chip.affiliate {
+      border-color: #f59e0b; color: #f59e0b;
+    }
+    .cat-chip.affiliate:hover {
+      background: #f59e0b; color: #fff;
+    }
+
+    /* Grid Deal Cards UI */
+    .deals-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 1.5rem; margin-bottom: 4rem;
+    }
+    .deal-card {
+      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px;
+      padding: 1.5rem; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .deal-card:hover { transform: translateY(-4px); background: var(--card-hover); }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+    .brand-name { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; }
+    .deal-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-primary); text-decoration: none; }
+    
+    .price-box { margin: 1rem 0; }
+    .original-price { text-decoration: line-through; color: var(--text-secondary); font-size: 0.9rem; margin-right: 0.5rem; }
+    .discount-price { font-size: 1.3rem; font-weight: 800; color: var(--accent-color); }
+    .krw-price { font-size: 0.95rem; color: #10b981; font-weight: 700; margin-top: 0.2rem; }
+
+    .tag-badge { padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 800; }
+    .tag-discount { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .tag-free { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+
+    .perks-box { background: var(--bg-color); padding: 0.8rem; border-radius: 8px; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; }
+
+    /* Community & Review Section */
+    .community-section {
+      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem; margin-top: 3rem;
+    }
+    .comm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .review-card { background: var(--bg-color); border: 1px solid var(--border-color); padding: 1rem; border-radius: 10px; margin-bottom: 1rem; }
 
     /* Modal */
     .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000;
     }
     .modal-overlay.active { display: flex; }
     .modal-box {
-      background: var(--modal-bg);
-      border: 1px solid var(--border-color);
-      width: 100%;
-      max-width: 400px;
-      border-radius: 12px;
-      padding: 2rem;
-      position: relative;
+      background: var(--modal-bg); border: 1px solid var(--border-color); width: 100%; max-width: 420px;
+      border-radius: 14px; padding: 2rem; position: relative; color: var(--text-primary);
     }
-    .modal-close {
-      position: absolute;
-      top: 1.25rem; right: 1.25rem;
-      background: none; border: none;
-      color: var(--text-secondary);
-      font-size: 1.5rem; cursor: pointer;
-    }
-    .modal-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 1.5rem; }
+    .modal-close { position: absolute; top: 1.25rem; right: 1.25rem; background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; }
     .form-group { margin-bottom: 1.25rem; }
     .form-group label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
     .form-group input {
-      width: 100%; padding: 0.75rem;
-      background: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 6px; color: #fff;
-      font-size: 0.95rem;
+      width: 100%; padding: 0.75rem; background: var(--bg-color); border: 1px solid var(--border-color);
+      border-radius: 6px; color: var(--text-primary); font-size: 0.95rem;
     }
     .btn-submit {
-      width: 100%; padding: 0.8rem;
-      background: var(--accent-color);
-      border: none; border-radius: 6px;
-      color: #fff; font-weight: 700;
-      font-size: 1rem; cursor: pointer;
+      width: 100%; padding: 0.8rem; background: var(--accent-color); border: none; border-radius: 6px;
+      color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer;
     }
-    .btn-submit:hover { background: var(--accent-hover); }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Sticky Header -->
   <header>
-    <a href="#" class="logo">Plug<span>Azit</span></a>
+    <a href="#" class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+      Plug<span>Azit</span>
+    </a>
     <nav>
+      <button class="theme-toggle" onclick="toggleTheme()">☀️ / 🌙 테마 변경</button>
       <div id="authNav">
         <button class="nav-btn" onclick="openModal('loginModal')">로그인</button>
         <button class="nav-btn" onclick="openModal('signupModal')">회원가입</button>
@@ -151,51 +180,61 @@
     </nav>
   </header>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <h1>Sail the Wave of Sound.</h1>
-    <p>PlugAzit은 급변하는 AI와 시류 속에서도 자신만의 예술적 지향점을 향해 항해하는 프로듀서들을 위한 글로벌 VST 딜 큐레이션 허브입니다.</p>
-    <div class="social-btns">
-      <a href="https://discord.gg" target="_blank" class="btn-social btn-discord">디스코드 아지트 입장</a>
-      <a href="https://x.com" target="_blank" class="btn-social btn-twitter">공식 X (트위터) 팔로우</a>
-    </div>
-  </section>
+  <div class="container">
+    <!-- Hero Banner -->
+    <section class="hero">
+      <h1>Sail the Wave of Sound.</h1>
+      <p>PlugAzit은 글로벌 VST 핫딜 큐레이션, 실시간 원화 환산, 브랜드 파트너십 및 프로듀서 커뮤니티 공간입니다.</p>
+      <div class="social-btns">
+        <a href="https://discord.gg" target="_blank" class="btn-social btn-discord">디스코드 아지트 입장</a>
+        <a href="https://x.com" target="_blank" class="btn-social btn-twitter">공식 X (트위터) 팔로우</a>
+      </div>
+    </section>
 
-  <!-- Hot Deals Section -->
-  <section>
-    <div class="section-title">
-      <span>GLOBAL VST CURATION &amp; HOT DEALS</span>
-      <span style="font-size:0.8rem; color:var(--text-secondary);">Supabase 실시간 수집</span>
+    <!-- Categories & Affiliate Bar -->
+    <div class="category-bar">
+      <button class="cat-chip active" onclick="filterCategory('all')">전체보기 (All)</button>
+      <button class="cat-chip" onclick="filterCategory('synth')">신디사이저 / 악기</button>
+      <button class="cat-chip" onclick="filterCategory('mixing')">믹싱 / 마스터링</button>
+      <button class="cat-chip" onclick="filterCategory('fx')">이펙터 / FX</button>
+      <button class="cat-chip" onclick="filterCategory('free')">100% 무료 (Freebies)</button>
+      <button class="cat-chip affiliate" onclick="filterCategory('affiliate')">🤝 제휴 브랜드 신청 (Affiliate)</button>
     </div>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>구분</th>
-            <th>제품명 / 브랜드</th>
-            <th>할인가</th>
-            <th>혜택 / 코드</th>
-          </tr>
-        </thead>
-        <tbody id="dealsTableBody">
-          <tr><td colspan="4" style="text-align:center; color:var(--text-secondary);">핫딜 목록을 불러오는 중입니다...</td></tr>
-        </tbody>
-      </table>
+
+    <!-- Deals Grid UI -->
+    <div class="deals-grid" id="dealsContainer">
+      <!-- 동적 카드 및 샘플 렌더링 영역 -->
     </div>
-  </section>
+
+    <!-- Community & User Reviews -->
+    <section class="community-section">
+      <div class="comm-header">
+        <h2>💬 프로듀서 커뮤니티 & 실시간 사용후기</h2>
+        <button class="btn-social btn-discord" onclick="alert('준비 중인 기능입니다. 디스코드 채널을 이용해주세요!')">글쓰기</button>
+      </div>
+      <div class="review-card">
+        <strong>@Aftrdry</strong> <span style="font-size:0.8rem; color:var(--text-secondary);">2시간 전</span>
+        <p style="margin-top:0.3rem;">Analog Lab Play 무료 딜 풀린 거 라이브 세션에 바로 적용했는데 프리셋 구성 퀄리티 엄청나네요.</p>
+      </div>
+      <div class="review-card">
+        <strong>@ProducerK</strong> <span style="font-size:0.8rem; color:var(--text-secondary);">5시간 전</span>
+        <p style="margin-top:0.3rem;">Komplete 14 50% 할인 코드로 환율 계산해보고 바로 질렀습니다. 정보 감사합니다!</p>
+      </div>
+    </section>
+  </div>
 
   <!-- Login Modal -->
   <div class="modal-overlay" id="loginModal">
     <div class="modal-box">
-      <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
-      <div class="modal-title">로그인</div>
+      <button class="modal-close" onclick="closeModal('loginModal')">×</button>
+      <h3 style="margin-bottom:1.5rem;">로그인</h3>
       <form id="loginForm">
         <div class="form-group">
-          <label for="loginEmail">이메일</label>
+          <label>이메일</label>
           <input type="email" id="loginEmail" placeholder="example@domain.com" required />
         </div>
         <div class="form-group">
-          <label for="loginPassword">비밀번호</label>
+          <label>비밀번호</label>
           <input type="password" id="loginPassword" placeholder="••••••••" required />
         </div>
         <button type="submit" class="btn-submit">로그인</button>
@@ -206,15 +245,15 @@
   <!-- Signup Modal -->
   <div class="modal-overlay" id="signupModal">
     <div class="modal-box">
-      <button class="modal-close" onclick="closeModal('signupModal')">&times;</button>
-      <div class="modal-title">회원가입</div>
+      <button class="modal-close" onclick="closeModal('signupModal')">×</button>
+      <h3 style="margin-bottom:1.5rem;">회원가입</h3>
       <form id="signupForm">
         <div class="form-group">
-          <label for="signupEmail">이메일</label>
+          <label>이메일</label>
           <input type="email" id="signupEmail" placeholder="example@domain.com" required />
         </div>
         <div class="form-group">
-          <label for="signupPassword">비밀번호</label>
+          <label>비밀번호</label>
           <input type="password" id="signupPassword" placeholder="8자리 이상 입력" required />
         </div>
         <button type="submit" class="btn-submit">가입하기</button>
@@ -222,85 +261,114 @@
     </div>
   </div>
 
-  <!-- JavaScript -->
   <script>
-    // 1. Supabase 클라이언트 초기화
+    // 1. Supabase Init
     const SUPABASE_URL = "https://pxmkzyhayxsvbbftncwy.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_J0LQJ-qjr5ISX1jRKaQ7-A_GwABw8XP";
-
     let supabaseClient = null;
 
-    function initSupabase() {
-      if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      } else {
-        console.error("Supabase SDK가 아직 로드되지 않았습니다.");
+    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    // Theme Toggle Logic
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const target = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', target);
+    }
+
+    function openModal(id) { document.getElementById(id)?.classList.add('active'); }
+    function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
+
+    // Sample Deals Data with KRW Calculation
+    const USD_TO_KRW = 1380; // 환율 기준
+    const sampleDeals = [
+      {
+        brand: "Native Instruments",
+        title: "Komplete 14 Standard",
+        cat: "synth",
+        original: 599,
+        discountPrice: 299,
+        discountRate: "50% OFF",
+        code: "BF-SEASON",
+        perk: "개인 라이선스 + 추가 바우처 지급"
+      },
+      {
+        brand: "Arturia",
+        title: "Analog Lab Play",
+        cat: "free",
+        original: 99,
+        discountPrice: 0,
+        discountRate: "100% FREE",
+        code: "DIRECT-DOWNLOAD",
+        perk: "평생 무상 사용 및 프리셋 100종 포함"
+      },
+      {
+        brand: "FabFilter",
+        title: "Pro-Q 3 Equalizer",
+        cat: "mixing",
+        original: 179,
+        discountPrice: 134,
+        discountRate: "25% OFF",
+        code: "FAB-PROMO-2026",
+        perk: "크로스그레이드 혜택 중복 가능"
       }
+    ];
+
+    function renderDeals(deals) {
+      const container = document.getElementById('dealsContainer');
+      if (!container) return;
+
+      container.innerHTML = deals.map(d => {
+        const krw = d.discountPrice === 0 ? "0원 (무료)" : `약 ${(d.discountPrice * USD_TO_KRW).toLocaleString()}원`;
+        const origKrw = d.original ? `($${d.original} / 약 ${(d.original * USD_TO_KRW).toLocaleString()}원)` : '';
+        const tagClass = d.discountPrice === 0 ? 'tag-free' : 'tag-discount';
+
+        return `
+          <div class="deal-card">
+            <div>
+              <div class="card-header">
+                <span class="brand-name">${d.brand}</span>
+                <span class="tag-badge ${tagClass}">${d.discountRate}</span>
+              </div>
+              <a href="#" class="deal-title">${d.title}</a>
+              <div class="price-box">
+                <span class="original-price">${origKrw}</span>
+                <span class="discount-price">$${d.discountPrice}</span>
+                <div class="krw-price">KRW: ${krw}</div>
+              </div>
+              <div class="perks-box">
+                💡 혜택: ${d.perk}<br/>
+                🔑 프로모션 코드: <strong>${d.code}</strong>
+              </div>
+            </div>
+            <button class="btn-submit" style="margin-top:0.5rem;" onclick="alert('${d.title} 구매 링크로 이동합니다.')">딜 상세보기 & 구매하기</button>
+          </div>
+        `;
+      }).join('');
     }
 
-    // Modal Control Functions
-    function openModal(id) {
-      document.getElementById(id)?.classList.add('active');
-    }
-    function closeModal(id) {
-      document.getElementById(id)?.classList.remove('active');
-    }
+    function filterCategory(cat) {
+      document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
 
-    // 2. 핫딜 목록 불러오기
-    async function fetchAndRenderDeals() {
-      const tbody = document.getElementById('dealsTableBody');
-      if (!tbody) return;
-
-      if (!supabaseClient) {
-        initSupabase();
-      }
-
-      if (!supabaseClient) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Supabase 연결 대기 중...</td></tr>';
+      if (cat === 'affiliate') {
+        alert('🤝 파트너십/제휴 문의: affiliate@plugazit.com 또는 디스코드 문의 채널을 이용해 주세요.');
         return;
       }
-
-      try {
-        const { data: deals, error } = await supabaseClient.from('deals').select('*').order('created_at', { ascending: false });
-
-        if (error || !deals || deals.length === 0) {
-          tbody.innerHTML = `
-            <tr>
-              <td><span class="tag tag-discount">50% OFF</span></td>
-              <td><a href="#" class="deal-link">Native Instruments Komplete 14</a></td>
-              <td>~$175</td>
-              <td>BF-SEASON</td>
-            </tr>
-            <tr>
-              <td><span class="tag tag-free">100% FREE</span></td>
-              <td><a href="#" class="deal-link">Arturia Analog Lab Play</a></td>
-              <td>$0 (무료)</td>
-              <td>DIRECT-DOWNLOAD</td>
-            </tr>
-          `;
-          return;
-        }
-
-        tbody.innerHTML = deals.map(deal => `
-          <tr>
-            <td><span class="tag ${deal.discount?.includes('100%') ? 'tag-free' : 'tag-discount'}">${deal.discount || 'HOT'}</span></td>
-            <td><a href="${deal.link || '#'}" target="_blank" class="deal-link">${deal.title}</a></td>
-            <td>${deal.price || 'Free'}</td>
-            <td>${deal.promo_code || 'DIRECT-LINK'}</td>
-          </tr>
-        `).join('');
-      } catch (err) {
-        console.error('Fetch error:', err);
+      if (cat === 'all') {
+        renderDeals(sampleDeals);
+      } else {
+        const filtered = sampleDeals.filter(d => d.cat === cat || (cat === 'free' && d.discountPrice === 0));
+        renderDeals(filtered);
       }
     }
 
-    // 3. 사용자 세션 상태 확인
+    // Auth & Event Handlers
     async function checkUserSession() {
-      if (!supabaseClient) initSupabase();
       if (!supabaseClient) return;
-
       const { data: { session } } = await supabaseClient.auth.getSession();
-      
       const authNav = document.getElementById('authNav');
       const userNav = document.getElementById('userNav');
       const userEmailSpan = document.getElementById('userEmailSpan');
@@ -315,9 +383,7 @@
       }
     }
 
-    // 4. 로그아웃 처리
     async function handleLogout() {
-      if (!supabaseClient) initSupabase();
       if (supabaseClient) {
         await supabaseClient.auth.signOut();
         alert('로그아웃 되었습니다.');
@@ -325,72 +391,31 @@
       }
     }
 
-    // 5. DOM 로드 완료 후 이벤트 바인딩
     document.addEventListener('DOMContentLoaded', () => {
-      initSupabase();
-      fetchAndRenderDeals();
+      renderDeals(sampleDeals);
       checkUserSession();
 
-      // 로그인 폼 제출 이벤트
-      const loginForm = document.getElementById('loginForm');
-      if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
+      document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail')?.value;
+        const password = document.getElementById('loginPassword')?.value;
+        if (!supabaseClient) return alert('Supabase 연동이 준비되지 않았습니다.');
 
-          const email = document.getElementById('loginEmail')?.value;
-          const password = document.getElementById('loginPassword')?.value;
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) alert('로그인 실패: ' + error.message);
+        else { alert('로그인 성공!'); closeModal('loginModal'); checkUserSession(); }
+      });
 
-          if (!supabaseClient) initSupabase();
+      document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('signupEmail')?.value;
+        const password = document.getElementById('signupPassword')?.value;
+        if (!supabaseClient) return alert('Supabase 연동이 준비되지 않았습니다.');
 
-          if (!supabaseClient) {
-            alert('Supabase 연동이 준비되지 않았습니다. 페이지를 다시고쳐주세요.');
-            return;
-          }
-
-          try {
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            if (error) {
-              alert('로그인 실패: ' + error.message);
-            } else {
-              alert('로그인 성공!');
-              closeModal('loginModal');
-              checkUserSession();
-            }
-          } catch (err) {
-            alert('로그인 처리 중 오류가 발생했습니다: ' + err.message);
-          }
-        });
-      }
-
-      // 회원가입 폼 제출 이벤트
-      const signupForm = document.getElementById('signupForm');
-      if (signupForm) {
-        signupForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-
-          const email = document.getElementById('signupEmail')?.value;
-          const password = document.getElementById('signupPassword')?.value;
-
-          if (!supabaseClient) initSupabase();
-
-          if (!supabaseClient) {
-            alert('Supabase 연동이 준비되지 않았습니다.');
-            return;
-          }
-
-          try {
-            const { data, error } = await supabaseClient.auth.signUp({ email, password });
-            if (error) {
-              alert('회원가입 실패: ' + error.message);
-            } else {
-              alert('회원가입 요청 성공! 이메일을 확인해 주세요.');
-              closeModal('signupModal');
-            }
-          } catch (err) {
-            alert('회원가입 처리 중 오류: ' + err.message);
-          }
-        });
-      }
+        const { error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) alert('회원가입 실패: ' + error.message);
+        else { alert('회원가입 신청 성공! 이메일을 확인하세요.'); closeModal('signupModal'); }
+      });
     });
   </script>
 </body>
