@@ -21,7 +21,6 @@
       --text-primary: #f2f0eb;
       --text-secondary: #909892;
       --modal-bg: #161917;
-      --logo-filter: invert(1);
       --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     }
 
@@ -38,7 +37,6 @@
       --text-primary: #1a1d1b;
       --text-secondary: #6e736f;
       --modal-bg: #ffffff;
-      --logo-filter: none;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -47,13 +45,13 @@
       color: var(--text-primary);
       font-family: var(--font-sans);
       line-height: 1.65;
-      padding-top: 85px;
+      padding-top: 90px;
       letter-spacing: -0.02em;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     header {
-      position: fixed; top: 0; left: 0; width: 100%; height: 80px;
+      position: fixed; top: 0; left: 0; width: 100%; height: 85px;
       background: var(--header-bg);
       border-bottom: 1px solid var(--border-color);
       display: flex; justify-content: space-between; align-items: center;
@@ -64,9 +62,13 @@
     .logo-container {
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
     }
-    .logo-img {
-      height: 48px; width: auto; display: block;
-      filter: var(--logo-filter); transition: filter 0.3s ease;
+    
+    /* Transparent Vector Logo - Crisp & Bold */
+    .brand-logo-svg {
+      height: 44px;
+      width: auto;
+      color: var(--text-primary);
+      display: block;
     }
 
     nav { display: flex; gap: 1.2rem; align-items: center; }
@@ -93,7 +95,7 @@
 
     /* Auth Buttons with proper spacing */
     #authNav, #userNav {
-      display: flex; gap: 0.75rem; align-items: center;
+      display: flex; gap: 0.8rem; align-items: center;
     }
 
     .nav-btn {
@@ -105,14 +107,14 @@
 
     .container { max-width: 1280px; margin: 0 auto; padding: 2.5rem 2.5rem; }
 
-    /* Hero / Slogan Section: Sail the Wave of Sound. */
+    /* Hero Slogan Section */
     .hero-slogan-section {
-      padding: 2rem 0 2.5rem 0;
+      padding: 1.5rem 0 2.2rem 0;
       border-bottom: 1px solid var(--border-color);
       margin-bottom: 2.5rem;
     }
     .hero-title {
-      font-size: 2.4rem; font-weight: 900; letter-spacing: -0.03em;
+      font-size: 2.5rem; font-weight: 900; letter-spacing: -0.03em;
       color: var(--text-primary); margin-bottom: 0.4rem;
     }
     .hero-subtitle {
@@ -207,10 +209,14 @@
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Header with Large Clean Transparent PlugÂzit Vector Logo -->
   <header>
     <a href="#" class="logo-container" onclick="showPage('deals'); return false;">
-      <img src="PlugAzit.png" alt="PlugÂzit" class="logo-img" />
+      <svg class="brand-logo-svg" viewBox="0 0 280 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="0" y="44" font-family="'Pretendard', sans-serif" font-weight="900" font-size="44" fill="currentColor">Plug</text>
+        <path d="M125 13 L136 3 L147 13 L143 15 L136 8 L129 15 Z" fill="currentColor"/>
+        <text x="120" y="44" font-family="'Pretendard', sans-serif" font-weight="900" font-size="44" fill="currentColor">Âzit</text>
+      </svg>
     </a>
 
     <nav>
