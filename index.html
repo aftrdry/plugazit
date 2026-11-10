@@ -224,13 +224,18 @@
 
   <!-- JavaScript -->
   <script>
-    // 1. Supabase 클라이언트 초기화 (사용자 프로젝트 키)
-    const SUPABASE_URL = 'https://pxmkzyhayxsvbbftncwy.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_J0LQJ-qjr5ISX1jRKaQ7-A_GwABw8XP';
-    
+    // 1. Supabase 클라이언트 초기화
+    const SUPABASE_URL = "https://pxmkzyhayxsvbbftncwy.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_J0LQJ-qjr5ISX1jRKaQ7-A_GwABw8XP";
+
     let supabaseClient = null;
-    if (typeof supabase !== 'undefined') {
-      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function initSupabase() {
+      if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } else {
+        console.error("Supabase SDK가 아직 로드되지 않았습니다.");
+      }
     }
 
     // Modal Control Functions
@@ -247,7 +252,11 @@
       if (!tbody) return;
 
       if (!supabaseClient) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Supabase SDK 로드 실패</td></tr>';
+        initSupabase();
+      }
+
+      if (!supabaseClient) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Supabase 연결 대기 중...</td></tr>';
         return;
       }
 
@@ -255,7 +264,6 @@
         const { data: deals, error } = await supabaseClient.from('deals').select('*').order('created_at', { ascending: false });
 
         if (error || !deals || deals.length === 0) {
-          // 백업 샘플 데이터 렌더링
           tbody.innerHTML = `
             <tr>
               <td><span class="tag tag-discount">50% OFF</span></td>
@@ -288,7 +296,9 @@
 
     // 3. 사용자 세션 상태 확인
     async function checkUserSession() {
+      if (!supabaseClient) initSupabase();
       if (!supabaseClient) return;
+
       const { data: { session } } = await supabaseClient.auth.getSession();
       
       const authNav = document.getElementById('authNav');
@@ -307,6 +317,7 @@
 
     // 4. 로그아웃 처리
     async function handleLogout() {
+      if (!supabaseClient) initSupabase();
       if (supabaseClient) {
         await supabaseClient.auth.signOut();
         alert('로그아웃 되었습니다.');
@@ -316,6 +327,7 @@
 
     // 5. DOM 로드 완료 후 이벤트 바인딩
     document.addEventListener('DOMContentLoaded', () => {
+      initSupabase();
       fetchAndRenderDeals();
       checkUserSession();
 
@@ -324,21 +336,28 @@
       if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
           e.preventDefault();
+
           const email = document.getElementById('loginEmail')?.value;
           const password = document.getElementById('loginPassword')?.value;
 
+          if (!supabaseClient) initSupabase();
+
           if (!supabaseClient) {
-            alert('Supabase 연동 오류가 발생했습니다.');
+            alert('Supabase 연동이 준비되지 않았습니다. 페이지를 다시고쳐주세요.');
             return;
           }
 
-          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-          if (error) {
-            alert('로그인 실패: ' + error.message);
-          } else {
-            alert('로그인에 성공했습니다!');
-            closeModal('loginModal');
-            checkUserSession();
+          try {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) {
+              alert('로그인 실패: ' + error.message);
+            } else {
+              alert('로그인 성공!');
+              closeModal('loginModal');
+              checkUserSession();
+            }
+          } catch (err) {
+            alert('로그인 처리 중 오류가 발생했습니다: ' + err.message);
           }
         });
       }
@@ -348,20 +367,27 @@
       if (signupForm) {
         signupForm.addEventListener('submit', async (e) => {
           e.preventDefault();
+
           const email = document.getElementById('signupEmail')?.value;
           const password = document.getElementById('signupPassword')?.value;
 
+          if (!supabaseClient) initSupabase();
+
           if (!supabaseClient) {
-            alert('Supabase 연동 오류가 발생했습니다.');
+            alert('Supabase 연동이 준비되지 않았습니다.');
             return;
           }
 
-          const { data, error } = await supabaseClient.auth.signUp({ email, password });
-          if (error) {
-            alert('회원가입 실패: ' + error.message);
-          } else {
-            alert('회원가입 완료! 이메일 인증을 확인해 주세요.');
-            closeModal('signupModal');
+          try {
+            const { data, error } = await supabaseClient.auth.signUp({ email, password });
+            if (error) {
+              alert('회원가입 실패: ' + error.message);
+            } else {
+              alert('회원가입 요청 성공! 이메일을 확인해 주세요.');
+              closeModal('signupModal');
+            }
+          } catch (err) {
+            alert('회원가입 처리 중 오류: ' + err.message);
           }
         });
       }
