@@ -9,20 +9,22 @@
 
   <style>
     :root {
-      --bg-color: #0b0f19;
-      --card-bg: #131927;
-      --card-hover: #1c2538;
-      --border-color: #1f293d;
+      --bg-color: #0b0f17;
+      --header-bg: rgba(11, 15, 23, 0.85);
+      --card-bg: #141b2d;
+      --card-hover: #1b243b;
+      --border-color: #212c42;
       --text-primary: #f3f4f6;
       --text-secondary: #9ca3af;
       --accent-color: #3b82f6;
       --accent-hover: #2563eb;
-      --modal-bg: #161e2e;
-      --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      --modal-bg: #151c2e;
+      --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     }
 
     [data-theme="light"] {
       --bg-color: #f8fafc;
+      --header-bg: rgba(248, 250, 252, 0.85);
       --card-bg: #ffffff;
       --card-hover: #f1f5f9;
       --border-color: #e2e8f0;
@@ -39,205 +41,198 @@
       color: var(--text-primary);
       font-family: var(--font-sans);
       line-height: 1.6;
-      padding-top: 80px;
-      transition: background-color 0.3s, color 0.3s;
+      padding-top: 75px;
+      transition: background-color 0.25s, color 0.25s;
     }
 
     /* Fixed Sticky Header */
     header {
-      position: fixed; top: 0; left: 0; width: 100%; height: 70px;
-      background: var(--bg-color);
+      position: fixed; top: 0; left: 0; width: 100%; height: 75px;
+      background: var(--header-bg);
       border-bottom: 1px solid var(--border-color);
       display: flex; justify-content: space-between; align-items: center;
-      padding: 0 2rem; z-index: 999;
-      backdrop-filter: blur(8px);
+      padding: 0 2rem; z-index: 1000;
+      backdrop-filter: blur(12px);
     }
-    .logo {
-      font-size: 1.8rem; font-weight: 900; color: var(--text-primary);
-      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 0.3rem;
+
+    .logo-container {
+      display: flex; align-items: center; gap: 0.6rem; text-decoration: none; cursor: pointer;
     }
-    .logo span { color: var(--accent-color); }
+    .logo-img { height: 32px; width: auto; display: block; }
+    .logo-text { font-size: 1.6rem; font-weight: 900; color: var(--text-primary); letter-spacing: -0.03em; }
+    .logo-text span { color: var(--accent-color); }
+
     nav { display: flex; gap: 1rem; align-items: center; }
 
-    .theme-toggle {
-      background: var(--card-bg); border: 1px solid var(--border-color);
-      color: var(--text-primary); padding: 0.5rem 0.8rem; border-radius: 8px;
-      cursor: pointer; font-weight: 600; font-size: 0.85rem;
+    /* Modern Theme Toggle Switch */
+    .toggle-switch {
+      position: relative; width: 50px; height: 26px;
+      background: var(--border-color); border-radius: 20px;
+      cursor: pointer; transition: 0.3s; display: flex; align-items: center; padding: 2px;
     }
+    .toggle-knob {
+      width: 22px; height: 22px; background: #fff; border-radius: 50%;
+      transition: 0.3s; transform: translateX(0);
+    }
+    [data-theme="light"] .toggle-knob { transform: translateX(24px); background: #0f172a; }
 
     .nav-btn {
-      background: transparent; border: none; color: var(--text-secondary);
-      font-size: 0.95rem; font-weight: 600; cursor: pointer; padding: 0.5rem 0.8rem;
-      border-radius: 6px; transition: all 0.2s;
+      background: transparent; border: 1px solid transparent; color: var(--text-secondary);
+      font-size: 0.9rem; font-weight: 600; cursor: pointer; padding: 0.45rem 0.9rem;
+      border-radius: 8px; transition: all 0.2s;
     }
-    .nav-btn:hover { color: var(--text-primary); background-color: var(--card-bg); }
+    .nav-btn:hover { color: var(--text-primary); background: var(--card-bg); border-color: var(--border-color); }
 
-    .container { max-width: 1140px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .container { max-width: 1140px; margin: 0 auto; padding: 2.5rem 1.5rem; }
 
-    /* Hero Section */
-    .hero { text-align: center; padding: 3rem 1rem 2rem 1rem; }
-    .hero h1 { font-size: 2.8rem; font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.02em; }
-    .hero p { color: var(--text-secondary); max-width: 650px; margin: 0 auto 2rem auto; font-size: 1.1rem; }
-    .social-btns { display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem; }
+    /* Clean Hero Section */
+    .hero { text-align: center; padding: 2.5rem 1rem 3rem 1rem; }
+    .hero h1 { font-size: 3rem; font-weight: 900; margin-bottom: 0.8rem; letter-spacing: -0.03em; }
+    .hero p { color: var(--text-secondary); max-width: 580px; margin: 0 auto 2rem auto; font-size: 1.1rem; }
+    
+    .social-btns { display: flex; justify-content: center; gap: 0.8rem; }
     .btn-social {
-      padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 700;
-      text-decoration: none; color: #fff; font-size: 0.95rem;
+      padding: 0.7rem 1.4rem; border-radius: 8px; font-weight: 700;
+      text-decoration: none; color: #fff; font-size: 0.9rem; transition: 0.2s;
     }
     .btn-discord { background-color: #5865F2; }
-    .btn-twitter { background-color: #1DA1F2; }
+    .btn-twitter { background-color: #000; border: 1px solid var(--border-color); }
+    .btn-social:hover { opacity: 0.9; transform: translateY(-1px); }
 
-    /* Category & Filters */
+    /* Streamlined Category Filters */
     .category-bar {
-      display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 1rem; margin-bottom: 1.5rem;
+      display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.8rem; margin-bottom: 2rem;
       border-bottom: 1px solid var(--border-color);
     }
     .cat-chip {
       background: var(--card-bg); border: 1px solid var(--border-color);
-      color: var(--text-secondary); padding: 0.5rem 1.2rem; border-radius: 20px;
-      font-size: 0.9rem; font-weight: 600; cursor: pointer; whitespace: nowrap; transition: 0.2s;
+      color: var(--text-secondary); padding: 0.5rem 1.1rem; border-radius: 8px;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer; whitespace: nowrap; transition: 0.2s;
     }
     .cat-chip.active, .cat-chip:hover {
       background: var(--accent-color); color: #fff; border-color: var(--accent-color);
     }
     .cat-chip.affiliate {
-      border-color: #f59e0b; color: #f59e0b;
+      margin-left: auto; border-color: #f59e0b; color: #f59e0b;
     }
-    .cat-chip.affiliate:hover {
-      background: #f59e0b; color: #fff;
-    }
+    .cat-chip.affiliate:hover { background: #f59e0b; color: #fff; }
 
-    /* Grid Deal Cards UI */
+    /* Modern Grid Deal Cards UI */
     .deals-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 1.5rem; margin-bottom: 4rem;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem; margin-bottom: 4rem;
     }
     .deal-card {
       background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px;
-      padding: 1.5rem; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between;
+      padding: 1.6rem; transition: all 0.25s ease; display: flex; flex-direction: column; justify-content: space-between;
     }
-    .deal-card:hover { transform: translateY(-4px); background: var(--card-hover); }
-    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
-    .brand-name { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; }
-    .deal-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-primary); text-decoration: none; }
+    .deal-card:hover { transform: translateY(-4px); background: var(--card-hover); border-color: var(--accent-color); }
     
-    .price-box { margin: 1rem 0; }
-    .original-price { text-decoration: line-through; color: var(--text-secondary); font-size: 0.9rem; margin-right: 0.5rem; }
-    .discount-price { font-size: 1.3rem; font-weight: 800; color: var(--accent-color); }
-    .krw-price { font-size: 0.95rem; color: #10b981; font-weight: 700; margin-top: 0.2rem; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .brand-name { font-size: 0.8rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; tracking: 0.05em; }
+    .deal-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.8rem; color: var(--text-primary); text-decoration: none; line-height: 1.3; }
+    
+    .price-box { margin: 1rem 0; padding: 0.8rem; background: var(--bg-color); border-radius: 8px; border: 1px solid var(--border-color); }
+    .original-price { text-decoration: line-through; color: var(--text-secondary); font-size: 0.85rem; margin-right: 0.4rem; }
+    .discount-price { font-size: 1.3rem; font-weight: 900; color: var(--accent-color); }
+    .krw-price { font-size: 0.9rem; color: #10b981; font-weight: 700; margin-top: 0.2rem; }
 
-    .tag-badge { padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 800; }
+    .tag-badge { padding: 0.25rem 0.55rem; border-radius: 6px; font-size: 0.75rem; font-weight: 800; }
     .tag-discount { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
     .tag-free { background: rgba(16, 185, 129, 0.15); color: #10b981; }
 
-    .perks-box { background: var(--bg-color); padding: 0.8rem; border-radius: 8px; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; }
+    .perks-box { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1.2rem; line-height: 1.5; }
 
-    /* Community & Review Section */
-    .community-section {
-      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem; margin-top: 3rem;
+    .btn-buy {
+      width: 100%; padding: 0.8rem; background: var(--accent-color); border: none; border-radius: 8px;
+      color: #fff; font-weight: 700; font-size: 0.95rem; cursor: pointer; text-align: center; text-decoration: none; display: block;
+      transition: background 0.2s;
     }
-    .comm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-    .review-card { background: var(--bg-color); border: 1px solid var(--border-color); padding: 1rem; border-radius: 10px; margin-bottom: 1rem; }
+    .btn-buy:hover { background: var(--accent-hover); }
 
-    /* Modal */
+    /* Modal Styling */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000;
+      background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 2000;
     }
     .modal-overlay.active { display: flex; }
     .modal-box {
-      background: var(--modal-bg); border: 1px solid var(--border-color); width: 100%; max-width: 420px;
-      border-radius: 14px; padding: 2rem; position: relative; color: var(--text-primary);
+      background: var(--modal-bg); border: 1px solid var(--border-color); width: 100%; max-width: 440px;
+      border-radius: 16px; padding: 2rem; position: relative; color: var(--text-primary);
     }
-    .modal-close { position: absolute; top: 1.25rem; right: 1.25rem; background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; }
-    .form-group { margin-bottom: 1.25rem; }
-    .form-group label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+    .modal-close { position: absolute; top: 1.2rem; right: 1.2rem; background: none; border: none; color: var(--text-secondary); font-size: 1.4rem; cursor: pointer; }
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 600; }
     .form-group input {
       width: 100%; padding: 0.75rem; background: var(--bg-color); border: 1px solid var(--border-color);
-      border-radius: 6px; color: var(--text-primary); font-size: 0.95rem;
-    }
-    .btn-submit {
-      width: 100%; padding: 0.8rem; background: var(--accent-color); border: none; border-radius: 6px;
-      color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer;
+      border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;
     }
   </style>
 </head>
 <body>
 
-  <!-- Sticky Header -->
+  <!-- Fixed Sticky Header -->
   <header>
-    <a href="#" class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
-      Plug<span>Azit</span>
+    <a href="#" class="logo-container" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+      <!-- 사용자 로고 이미지 반영 영역 (이미지 파일 준비시 아래 src 주석 해제) -->
+      <!-- <img src="로고이미지경로.png" alt="PlugAzit Logo" class="logo-img" /> -->
+      <div class="logo-text">Plug<span>Azit</span></div>
     </a>
     <nav>
-      <button class="theme-toggle" onclick="toggleTheme()">☀️ / 🌙 테마 변경</button>
+      <!-- Modern Theme Switcher -->
+      <div class="toggle-switch" onclick="toggleTheme()" title="테마 변경">
+        <div class="toggle-knob"></div>
+      </div>
+      
       <div id="authNav">
         <button class="nav-btn" onclick="openModal('loginModal')">로그인</button>
         <button class="nav-btn" onclick="openModal('signupModal')">회원가입</button>
       </div>
       <div id="userNav" style="display:none;">
-        <span id="userEmailSpan" style="font-size:0.9rem; color:var(--text-secondary); margin-right:0.5rem;"></span>
+        <button class="nav-btn" onclick="openModal('myPageModal')">👤 마이페이지</button>
         <button class="nav-btn" onclick="handleLogout()">로그아웃</button>
       </div>
     </nav>
   </header>
 
   <div class="container">
-    <!-- Hero Banner -->
+    <!-- Clean Hero Banner -->
     <section class="hero">
       <h1>Sail the Wave of Sound.</h1>
-      <p>PlugAzit은 글로벌 VST 핫딜 큐레이션, 실시간 원화 환산, 브랜드 파트너십 및 프로듀서 커뮤니티 공간입니다.</p>
+      <p>글로벌 VST 핫딜 큐레이션, 실시간 원화 환산 및 프로듀서 커뮤니티</p>
       <div class="social-btns">
-        <a href="https://discord.gg" target="_blank" class="btn-social btn-discord">디스코드 아지트 입장</a>
-        <a href="https://x.com" target="_blank" class="btn-social btn-twitter">공식 X (트위터) 팔로우</a>
+        <a href="https://discord.gg" target="_blank" class="btn-social btn-discord">디스코드 아지트</a>
+        <a href="https://x.com" target="_blank" class="btn-social btn-twitter">공식 X (트위터)</a>
       </div>
     </section>
 
-    <!-- Categories & Affiliate Bar -->
+    <!-- Clean Category Filters -->
     <div class="category-bar">
-      <button class="cat-chip active" onclick="filterCategory('all')">전체보기 (All)</button>
-      <button class="cat-chip" onclick="filterCategory('synth')">신디사이저 / 악기</button>
-      <button class="cat-chip" onclick="filterCategory('mixing')">믹싱 / 마스터링</button>
-      <button class="cat-chip" onclick="filterCategory('fx')">이펙터 / FX</button>
-      <button class="cat-chip" onclick="filterCategory('free')">100% 무료 (Freebies)</button>
-      <button class="cat-chip affiliate" onclick="filterCategory('affiliate')">🤝 제휴 브랜드 신청 (Affiliate)</button>
+      <button class="cat-chip active" onclick="filterCategory('all', this)">전체보기</button>
+      <button class="cat-chip" onclick="filterCategory('synth', this)">신디사이저 / 가상악기</button>
+      <button class="cat-chip" onclick="filterCategory('mixing', this)">믹싱 & 마스터링</button>
+      <button class="cat-chip" onclick="filterCategory('free', this)">100% FREE</button>
+      <button class="cat-chip affiliate" onclick="filterCategory('affiliate', this)">🤝 브랜드 제휴 문의</button>
     </div>
 
     <!-- Deals Grid UI -->
-    <div class="deals-grid" id="dealsContainer">
-      <!-- 동적 카드 및 샘플 렌더링 영역 -->
-    </div>
-
-    <!-- Community & User Reviews -->
-    <section class="community-section">
-      <div class="comm-header">
-        <h2>💬 프로듀서 커뮤니티 & 실시간 사용후기</h2>
-        <button class="btn-social btn-discord" onclick="alert('준비 중인 기능입니다. 디스코드 채널을 이용해주세요!')">글쓰기</button>
-      </div>
-      <div class="review-card">
-        <strong>@Aftrdry</strong> <span style="font-size:0.8rem; color:var(--text-secondary);">2시간 전</span>
-        <p style="margin-top:0.3rem;">Analog Lab Play 무료 딜 풀린 거 라이브 세션에 바로 적용했는데 프리셋 구성 퀄리티 엄청나네요.</p>
-      </div>
-      <div class="review-card">
-        <strong>@ProducerK</strong> <span style="font-size:0.8rem; color:var(--text-secondary);">5시간 전</span>
-        <p style="margin-top:0.3rem;">Komplete 14 50% 할인 코드로 환율 계산해보고 바로 질렀습니다. 정보 감사합니다!</p>
-      </div>
-    </section>
+    <div class="deals-grid" id="dealsContainer"></div>
   </div>
 
   <!-- Login Modal -->
   <div class="modal-overlay" id="loginModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('loginModal')">×</button>
-      <h3 style="margin-bottom:1.5rem;">로그인</h3>
+      <h3 style="margin-bottom:1.5rem; font-size:1.3rem;">로그인</h3>
       <form id="loginForm">
         <div class="form-group">
-          <label>이메일</label>
+          <label>이메일 계정</label>
           <input type="email" id="loginEmail" placeholder="example@domain.com" required />
         </div>
         <div class="form-group">
           <label>비밀번호</label>
           <input type="password" id="loginPassword" placeholder="••••••••" required />
         </div>
-        <button type="submit" class="btn-submit">로그인</button>
+        <button type="submit" class="btn-buy" style="margin-top:1rem;">로그인하기</button>
       </form>
     </div>
   </div>
@@ -246,23 +241,39 @@
   <div class="modal-overlay" id="signupModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('signupModal')">×</button>
-      <h3 style="margin-bottom:1.5rem;">회원가입</h3>
+      <h3 style="margin-bottom:1.5rem; font-size:1.3rem;">회원가입</h3>
       <form id="signupForm">
         <div class="form-group">
-          <label>이메일</label>
+          <label>이메일 계정</label>
           <input type="email" id="signupEmail" placeholder="example@domain.com" required />
         </div>
         <div class="form-group">
           <label>비밀번호</label>
           <input type="password" id="signupPassword" placeholder="8자리 이상 입력" required />
         </div>
-        <button type="submit" class="btn-submit">가입하기</button>
+        <button type="submit" class="btn-buy" style="margin-top:1rem;">가입 완료하기</button>
       </form>
     </div>
   </div>
 
+  <!-- My Page Modal -->
+  <div class="modal-overlay" id="myPageModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('myPageModal')">×</button>
+      <h3 style="margin-bottom:1rem; font-size:1.3rem;">👤 마이페이지</h3>
+      <div style="margin-bottom:1.5rem; padding:1rem; background:var(--bg-color); border-radius:8px; border:1px solid var(--border-color);">
+        <div style="font-size:0.85rem; color:var(--text-secondary);">로그인 계정</div>
+        <div id="myPageEmail" style="font-weight:700; margin-top:0.2rem;">-</div>
+      </div>
+      <h4 style="font-size:1rem; margin-bottom:0.8rem;">📌 나의 관심 딜 (Bookmarks)</h4>
+      <div style="font-size:0.9rem; color:var(--text-secondary); text-align:center; padding:1.5rem 0;">
+        아직 저장된 관심 딜이 없습니다.
+      </div>
+    </div>
+  </div>
+
   <script>
-    // 1. Supabase Init
+    // 1. Supabase Client Setup
     const SUPABASE_URL = "https://pxmkzyhayxsvbbftncwy.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_J0LQJ-qjr5ISX1jRKaQ7-A_GwABw8XP";
     let supabaseClient = null;
@@ -271,7 +282,7 @@
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
-    // Theme Toggle Logic
+    // Theme Toggle Handler
     function toggleTheme() {
       const current = document.documentElement.getAttribute('data-theme');
       const target = current === 'dark' ? 'light' : 'dark';
@@ -281,9 +292,9 @@
     function openModal(id) { document.getElementById(id)?.classList.add('active'); }
     function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
 
-    // Sample Deals Data with KRW Calculation
-    const USD_TO_KRW = 1380; // 환율 기준
-    const sampleDeals = [
+    // Real Vendor External Direct Links Data & KRW Exchange Rate (1,380 KRW)
+    const USD_TO_KRW = 1380;
+    const dealsData = [
       {
         brand: "Native Instruments",
         title: "Komplete 14 Standard",
@@ -292,7 +303,8 @@
         discountPrice: 299,
         discountRate: "50% OFF",
         code: "BF-SEASON",
-        perk: "개인 라이선스 + 추가 바우처 지급"
+        perk: "개인 라이선스 포함 + 공식 스토어 바우처 제공",
+        storeUrl: "https://www.native-instruments.com"
       },
       {
         brand: "Arturia",
@@ -302,7 +314,8 @@
         discountPrice: 0,
         discountRate: "100% FREE",
         code: "DIRECT-DOWNLOAD",
-        perk: "평생 무상 사용 및 프리셋 100종 포함"
+        perk: "100가지 핵심 빈티지 신스 프리셋 무상 제공",
+        storeUrl: "https://www.arturia.com"
       },
       {
         brand: "FabFilter",
@@ -312,7 +325,19 @@
         discountPrice: 134,
         discountRate: "25% OFF",
         code: "FAB-PROMO-2026",
-        perk: "크로스그레이드 혜택 중복 가능"
+        perk: "업계 표준 EQ 및 계정 크로스그레이드 중복 지원",
+        storeUrl: "https://www.fabfilter.com"
+      },
+      {
+        brand: "Waves Audio",
+        title: "Horizon Bundle",
+        cat: "mixing",
+        original: 3999,
+        discountPrice: 249,
+        discountRate: "93% OFF",
+        code: "CREATE80",
+        perk: "80개 이상 핵심 믹싱/마스터링 플러그인 동시 포함",
+        storeUrl: "https://www.waves.com"
       }
     ];
 
@@ -322,7 +347,7 @@
 
       container.innerHTML = deals.map(d => {
         const krw = d.discountPrice === 0 ? "0원 (무료)" : `약 ${(d.discountPrice * USD_TO_KRW).toLocaleString()}원`;
-        const origKrw = d.original ? `($${d.original} / 약 ${(d.original * USD_TO_KRW).toLocaleString()}원)` : '';
+        const origKrw = d.original ? `$${d.original} (약 ${(d.original * USD_TO_KRW).toLocaleString()}원)` : '';
         const tagClass = d.discountPrice === 0 ? 'tag-free' : 'tag-discount';
 
         return `
@@ -332,51 +357,51 @@
                 <span class="brand-name">${d.brand}</span>
                 <span class="tag-badge ${tagClass}">${d.discountRate}</span>
               </div>
-              <a href="#" class="deal-title">${d.title}</a>
+              <a href="${d.storeUrl}" target="_blank" class="deal-title">${d.title}</a>
               <div class="price-box">
                 <span class="original-price">${origKrw}</span>
                 <span class="discount-price">$${d.discountPrice}</span>
-                <div class="krw-price">KRW: ${krw}</div>
+                <div class="krw-price">한화 추산: ${krw}</div>
               </div>
               <div class="perks-box">
                 💡 혜택: ${d.perk}<br/>
-                🔑 프로모션 코드: <strong>${d.code}</strong>
+                🔑 코드: <strong>${d.code}</strong>
               </div>
             </div>
-            <button class="btn-submit" style="margin-top:0.5rem;" onclick="alert('${d.title} 구매 링크로 이동합니다.')">딜 상세보기 & 구매하기</button>
+            <a href="${d.storeUrl}" target="_blank" class="btn-buy">공식 스토어 딜 보러가기 ↗</a>
           </div>
         `;
       }).join('');
     }
 
-    function filterCategory(cat) {
+    function filterCategory(cat, el) {
       document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
-      event.target.classList.add('active');
+      if (el) el.classList.add('active');
 
       if (cat === 'affiliate') {
-        alert('🤝 파트너십/제휴 문의: affiliate@plugazit.com 또는 디스코드 문의 채널을 이용해 주세요.');
+        alert('🤝 제휴 및 스토어 입점 문의: affiliate@plugazit.com 또는 공식 디스코드 채널로 연락 부탁드립니다.');
         return;
       }
       if (cat === 'all') {
-        renderDeals(sampleDeals);
+        renderDeals(dealsData);
       } else {
-        const filtered = sampleDeals.filter(d => d.cat === cat || (cat === 'free' && d.discountPrice === 0));
+        const filtered = dealsData.filter(d => d.cat === cat || (cat === 'free' && d.discountPrice === 0));
         renderDeals(filtered);
       }
     }
 
-    // Auth & Event Handlers
+    // Auth & Session Handling
     async function checkUserSession() {
       if (!supabaseClient) return;
       const { data: { session } } = await supabaseClient.auth.getSession();
       const authNav = document.getElementById('authNav');
       const userNav = document.getElementById('userNav');
-      const userEmailSpan = document.getElementById('userEmailSpan');
+      const myPageEmail = document.getElementById('myPageEmail');
 
       if (session && session.user) {
         if (authNav) authNav.style.display = 'none';
         if (userNav) userNav.style.display = 'flex';
-        if (userEmailSpan) userEmailSpan.textContent = session.user.email;
+        if (myPageEmail) myPageEmail.textContent = session.user.email;
       } else {
         if (authNav) authNav.style.display = 'flex';
         if (userNav) userNav.style.display = 'none';
@@ -392,29 +417,29 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      renderDeals(sampleDeals);
+      renderDeals(dealsData);
       checkUserSession();
 
       document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('loginEmail')?.value;
         const password = document.getElementById('loginPassword')?.value;
-        if (!supabaseClient) return alert('Supabase 연동이 준비되지 않았습니다.');
+        if (!supabaseClient) return alert('Supabase 연동 오류입니다.');
 
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) alert('로그인 실패: ' + error.message);
-        else { alert('로그인 성공!'); closeModal('loginModal'); checkUserSession(); }
+        else { alert('로그인에 성공했습니다!'); closeModal('loginModal'); checkUserSession(); }
       });
 
       document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('signupEmail')?.value;
         const password = document.getElementById('signupPassword')?.value;
-        if (!supabaseClient) return alert('Supabase 연동이 준비되지 않았습니다.');
+        if (!supabaseClient) return alert('Supabase 연동 오류입니다.');
 
         const { error } = await supabaseClient.auth.signUp({ email, password });
         if (error) alert('회원가입 실패: ' + error.message);
-        else { alert('회원가입 신청 성공! 이메일을 확인하세요.'); closeModal('signupModal'); }
+        else { alert('가입 요청 성공! 이메일 인증을 확인해 주세요.'); closeModal('signupModal'); }
       });
     });
   </script>
