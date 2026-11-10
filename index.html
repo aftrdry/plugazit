@@ -70,7 +70,7 @@
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
     }
 
-    /* 로고 마우스 오버 툴팁(Ps 현상) 및 경계 잔상 완벽 방어 */
+    /* 로고 마우스 오버 툴팁(Ps 현상) 및 잔상 방지 */
     .brand-logo-img {
       height: 110px;
       width: auto;
@@ -119,7 +119,7 @@
 
     .container { max-width: 1280px; margin: 0 auto; padding: 2.5rem 2.5rem; flex: 1; width: 100%; }
 
-    /* Hero Slogan Section (병렬 대구 구조 반영) */
+    /* Hero Slogan Section (병렬 대구 구조 및 글자 톤 통일 완벽 수정) */
     .hero-slogan-section {
       padding: 1.5rem 0 2.2rem 0;
       border-bottom: 1px solid var(--border-color);
@@ -130,7 +130,7 @@
       color: var(--text-primary); margin-bottom: 0.6rem;
     }
     .hero-subtitle {
-      font-size: 1.05rem; color: var(--text-secondary); font-weight: 500; line-height: 1.6;
+      font-size: 1.05rem; color: var(--text-primary); font-weight: 600; line-height: 1.6;
     }
     .hero-subtitle .sub-line {
       display: block; color: var(--text-primary); font-weight: 600;
@@ -202,7 +202,7 @@
     .comm-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.6rem; border-radius: 10px; margin-bottom: 1.2rem; }
     .comm-author { font-weight: 700; color: var(--accent-gold); margin-right: 0.6rem; }
 
-    /* Footer 단일 연락처 표기 */
+    /* Footer 단일 연락처 표기 복원 */
     footer {
       border-top: 1px solid var(--border-color); padding: 2rem 3rem; text-align: center;
       color: var(--text-secondary); font-size: 0.85rem; margin-top: auto; background: var(--card-bg);
@@ -240,7 +240,7 @@
 </head>
 <body>
 
-  <!-- Header with Clean Brand Logo (No Ps / No White Edge Leak) -->
+  <!-- Header with Clean Brand Logo -->
   <header>
     <a href="#" class="logo-container" onclick="showPage('deals'); return false;">
       <img src="PlugAzit.png" alt="PlugAzit" class="brand-logo-img" />
@@ -267,7 +267,7 @@
   </header>
 
   <div class="container">
-    <!-- Hero Slogan Section (기·회 병렬 대구 구조 완벽 반영) -->
+    <!-- Hero Slogan Section (요청하신 병렬 대구 및 스타일 통일 반영) -->
     <div class="hero-slogan-section">
       <h1 class="hero-title">Right Near, Your Azit.</h1>
       <p class="hero-subtitle">
@@ -307,20 +307,25 @@
       <div id="communityList">
         <div class="comm-card">
           <span class="comm-author">@Aftrdry</span> <span style="font-size:0.8rem; color:var(--text-secondary);">오늘 20:15</span>
-          <h4 style="margin:0.5rem 0 0.3rem 0; font-size:1.1rem;">로직(Logic Pro)에서 사이드체인 컴프 압축감 가볍게 잡는 팁</h4>
-          <p style="font-size:0.9rem; color:var(--text-secondary);">버스 컴프 다이내믹스 세팅할 때 오토메이션과 연계하면 훨씬 단단해집니다...</p>
+          <h4 style="margin:0.5rem 0 0.3rem 0; font-size:1.1rem;">FabFilter Pro-Q 3 Dynamic EQ 보컬 마스킹 잡는 팁</h4>
+          <p style="font-size:0.92rem; color:var(--text-secondary);">저음역 보컬과 베이스 붕붕거림 잡을 때 Sidechain 연동 후 250Hz 영역 Dynamic EQ 적용하면 투명하고 깔끔해집니다.</p>
+        </div>
+        <div class="comm-card">
+          <span class="comm-author">@ProducerK</span> <span style="font-size:0.8rem; color:var(--text-secondary);">어제 18:40</span>
+          <h4 style="margin:0.5rem 0 0.3rem 0; font-size:1.1rem;">soothe2 대신 쓸 수 있는 보컬 서스테인 처리 플러그인 추천</h4>
+          <p style="font-size:0.92rem; color:var(--text-secondary);">Waves Silk Vocal과 Gullfoss 조합도 꽤 쓸만하네요. 불쾌한 부밍음 제어에 확실합니다.</p>
         </div>
       </div>
     </div>
 
-    <!-- ADMIN VIEW (Supabase Realtime Deal Management) -->
+    <!-- ADMIN VIEW -->
     <div id="adminView">
       <div style="background:var(--card-bg); border:1px solid var(--border-color); padding:2rem; border-radius:10px; margin-bottom:2rem;">
         <h2 style="font-weight:800; font-size:1.4rem; margin-bottom:1rem; color:var(--accent-gold);">⚡ VST Deal Management (Admin)</h2>
         <form id="dealForm" onsubmit="handleDealSubmit(event)">
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div class="form-group"><label>브랜드명</label><input type="text" id="dealBrand" required placeholder="예: Arturia, Waves"></div>
-            <div class="form-group"><label>플러그인/딜 타이틀</label><input type="text" id="dealTitle" required placeholder="예: MiniFreak V Sale"></div>
+            <div class="form-group"><label>브랜드명</label><input type="text" id="dealBrand" required placeholder="예: FabFilter"></div>
+            <div class="form-group"><label>플러그인/딜 타이틀</label><input type="text" id="dealTitle" required placeholder="예: Pro-Q 3"></div>
           </div>
           <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
             <div class="form-group"><label>메인 카테고리</label>
@@ -331,10 +336,9 @@
                 <option value="free">100% FREE</option>
               </select>
             </div>
-            <div class="form-group"><label>정가 ($)</label><input type="text" id="dealOrigPrice" placeholder="$199"></div>
-            <div class="form-group"><label>할인가 ($)</label><input type="text" id="dealDiscPrice" placeholder="$49"></div>
+            <div class="form-group"><label>정가 ($)</label><input type="text" id="dealOrigPrice" placeholder="179"></div>
+            <div class="form-group"><label>할인가 ($)</label><input type="text" id="dealDiscPrice" placeholder="134"></div>
           </div>
-          <div class="form-group"><label>원화 예상가 (KRW)</label><input type="text" id="dealKrwPrice" placeholder="약 68,000원"></div>
           <div class="form-group"><label>상세 설명</label><textarea id="dealDesc" rows="2" placeholder="딜 핵심 특징 및 요약"></textarea></div>
           <div class="form-group"><label>제휴/구매 링크 URL</label><input type="url" id="dealUrl" required placeholder="https://..."></div>
           <button type="submit" class="btn-buy" style="margin-top:1rem;">새로운 딜 등록 / 업데이트</button>
@@ -343,20 +347,20 @@
     </div>
   </div>
 
-  <!-- FOOTER (단일 연락처 단일화 적용) -->
+  <!-- FOOTER (단일 연락처 단일화 복원) -->
   <footer>
     <p>© 2026 PlugAzit. All rights reserved.  |  
        컨택 및 제휴 문의: <a href="mailto:aftrdry@outlook.kr">aftrdry@outlook.kr</a>
     </p>
   </footer>
 
-  <!-- MODALS (Login, Signup, Terms) -->
+  <!-- MODALS -->
   <div class="modal-overlay" id="loginModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('loginModal')">×</button>
       <h3 style="margin-bottom:1.5rem; font-weight:800;">로그인</h3>
       <form onsubmit="handleLoginSubmit(event)">
-        <div class="form-group"><label>이메일</label><input type="email" required placeholder="email@domain.com"></div>
+        <div class="form-group"><label>이메일 계정</label><input type="email" required placeholder="email@domain.com"></div>
         <div class="form-group"><label>비밀번호</label><input type="password" required placeholder="••••••••"></div>
         <button type="submit" class="btn-buy" style="margin-top:1rem;">로그인</button>
       </form>
@@ -368,7 +372,7 @@
       <button class="modal-close" onclick="closeModal('signupModal')">×</button>
       <h3 style="margin-bottom:1.5rem; font-weight:800;">회원가입</h3>
       <form onsubmit="handleSignupSubmit(event)">
-        <div class="form-group"><label>이메일</label><input type="email" required placeholder="email@domain.com"></div>
+        <div class="form-group"><label>이메일 계정</label><input type="email" required placeholder="email@domain.com"></div>
         <div class="form-group"><label>비밀번호</label><input type="password" required placeholder="••••••••"></div>
         <div class="form-group">
           <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:normal;">
@@ -376,43 +380,181 @@
           </label>
         </div>
         <div class="legal-text-content">
-          <h4>서비스 이용약관 요약</h4>
-          <p>PlugAzit는 프로듀서들을 위한 VST 딜 큐레이션 및 정보 공유 아지트입니다. 타인의 저작권을 침해하거나 허위 정보를 유포할 경우 제재될 수 있습니다.</p>
+          <h4>서비스 이용약관 및 법적 고지</h4>
+          <p>PlugAzit는 프로듀서들을 위한 VST 딜 큐레이션 및 정보 공유 아지트입니다. 제공되는 모든 세일 정보와 가격은 각 브랜드 공식 스토어 정책에 따르며, 제휴 링크를 통한 구매 시 소정의 수수료를 제공받을 수 있습니다.</p>
         </div>
         <button type="submit" class="btn-buy" style="margin-top:1.2rem;">가입 완료</button>
       </form>
     </div>
   </div>
 
-  <!-- JavaScript Integration & Supabase Mock/Logic -->
+  <div class="modal-overlay" id="postModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('postModal')">×</button>
+      <h3 style="margin-bottom:1.5rem; font-weight:800;">글쓰기</h3>
+      <form id="postForm" onsubmit="handlePostSubmit(event)">
+        <div class="form-group"><label>제목</label><input type="text" id="postTitle" required /></div>
+        <div class="form-group"><label>내용</label><textarea id="postContent" rows="4" required></textarea></div>
+        <button type="submit" class="btn-buy">등록하기</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript Logic & VST Deals Dataset 복원 -->
   <script>
-    // Theme Toggle Logic
+    const SUPABASE_URL = "https://pxmkzyhayxsvbbftncwy.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_J0LQJ-qjr5ISX1jRKaQ7-A_GwABw8XP";
+    let supabaseClient = null;
+    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
     function toggleTheme() {
-      const html = document.documentElement;
-      const currentTheme = html.getAttribute('data-theme');
-      html.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+      const current = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
     }
 
-    // Navigation Switcher
-    function showPage(pageId) {
-      document.getElementById('dealsView').style.display = pageId === 'deals' ? 'block' : 'none';
-      document.getElementById('communityView').style.display = pageId === 'community' ? 'block' : 'none';
-      document.getElementById('adminView').style.display = pageId === 'admin' ? 'block' : 'none';
+    function showPage(page) {
+      document.getElementById('dealsView').style.display = page === 'deals' ? 'block' : 'none';
+      document.getElementById('communityView').style.display = page === 'community' ? 'block' : 'none';
+      document.getElementById('adminView').style.display = page === 'admin' ? 'block' : 'none';
 
-      document.querySelectorAll('.nav-tab-link').forEach(btn => btn.classList.remove('active'));
-      if(pageId === 'deals') document.getElementById('navDealsBtn').classList.add('active');
-      if(pageId === 'community') document.getElementById('navCommBtn').classList.add('active');
-      if(pageId === 'admin') document.getElementById('navAdminBtn').classList.add('active');
+      document.getElementById('navDealsBtn').classList.toggle('active', page === 'deals');
+      document.getElementById('navCommBtn').classList.toggle('active', page === 'community');
+      const adminBtn = document.getElementById('navAdminBtn');
+      if(adminBtn) adminBtn.classList.toggle('active', page === 'admin');
     }
 
-    function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
-    function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+    function openModal(id) { document.getElementById(id)?.classList.add('active'); }
+    function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
 
-    function handleLogout() {
-      document.getElementById('authNav').style.display = 'flex';
-      document.getElementById('userNav').style.display = 'none';
-      document.getElementById('navAdminBtn').style.display = 'none';
-      alert('로그아웃 되었습니다.');
+    const USD_TO_KRW = 1380;
+    const subCategories = {
+      all: ["전체 보기"],
+      mixing: ["전체", "EQ", "Compressor/Limiter", "Reverb/Delay", "De-Esser/Dynamic", "Saturation/Tape", "Mastering Chain"],
+      synth: ["전체", "Analog/Synth", "Sample Library", "Cinematic/Orchestral", "Drum/Percussion"],
+      fx: ["전체", "Pitch/Vocal", "Utility/Analyzer", "Modulation"],
+      free: ["전체", "Free Synths", "Free FX"]
+    };
+
+    const dealsData = [
+      { brand: "FabFilter", title: "Pro-Q 3 Equalizer", cat: "mixing", sub: "EQ", desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.", original: 179, discountPrice: 134, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 지원", storeUrl: "https://www.fabfilter.com" },
+      { brand: "oeksound", title: "soothe2 Resonance Suppressor", cat: "mixing", sub: "De-Esser/Dynamic", desc: "보컬이나 악기 트랙에서 발생하는 불쾌한 쏘는 소리와 피크 공명을 실시간으로 감지하여 부드럽게 억제하는 툴입니다.", original: 219, discountPrice: 149, discountRate: "32% OFF", code: "SOOTHE2026", perk: "불쾌한 공명 사운드 자동 실시간 제어", storeUrl: "https://oeksound.com" },
+      { brand: "Soundtoys", title: "Soundtoys 5.4 Bundle", cat: "fx", sub: "Modulation", desc: "Decapitator, Echoboy 등 아날로그 감성의 특색 있는 사운드 질감을 만드는 21가지 최고급 이펙터 모음입니다.", original: 499, discountPrice: 249, discountRate: "50% OFF", code: "SOUNDTOYS-DEAL", perk: "21개 대표 사운드 디자이닝 이펙터 전체 포함", storeUrl: "https://www.soundtoys.com" },
+      { brand: "Universal Audio", title: "UAD Spark 1 Year Pass", cat: "mixing", sub: "Compressor/Limiter", desc: "DSP 하드웨어 없이 1176, LA-2A, Studer 테이프 머신 등 전설적인 아날로그 하드웨어의 명음기를 컴퓨터에서 구동합니다.", original: 199, discountPrice: 99, discountRate: "50% OFF", code: "UAD-SPARK-50", perk: "전설적 아날로그 믹싱 기기 네이티브 지원", storeUrl: "https://www.uaudio.com" },
+      { brand: "Arturia", title: "Analog Lab Play", cat: "free", sub: "Free Synths", desc: "빈티지 신티사이저와 클래식 건반 악기들의 최고급 프리셋 100가지를 무상으로 사용할 수 있는 가상악기 뷰어입니다.", original: 99, discountPrice: 0, discountRate: "100% FREE", code: "DIRECT-DOWNLOAD", perk: "100가지 핵심 빈티지 신스 프리셋 무상 제공", storeUrl: "https://www.arturia.com" },
+      { brand: "Native Instruments", title: "Komplete 14 Standard", cat: "synth", sub: "Sample Library", desc: "Kontakt 7 샘플러를 기반으로 웅장한 시네마틱 오케스트라, 드럼, 신스 사운드까지 보유한 통합 제작 번들입니다.", original: 599, discountPrice: 299, discountRate: "50% OFF", code: "BF-SEASON", perk: "Kontakt 7 및 수만 가지 시네마틱 샘플 수록", storeUrl: "https://www.native-instruments.com" },
+      { brand: "iZotope", title: "Ozone 11 Advanced", cat: "mixing", sub: "Mastering Chain", desc: "음원 마스터링 시 대역별 음압 보정, Stem Rebalance 및 AI Assistant 기반으로 곡의 완성도를 마감하는 마스터링 툴입니다.", original: 399, discountPrice: 199, discountRate: "50% OFF", code: "OZONE11-SALE", perk: "AI 기반 종합 음압/마스터링 프로세싱", storeUrl: "https://www.izotope.com" },
+      { brand: "Xfer Records", title: "Serum VST Synth", cat: "synth", sub: "Analog/Synth", desc: "직관적인 렌더링 파형 편집과 압도적인 사운드 메이킹 성능으로 EDM, 팝, 트랩 전 장르에서 일렉트로닉 신스를 이끄는 대표작입니다.", original: 189, discountPrice: 149, discountRate: "21% OFF", code: "SERUM-PROMO", perk: "웨이브테이블 신티사이저 글로벌 시그니처 툴", storeUrl: "https://xferrecords.com" },
+      { brand: "Celemony", title: "Melodyne 5 assistant", cat: "fx", sub: "Pitch/Vocal", desc: "보컬의 음정과 타이밍을 음질 손상 없이 정밀하게 수정하는 글로벌 표준 보컬 피치 보정 플러그인입니다.", original: 249, discountPrice: 149, discountRate: "40% OFF", code: "MELODYNE40", perk: "자연스러운 보컬 피치 및 타임 보정 업계 표준", storeUrl: "https://www.celemony.com" },
+      { brand: "Spectrasonics", title: "Omnisphere 2.8", cat: "synth", sub: "Cinematic/Orchestral", desc: "영화 음악, 앰비언트, 팝 프로듀싱에 독보적인 대규모 하이브리드 파형 엔진 기반의 대형 몬스터 신티사이저입니다.", original: 499, discountPrice: 399, discountRate: "20% OFF", code: "OMNI-PROD", perk: "시네마틱 및 팝 프로듀싱 필수 대형 신스 번들", storeUrl: "https://www.spectrasonics.net" },
+      { brand: "Slate Digital", title: "Virtual Tape Machines", cat: "mixing", sub: "Saturation/Tape", desc: "아날로그 마스터 테이프 릴의 특유한 따뜻함과 Harmonic Distortion 질감을 디지털 트랙에 부여하는 플러그인입니다.", original: 149, discountPrice: 49, discountRate: "67% OFF", code: "SLATE-TAPE", perk: "아날로그 마스터 테이프 특유의 따뜻한 새츄레이션", storeUrl: "https://slatedigital.com" },
+      { brand: "Waves Audio", title: "Horizon Bundle", cat: "mixing", sub: "Compressor/Limiter", desc: "L2 Ultramaximizer, Vocal Rider 등 80개 이상의 필수 믹싱 및 마스터링 프로세서를 한 번에 제공하는 스테디셀러 패키지입니다.", original: 3999, discountPrice: 249, discountRate: "93% OFF", code: "CREATE80", perk: "80개 이상 핵심 믹싱 플러그인 동시 포함", storeUrl: "https://www.waves.com" },
+      { brand: "Valhalla DSP", title: "Valhalla VintageVerb", cat: "fx", sub: "Reverb/Delay", desc: "1970~80년대 하드웨어 리버브의 울림을 완벽히 재현하여 공간감을 만들어내는 프로듀서 필수 리버브 플러그인입니다.", original: 50, discountPrice: 50, discountRate: "BEST VALUE", code: "DIRECT-BUY", perk: "부드럽고 자연스러운 아날로그 공간감 제공", storeUrl: "https://valhalladsp.com" },
+      { brand: "Cableguys", title: "ShaperBox 3 Bundle", cat: "fx", sub: "Modulation", desc: "Volume, Filter, Time 모듈레이션을 자유로운 커스텀 드로잉으로 조작하여 사이드체인과 트렌디한 리듬을 연출합니다.", original: 99, discountPrice: 89, discountRate: "10% OFF", code: "SHAPER3-DEAL", perk: "사이드체인 및 모듈레이션 사운드 디자인 최적화", storeUrl: "https://www.cableguys.com" },
+      { brand: "Spitfire Audio", title: "LABS Series", cat: "free", sub: "Free Synths", desc: "고품질로 믹싱된 피아노, 핑거기타, 시네마틱 스트링 등을 무상으로 제공하는 독립 가상악기 컬렉션입니다.", original: 49, discountPrice: 0, discountRate: "100% FREE", code: "SPITFIRE-LABS", perk: "무료 시네마틱 및 아쿠스틱 오케스트라 사운드", storeUrl: "https://labs.spitfireaudio.com" },
+      { brand: "Output", title: "Arcade 2.0 Loop Synth", cat: "synth", sub: "Sample Library", desc: "매일 업로드되는 고품질 루프 샘플을 자신의 키보드 키에 맞게 실시간 조성 변환하여 아이디어를 스케치하는 가상악기입니다.", original: 120, discountPrice: 60, discountRate: "50% OFF", code: "ARCADE-50", perk: "실시간 클라우드 기반 샘플 라이브러리 구독", storeUrl: "https://output.com" },
+      { brand: "Plugin Alliance", title: "Brainworx bx_console SSL 4000 E", cat: "mixing", sub: "Mastering Chain", desc: "전설적인 SSL 4000 E 콘솔 채널 스트립의 EQ, 콤프레서, 게이트 아날로그 회로를 정밀 모델링한 플러그인입니다.", original: 349, discountPrice: 39, discountRate: "88% OFF", code: "PA-SSL-SALE", perk: "SSL 콘솔 특유의 Punchy한 아날로그 채널 믹싱", storeUrl: "https://www.plugin-alliance.com" },
+      { brand: "LennarDigital", title: "Sylenth1 Synthesizer", cat: "synth", sub: "Analog/Synth", desc: "가벼운 CPU 점유율과 따뜻한 아날로그 VCF 필터 성능으로 댄스 및 EDM 사운드의 뼈대를 담당하는 웜 신티사이저입니다.", original: 159, discountPrice: 139, discountRate: "12% OFF", code: "SYLENTH139", perk: "아날로그 감성의 초경량 사운드 엔진 탑재", storeUrl: "https://www.lennardigital.com" },
+      { brand: "Softube", title: "Console 1 Empirical Labs Mike-E", cat: "mixing", sub: "Compressor/Limiter", desc: "펀치감 넘치는 새츄레이션과 강력한 콤프레션을 결합하여 드럼과 보컬에 아날로그 질감을 더해주는 컴프레서입니다.", original: 199, discountPrice: 99, discountRate: "50% OFF", code: "SOFTUBE-MIKE", perk: "강렬한 드럼 펀치감 및 새츄레이션 선사", storeUrl: "https://www.softube.com" },
+      { brand: "Vital Audio", title: "Vital Spectral Synth", cat: "free", sub: "Free Synths", desc: "시각적인 스펙트럼 변조 연출과 파형 드로잉을 무상으로 지원하는 고성능 비주얼 웨이브테이블 신티사이저입니다.", original: 80, discountPrice: 0, discountRate: "100% FREE", code: "VITAL-FREE", perk: "풀 비주얼 스펙트럼 웨이브테이블 무료 제공", storeUrl: "https://vital.audio" }
+    ];
+
+    let currentMainCat = 'all';
+    let currentSubCat = '전체';
+
+    function setMainCategory(cat, el) {
+      document.querySelectorAll('.main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
+      if (el) el.classList.add('active');
+      currentMainCat = cat;
+      currentSubCat = '전체';
+      renderSubCategories();
+      renderDeals();
+    }
+
+    function renderSubCategories() {
+      const subBar = document.getElementById('subCatBar');
+      const subs = subCategories[currentMainCat] || ["전체"];
+      subBar.innerHTML = subs.map(s => `
+        <button class="sub-chip ${s === currentSubCat ? 'active' : ''}" onclick="setSubCategory('${s}', this)">${s}</button>
+      `).join('');
+    }
+
+    function setSubCategory(sub, el) {
+      document.querySelectorAll('.sub-chip').forEach(c => c.classList.remove('active'));
+      if (el) el.classList.add('active');
+      currentSubCat = sub;
+      renderDeals();
+    }
+
+    function renderDeals() {
+      const container = document.getElementById('dealsContainer');
+      let filtered = dealsData;
+
+      if (currentMainCat !== 'all') {
+        if (currentMainCat === 'free') {
+          filtered = filtered.filter(d => d.discountPrice === 0);
+        } else {
+          filtered = filtered.filter(d => d.cat === currentMainCat);
+        }
+      }
+
+      if (currentSubCat !== '전체' && currentSubCat !== '전체 보기') {
+        filtered = filtered.filter(d => d.sub === currentSubCat);
+      }
+
+      container.innerHTML = filtered.map(d => {
+        const krw = d.discountPrice === 0 ? "0원 (무료)" : `약 ${(d.discountPrice * USD_TO_KRW).toLocaleString()}원`;
+        const origKrw = d.original ? `$${d.original} (약 ${(d.original * USD_TO_KRW).toLocaleString()}원)` : '';
+        const tagClass = d.discountPrice === 0 ? 'tag-free' : 'tag-discount';
+
+        return `
+          <div class="deal-card">
+            <div>
+              <div class="card-header">
+                <span class="brand-name">${d.brand}</span>
+                <span class="tag-badge ${tagClass}">${d.discountRate}</span>
+              </div>
+              <a href="${d.storeUrl}" target="_blank" class="deal-title">${d.title}</a>
+              <div class="sub-cat-tag"># ${d.sub}</div>
+              <div class="description-text">${d.desc}</div>
+              <div class="price-box">
+                <span class="original-price">${origKrw}</span>
+                <span class="discount-price">$${d.discountPrice}</span>
+                <div class="krw-price">한화 추산: ${krw}</div>
+              </div>
+              <div class="perks-box">
+                혜택: ${d.perk}<br/>
+                프로모션 코드: <strong>${d.code}</strong>
+              </div>
+            </div>
+            <a href="${d.storeUrl}" target="_blank" class="btn-buy">공식 스토어 딜 바로가기 ↗</a>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterCategory(cat) {
+      if (cat === 'affiliate') {
+        alert('제휴 문의: aftrdry@outlook.kr 또는 공식 디스코드 채널로 부탁드립니다.');
+      }
+    }
+
+    async function checkUserSession() {
+      if (!supabaseClient) return;
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      document.getElementById('authNav').style.display = session?.user ? 'none' : 'flex';
+      document.getElementById('userNav').style.display = session?.user ? 'flex' : 'none';
+      const adminBtn = document.getElementById('navAdminBtn');
+      if(adminBtn && session?.user) adminBtn.style.display = 'block';
+    }
+
+    async function handleLogout() {
+      if (supabaseClient) {
+        await supabaseClient.auth.signOut();
+        alert('로그아웃 되었습니다.');
+        location.reload();
+      }
     }
 
     function handleLoginSubmit(e) {
@@ -420,55 +562,24 @@
       closeModal('loginModal');
       document.getElementById('authNav').style.display = 'none';
       document.getElementById('userNav').style.display = 'flex';
-      document.getElementById('navAdminBtn').style.display = 'block'; // 어드민 권한 활성화 시뮬레이션
+      const adminBtn = document.getElementById('navAdminBtn');
+      if(adminBtn) adminBtn.style.display = 'block';
       alert('환영합니다, 프로듀서님!');
     }
 
     function handleSignupSubmit(e) {
       e.preventDefault();
       const chk = document.getElementById('termsCheck');
-      if(!chk.checked) { alert('이용약관에 동의해주세요.'); return; }
+      if(chk && !chk.checked) { alert('이용약관 및 법적 고지에 동의해주세요.'); return; }
       closeModal('signupModal');
       alert('회원가입이 완료되었습니다!');
     }
 
-    // Sample Deals Data Render
-    const sampleDeals = [
-      { brand: "Arturia", title: "MiniFreak V", cat: "synth", orig: "$199", disc: "$49", krw: "약 68,000원", desc: "아날로그 하드웨어의 질감을 완벽히 이식한 하이브리드 신디사이저 VST", badge: "75% OFF", url: "#" },
-      { brand: "Waves", title: "SSL G-Master Bus Compressor", cat: "mixing", orig: "$249", disc: "$29", krw: "약 40,000원", desc: "믹싱 버스의 최종 마감을 책임지는 전설적인 레전더리 콘솔 컴프레서", badge: "HOT DEAL", url: "#" },
-      { brand: "Valhalla DSP", title: "Valhalla Supermassive", cat: "free", orig: "$0", disc: "$0", krw: "FREE", desc: "공간을 압도하는 거대한 리버브와 딜레이 이펙트 (상시 무료)", badge: "100% FREE", url: "#" }
-    ];
-
-    function renderDeals(deals) {
-      const container = document.getElementById('dealsContainer');
-      container.innerHTML = deals.map(d => `
-        <div class="deal-card">
-          <div>
-            <div class="card-header">
-              <span class="brand-name">${d.brand}</span>
-              <span class="tag-badge ${d.cat === 'free' ? 'tag-free' : 'tag-discount'}">${d.badge}</span>
-            </div>
-            <h3 class="deal-title">${d.title}</h3>
-            <p class="description-text">${d.desc}</p>
-          </div>
-          <div>
-            <div class="price-box">
-              <span class="original-price">${d.orig}</span>
-              <span class="discount-price">${d.disc}</span>
-              <div class="krw-price">${d.krw}</div>
-            </div>
-            <a href="${d.url}" class="btn-buy" target="_blank">딜 보러가기 / 세일 참여</a>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function setMainCategory(cat, el) {
-      document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
-      if(cat === 'all') renderDeals(sampleDeals);
-      else if(cat === 'free') renderDeals(sampleDeals.filter(d => d.cat === 'free'));
-      else renderDeals(sampleDeals.filter(d => d.cat === 'cat' || d.cat === cat));
+    function handlePostSubmit(e) {
+      e.preventDefault();
+      alert('게시글이 성공적으로 등록되었습니다!');
+      closeModal('postModal');
+      e.target.reset();
     }
 
     function handleDealSubmit(e) {
@@ -478,8 +589,11 @@
       showPage('deals');
     }
 
-    // Initial Load
-    window.onload = () => { renderDeals(sampleDeals); };
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSubCategories();
+      renderDeals();
+      checkUserSession();
+    });
   </script>
 </body>
 </html>
