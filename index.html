@@ -22,6 +22,8 @@
       --text-secondary: #909892;
       --modal-bg: #161917;
       --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --logo-blend: screen;
+      --logo-filter: invert(1);
     }
 
     /* Sand Beige & Deep Walnut Tone */
@@ -37,6 +39,9 @@
       --text-primary: #1a1d1b;
       --text-secondary: #6e736f;
       --modal-bg: #ffffff;
+      --logo-blend: multiply;
+      /* 라이트모드에서 흰색 테두리/잔상이 남지 않도록 순수 블랙으로 강제 렌더링 */
+      --logo-filter: brightness(0); 
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -62,12 +67,22 @@
       backdrop-filter: blur(16px);
     }
 
-    /* 텍스트/SVG 기반 순수 로고 (경계선/잔상 원천 차단) */
     .logo-container {
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
-      font-size: 2.2rem; font-weight: 900; letter-spacing: -0.04em; color: var(--text-primary);
     }
-    .logo-container span { color: var(--accent-gold); }
+
+    /* 로고 마우스 오버 툴팁(Ps 현상) 및 라이트모드 흰색 경계선 완벽 박멸 */
+    .brand-logo-img {
+      height: 110px;
+      width: auto;
+      display: block;
+      object-fit: contain;
+      mix-blend-mode: var(--logo-blend);
+      filter: var(--logo-filter);
+      pointer-events: none;
+      -webkit-user-drag: none;
+      transition: filter 0.3s ease, mix-blend-mode 0.3s ease;
+    }
 
     nav { display: flex; gap: 1.2rem; align-items: center; }
 
@@ -235,10 +250,10 @@
 </head>
 <body>
 
-  <!-- Header with Pure Text/SVG Logo (No Image Artifacts) -->
+  <!-- Header with Clean Brand Logo -->
   <header>
     <a href="#" class="logo-container" onclick="showPage('deals'); return false;">
-      Plug<span>Azit</span>
+      <img src="PlugAzit.png" alt="PlugAzit" class="brand-logo-img" />
     </a>
 
     <nav>
@@ -468,9 +483,12 @@
       { brand: "Output", title: "Arcade 2.0 Loop Synth", cat: "synth", sub: "Sample Library", desc: "매일 업로드되는 고품질 루프 샘플을 자신의 키보드 키에 맞게 실시간 조성 변환하여 아이디어를 스케치하는 가상악기입니다.", original: 120, discountPrice: 60, discountRate: "50% OFF", code: "ARCADE-50", perk: "실시간 클라우드 기반 샘플 라이브러리 구독", storeUrl: "https://output.com" },
       { brand: "Plugin Alliance", title: "Brainworx bx_console SSL 4000 E", cat: "mixing", sub: "Mastering Chain", desc: "전설적인 SSL 4000 E 콘솔 채널 스트립의 EQ, 콤프레서, 게이트 아날로그 회로를 정밀 모델링한 플러그인입니다.", original: 349, discountPrice: 39, discountRate: "88% OFF", code: "PA-SSL-SALE", perk: "SSL 콘솔 특유의 Punchy한 아날로그 채널 믹싱", storeUrl: "https://www.plugin-alliance.com" },
       { brand: "LennarDigital", title: "Sylenth1 Synthesizer", cat: "synth", sub: "Analog/Synth", desc: "가벼운 CPU 점유율과 따뜻한 아날로그 VCF 필터 성능으로 댄스 및 EDM 사운드의 뼈대를 담당하는 웜 신티사이저입니다.", original: 159, discountPrice: 139, discountRate: "12% OFF", code: "SYLENTH139", perk: "아날로그 감성의 초경량 사운드 엔진 탑재", storeUrl: "https://www.lennardigital.com" },
-      { brand: "Softube", title: "Console 1 Empirical Labs Mike-E", cat: "mixing", sub: "Compressor/Limiter", desc: "펀치감 넘치는 새츄레이션과 강력한 콤프레션을 결합하여 드럼과 보컬에 아날로그 질감을 더해주는 컴프레서입니다.", original: 199, discountPrice: 99, discountRate: "50% OFF", code: "SOFTUBE-MIKE", perk: "강렬한 드럼 펀치감 및 새츄레이션 선사", storeUrl: "https://softube.com" },
+      { brand: "Softube", title: "Console 1 Empirical Labs Mike-E", cat: "mixing", sub: "Compressor/Limiter", desc: "펀치감 넘치는 새츄레이션과 강력한 콤프레션을 결합하여 드럼과 보컬에 아날로그 질감을 더해주는 컴프레서입니다.", original: 199, discountPrice: 99, discountRate: "50% OFF", code: "SOFTUBE-MIKE", perk: "강렬한 드럼 펀치감 및 새츄레이션 선사", storeUrl: "https://www.softube.com" },
       { brand: "Vital Audio", title: "Vital Spectral Synth", cat: "free", sub: "Free Synths", desc: "시각적인 스펙트럼 변조 연출과 파형 드로잉을 무상으로 지원하는 고성능 비주얼 웨이브테이블 신티사이저입니다.", original: 80, discountPrice: 0, discountRate: "100% FREE", code: "VITAL-FREE", perk: "풀 비주얼 스펙트럼 웨이브테이블 무료 제공", storeUrl: "https://vital.audio" }
     ];
+
+    let currentMainCat = 'all';
+    let currentSubCat = '전체';
 
     function setMainCategory(cat, el) {
       document.querySelectorAll('.main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
