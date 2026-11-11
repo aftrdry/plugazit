@@ -65,8 +65,17 @@
       display: flex; align-items: center; text-decoration: none; cursor: pointer;
       height: 90px;
     }
+    
+    /* 2. 다크 모드 시 로고 반전 처리 */
     .brand-logo-img {
       height: 80px; width: auto; display: block; object-fit: contain;
+      transition: filter 0.3s ease;
+    }
+    [data-theme="dark"] .brand-logo-img {
+      filter: invert(1);
+    }
+    [data-theme="light"] .brand-logo-img {
+      filter: none;
     }
 
     nav { display: flex; gap: 1rem; align-items: center; }
@@ -144,7 +153,7 @@
     }
     .sub-chip.active, .sub-chip:hover { background: var(--card-hover); color: var(--text-primary); border-color: var(--text-primary); }
 
-    /* 정렬 및 검색 필터 바 */
+    /* 3. 정렬 선택 박스 여백 및 화살표 안쪽 보정 */
     .filter-control-bar {
       display: flex; justify-content: space-between; align-items: center;
       gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
@@ -158,8 +167,13 @@
     }
     .search-input-box input:focus { border-color: var(--accent-gold); }
     .sort-select-box select {
-      padding: 0.65rem 1rem; background: var(--card-bg); border: 1px solid var(--border-color);
+      padding: 0.65rem 2.6rem 0.65rem 1.1rem; /* 우측 안쪽 여백 확보로 화살표 여유 배치 */
+      background: var(--card-bg); border: 1px solid var(--border-color);
       border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none; cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%20909892' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
     }
     .sort-select-box select:focus { border-color: var(--accent-gold); }
 
@@ -450,7 +464,7 @@
     </div>
   </div>
 
-  <!-- 아이디(이메일) 힌트 찾기 모달 -->
+  <!-- 4. 아이디(이메일) 힌트 찾기 모달 (실제 마스킹 이메일 힌트 출력) -->
   <div class="modal-overlay" id="findEmailModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('findEmailModal')">×</button>
@@ -570,16 +584,14 @@
     const SUPABASE_ANON_KEY = "sb_publishable_J0LQJ-qjr5ISX1jRKaQ7-A_GwABw8XP";
     let supabaseClient = null;
 
-    // 관리자 이메일 목록
     const ADMIN_EMAILS = ["aftrdry@outlook.kr", "aftrdry@outlook.com", "sharpmson774@gmail.com"];
     let currentUser = null;
-    let rawCommunityPosts = []; // Supabase 게시글 데이터 저장 배열
+    let rawCommunityPosts = [];
 
     if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
-    // 비밀번호 표시 / 숨김 토글
     function togglePasswordVisibility(inputId, btnEl) {
       const input = document.getElementById(inputId);
       if (!input) return;
@@ -597,7 +609,6 @@
       document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
     }
 
-    // 좌측 상단 로고 클릭 시 필터 상태 및 선택 항목을 완전 초기화하고 홈(전체 딜 보기)으로 이동
     function resetToHome() {
       currentMainCat = 'all';
       currentSubCat = '전체';
@@ -633,7 +644,6 @@
     function openModal(id) { document.getElementById(id)?.classList.add('active'); }
     function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
 
-    // VST Vault 데이터 세팅 (마감일 및 수치 정렬용 정밀 파싱 포함)
     const USD_TO_KRW = 1380;
     const subCategories = {
       all: ["전체 보기"],
@@ -686,7 +696,6 @@
       renderDeals();
     }
 
-    // VST 딜 검색, 정렬 및 렌더링 엔진
     function renderDeals() {
       const container = document.getElementById('dealsContainer');
       const searchKeyword = document.getElementById('dealSearchKeyword').value.trim().toLowerCase();
@@ -694,7 +703,6 @@
 
       let filtered = [...dealsData];
 
-      // 1. 카테고리 필터링
       if (currentMainCat !== 'all') {
         if (currentMainCat === 'free') {
           filtered = filtered.filter(d => d.discountPrice === 0);
@@ -707,7 +715,6 @@
         filtered = filtered.filter(d => d.sub === currentSubCat);
       }
 
-      // 2. 키워드 검색 필터링 (브랜드명, 타이틀, 설명)
       if (searchKeyword !== '') {
         filtered = filtered.filter(d => 
           d.brand.toLowerCase().includes(searchKeyword) ||
@@ -716,7 +723,6 @@
         );
       }
 
-      // 3. 정렬 엔진
       if (sortOption === 'priceLow') {
         filtered.sort((a, b) => a.discountPrice - b.discountPrice);
       } else if (sortOption === 'priceHigh') {
@@ -769,7 +775,7 @@
       }
     }
 
-    // --- 커뮤니티 엔진 (Supabase 실시간 연동 & 검색/필터) ---
+    // --- 1. 커뮤니티 엔진 (에러 조치 및 가드 포함) ---
 
     let currentCommCat = 'all';
 
@@ -799,7 +805,7 @@
 
         if (error) {
           console.error('커뮤니티 글 불러오기 에러:', error.message);
-          listEl.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding: 2rem;">글을 불러오는데 실패했습니다. (DB 세팅 확인 필요)</p>`;
+          listEl.innerHTML = `<div style="text-align: center; padding: 2.5rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">Supabase에 'posts' 테이블이 준비되지 않았습니다. 제공된 SQL문을 실행해 주세요.</div>`;
         } else {
           rawCommunityPosts = data || [];
           renderCommunityPosts();
@@ -815,12 +821,10 @@
 
       let filtered = [...rawCommunityPosts];
 
-      // 1. 게시판 카테고리 필터링
       if (currentCommCat !== 'all') {
         filtered = filtered.filter(p => p.category === currentCommCat);
       }
 
-      // 2. 검색 키워드 필터링 (제목, 내용, 닉네임)
       if (keyword !== '') {
         filtered = filtered.filter(p => 
           p.title.toLowerCase().includes(keyword) ||
@@ -876,7 +880,6 @@
         return;
       }
 
-      // 공지사항 작성 권한 검증
       if (category === '공지사항' && (!session.user.email || !ADMIN_EMAILS.includes(session.user.email.toLowerCase()))) {
         alert('공지사항은 관리자 계정만 작성할 수 있습니다.');
         return;
@@ -896,7 +899,11 @@
         }]);
 
       if (error) {
-        alert('게시글 작성 실패: ' + error.message);
+        if (error.message.includes('find the table')) {
+          alert('게시글 작성 실패: Supabase 에디터에서 제공된 SQL 문을 실행하여 posts 테이블을 먼저 만들어 주세요.');
+        } else {
+          alert('게시글 작성 실패: ' + error.message);
+        }
       } else {
         alert('성공적으로 게시글이 등록되었습니다.');
         closeModal('postModal');
@@ -905,7 +912,7 @@
       }
     }
 
-    // --- Supabase 인증 및 관리자 권한 ---
+    // --- Supabase 인증 및 4 & 5번 가이드 보완 ---
 
     async function checkUserSession() {
       if (!supabaseClient) return;
@@ -982,9 +989,10 @@
       }
     }
 
+    // 5. 비밀번호 재설정 이메일 전송 (Rate limit 오류 핸들링 보완)
     async function handleResetPasswordSubmit(e) {
       e.preventDefault();
-      const email = document.getElementById('resetEmail').value;
+      const email = document.getElementById('resetEmail').value.trim();
 
       if (!supabaseClient) {
         alert('재설정 이메일이 발송되었습니다.');
@@ -997,33 +1005,49 @@
       });
 
       if (error) {
-        alert('요청 실패: ' + error.message);
+        if (error.message.includes('rate limit')) {
+          alert('요청 실패: 단시간 내 메일 발송 제한(Rate limit)을 초과했습니다. Supabase 대시보드 Rate Limits에서 횟수를 늘리거나 1~2분 후 시도해 주세요.');
+        } else {
+          alert('요청 실패: ' + error.message);
+        }
       } else {
         alert('비밀번호 재설정 링크가 이메일로 발송되었습니다.');
         closeModal('resetPwModal');
       }
     }
 
+    // 4. 아이디 힌트 찾기 (실제 DB 마스킹 이메일 정보 제공)
     async function handleFindEmailSubmit(e) {
       e.preventDefault();
       const nickname = document.getElementById('findNickname').value.trim();
 
       if (!supabaseClient) {
-        alert('닉네임 [' + nickname + '] 님의 가입 이메일 힌트: af***@outlook.kr');
+        alert(`닉네임 [${nickname}] 님의 가입 이메일 힌트: af***@outlook.kr`);
         closeModal('findEmailModal');
         return;
       }
 
       const { data, error } = await supabaseClient
         .from('profiles')
-        .select('nickname, id')
+        .select('email, nickname')
         .eq('nickname', nickname)
         .maybeSingle();
 
       if (error || !data) {
         alert('해당 닉네임으로 등록된 회원 정보를 찾을 수 없습니다.');
       } else {
-        alert('닉네임 [' + nickname + '] 님의 회원 가입 정보가 확인되었습니다. 비밀번호 찾기를 이용하세요.');
+        const parts = data.email.split('@');
+        const userPart = parts[0];
+        const domainPart = parts[1];
+        
+        let maskedUser = userPart;
+        if (userPart.length > 2) {
+          maskedUser = userPart.substring(0, 2) + '*'.repeat(userPart.length - 2);
+        }
+        
+        const maskedEmail = `${maskedUser}@${domainPart}`;
+
+        alert(`닉네임 [${nickname}] 님의 가입 이메일 힌트는 [ ${maskedEmail} ] 입니다.`);
         closeModal('findEmailModal');
       }
     }
@@ -1088,6 +1112,7 @@
         .from('profiles')
         .upsert({
           id: session.user.id,
+          email: session.user.email,
           nickname,
           main_daw,
           updated_at: new Date()
