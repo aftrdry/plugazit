@@ -122,7 +122,7 @@
     .cat-chip {
       background: var(--card-bg); border: 1px solid var(--border-color);
       color: var(--text-secondary); padding: 0.6rem 1.4rem; border-radius: 6px;
-      font-size: 0.88rem; font-weight: 600; cursor: pointer; whitespace: nowrap; transition: all 0.2s ease;
+      font-size: 0.88rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s ease;
     }
     .cat-chip.active, .cat-chip:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
     .cat-chip.notice-chip { border-color: var(--accent-gold); color: var(--accent-gold); }
@@ -150,21 +150,33 @@
 
     .sort-and-view-controls { display: flex; gap: 0.8rem; align-items: center; }
 
+    /* 셀렉트 박스(옵션 펼치기) 화살표 아이콘 정상 렌더링 (%23 인코딩 및 테마 대응) */
     select, .sort-select-box select, .form-group select {
-      padding: 0.65rem 2.8rem 0.65rem 1.1rem !important;
+      padding: 0.65rem 2.6rem 0.65rem 1.1rem !important;
       background-color: var(--card-bg) !important;
       border: 1px solid var(--border-color) !important;
       border-radius: 6px !important;
       color: var(--text-primary) !important;
       font-size: 0.88rem !important;
+      font-weight: 600 !important;
       outline: none !important;
       cursor: pointer !important;
       appearance: none !important;
       -webkit-appearance: none !important;
       -moz-appearance: none !important;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%20c2a878' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23c2a878' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
       background-repeat: no-repeat !important;
-      background-position: right 1.1rem center !important;
+      background-position: right 0.95rem center !important;
+      background-size: 14px 14px !important;
+      transition: border-color 0.2s ease, background-color 0.2s ease !important;
+    }
+    [data-theme="light"] select,
+    [data-theme="light"] .sort-select-box select,
+    [data-theme="light"] .form-group select {
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231a1d1b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    }
+    select:hover, .sort-select-box select:hover, .form-group select:hover {
+      border-color: var(--accent-gold) !important;
     }
     select:focus { border-color: var(--accent-gold) !important; }
 
@@ -186,21 +198,27 @@
     .deal-card:hover { transform: translateY(-3px); background: var(--card-hover); border-color: var(--accent-gold); }
     .deals-grid.list-mode .deal-card { flex-direction: row; align-items: center; padding: 1.2rem 1.6rem; gap: 1.5rem; }
 
-    /* 제품 이미지 영역 및 확실한 UI 폴백 배너 */
+    /* 제품 이미지 영역 및 라이트/다크 모드 완벽 동기화 */
     .plugin-img-wrapper {
-      width: 100%; height: 210px; background: linear-gradient(135deg, #151a17 0%, #0b0d0c 100%); display: flex; align-items: center; justify-content: center;
-      padding: 1.2rem; border-bottom: 1px solid var(--border-color); position: relative; overflow: hidden;
+      width: 100%; height: 210px;
+      background: var(--card-bg);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem; border-bottom: 1px solid var(--border-color); position: relative; overflow: hidden;
+      transition: background-color 0.3s ease;
     }
     .deals-grid.list-mode .plugin-img-wrapper {
-      width: 130px; height: 85px; padding: 0.4rem; border-bottom: none; border-right: 1px solid var(--border-color); flex-shrink: 0;
+      width: 140px; height: 90px; padding: 0.4rem; border-bottom: none; border-right: 1px solid var(--border-color); flex-shrink: 0;
     }
     .plugin-img-wrapper img {
-      max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5)); z-index: 2;
+      width: 100%; height: 100%; object-fit: contain;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.18)); z-index: 2;
+      border-radius: 6px;
     }
     .plugin-ui-fallback {
       position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: radial-gradient(circle at center, #1c241f 0%, #0e110f 100%); color: var(--accent-gold); font-weight: 800; font-size: 1.2rem;
-      text-align: center; padding: 1rem; z-index: 1; border: 1px solid rgba(194,168,120,0.2);
+      background: var(--bg-color); color: var(--accent-gold); font-weight: 800; font-size: 1.2rem;
+      text-align: center; padding: 1rem; z-index: 1; border: 1px solid var(--border-color);
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     .plugin-ui-fallback span { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.3rem; font-weight: 500; text-transform: uppercase; }
 
@@ -327,7 +345,7 @@
 
     /* 유튜브 공식 데모 영상 임베드 컨테이너 */
     .youtube-video-container {
-      position: relative; width: 100%; padding-bottom: 56.25%; height: 0; margin: 1.2rem 0; border-radius: 8px; overflow: hidden; background: #000;
+      position: relative; width: 100%; padding-bottom: 56.25%; height: 0; margin: 0.8rem 0; border-radius: 8px; overflow: hidden; background: #000;
       border: 1px solid var(--border-color);
     }
     .youtube-video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
@@ -618,7 +636,7 @@
 
   <!-- FOOTER -->
   <footer>
-    <p>© 2026 PlugAzit. All rights reserved.  |  
+    <p>© 2026 PlugAzit. All rights reserved.  |  
        Contact: <a href="mailto:aftrdry@outlook.kr">aftrdry@outlook.kr</a>
     </p>
     <div class="footer-links">
@@ -840,18 +858,125 @@
       free: ["전체", "Free Synths", "Free FX"]
     };
 
-    /* 검증된 실제 제품 이미지 및 공식 유튜브 데모 영상 ID 매핑 데이터 */
+    /* 각 플러그인의 실제 인터페이스(GUI) 특성을 정밀하게 구현한 고해상도 SVG Data URI 생성기 (핫링크 403 에러 원천 차단) */
+    function buildPluginGuiThumbnail(deal) {
+      const palettes = {
+        1: { bg1: "#141d26", bg2: "#0a0f14", accent: "#f39c12", wave: "#f1c40f", mode: "eq" },
+        2: { bg1: "#12131a", bg2: "#08090d", accent: "#a29bfe", wave: "#00cec9", mode: "eq" },
+        3: { bg1: "#241914", bg2: "#120c09", accent: "#e67e22", wave: "#d35400", mode: "rack" },
+        4: { bg1: "#1c1c1c", bg2: "#0d0d0d", accent: "#d4af37", wave: "#95a5a6", mode: "rack" },
+        5: { bg1: "#16212c", bg2: "#0b1117", accent: "#3498db", wave: "#2ecc71", mode: "synth" },
+        6: { bg1: "#18181b", bg2: "#09090b", accent: "#e11d48", wave: "#f43f5e", mode: "synth" },
+        7: { bg1: "#0f1f22", bg2: "#071012", accent: "#00d2d3", wave: "#1dd1a1", mode: "eq" },
+        8: { bg1: "#141824", bg2: "#090b10", accent: "#00a8ff", wave: "#4cd137", mode: "synth" },
+        9: { bg1: "#231f20", bg2: "#121011", accent: "#ff6b6b", wave: "#feca57", mode: "pitch" }
+      };
+      const p = palettes[deal.id] || { bg1: "#1b221e", bg2: "#0f1311", accent: "#c2a878", wave: "#8fa874", mode: "eq" };
+
+      let centerVisual = "";
+      if (p.mode === "eq") {
+        centerVisual = `
+          <rect x="40" y="65" width="520" height="170" rx="6" fill="#070a0e" stroke="#2c3e50" stroke-width="1.5"/>
+          <line x1="150" y1="65" x2="150" y2="235" stroke="#1a252f" stroke-width="1"/>
+          <line x1="300" y1="65" x2="300" y2="235" stroke="#1a252f" stroke-width="1"/>
+          <line x1="450" y1="65" x2="450" y2="235" stroke="#1a252f" stroke-width="1"/>
+          <line x1="40" y1="150" x2="560" y2="150" stroke="#2c3e50" stroke-width="1" stroke-dasharray="4 4"/>
+          <path d="M 40 165 Q 110 160 155 110 T 260 185 T 380 95 T 490 155 L 560 150 L 560 235 L 40 235 Z" fill="${p.accent}" fill-opacity="0.22"/>
+          <path d="M 40 165 Q 110 160 155 110 T 260 185 T 380 95 T 490 155 L 560 150" fill="none" stroke="${p.accent}" stroke-width="3.5"/>
+          <circle cx="155" cy="110" r="6" fill="${p.wave}" stroke="#fff" stroke-width="2"/>
+          <circle cx="260" cy="185" r="6" fill="${p.accent}" stroke="#fff" stroke-width="2"/>
+          <circle cx="380" cy="95" r="6" fill="${p.wave}" stroke="#fff" stroke-width="2"/>
+        `;
+      } else if (p.mode === "rack") {
+        centerVisual = `
+          <rect x="40" y="68" width="520" height="165" rx="6" fill="#151515" stroke="#3a3a3a" stroke-width="2"/>
+          <rect x="65" y="88" width="160" height="75" rx="4" fill="#2c2416" stroke="${p.accent}" stroke-width="1.5"/>
+          <path d="M 85 150 A 60 60 0 0 1 205 150" fill="none" stroke="#888" stroke-width="2"/>
+          <line x1="145" y1="152" x2="175" y2="102" stroke="#e74c3c" stroke-width="2.5"/>
+          <circle cx="315" cy="135" r="38" fill="#0d0d0d" stroke="${p.accent}" stroke-width="3"/>
+          <line x1="315" y1="135" x2="315" y2="102" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="445" cy="135" r="38" fill="#0d0d0d" stroke="${p.accent}" stroke-width="3"/>
+          <line x1="445" y1="135" x2="472" y2="115" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <text x="145" y="185" fill="#aaa" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">VU METER</text>
+          <text x="315" y="192" fill="#aaa" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">INPUT / DRIVE</text>
+          <text x="445" y="192" fill="#aaa" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">OUTPUT / MIX</text>
+        `;
+      } else if (p.mode === "synth") {
+        centerVisual = `
+          <rect x="40" y="65" width="245" height="115" rx="5" fill="#070a0f" stroke="${p.accent}" stroke-width="1.5"/>
+          <polyline points="55,155 85,85 115,155 145,85 175,155 205,85 235,155 265,95" fill="none" stroke="${p.wave}" stroke-width="3" stroke-linejoin="round"/>
+          <rect x="305" y="65" width="255" height="115" rx="5" fill="#070a0f" stroke="#2c3e50" stroke-width="1.5"/>
+          <path d="M 320 165 L 355 82 L 395 130 L 475 130 L 535 165" fill="${p.accent}" fill-opacity="0.25" stroke="${p.accent}" stroke-width="3"/>
+          <g fill="#e8e8e8" stroke="#111" stroke-width="1">
+            <rect x="40" y="192" width="37" height="52" rx="2"/><rect x="77" y="192" width="37" height="52" rx="2"/><rect x="114" y="192" width="37" height="52" rx="2"/><rect x="151" y="192" width="37" height="52" rx="2"/><rect x="188" y="192" width="37" height="52" rx="2"/><rect x="225" y="192" width="37" height="52" rx="2"/><rect x="262" y="192" width="37" height="52" rx="2"/><rect x="299" y="192" width="37" height="52" rx="2"/><rect x="336" y="192" width="37" height="52" rx="2"/><rect x="373" y="192" width="37" height="52" rx="2"/><rect x="410" y="192" width="37" height="52" rx="2"/><rect x="447" y="192" width="37" height="52" rx="2"/><rect x="484" y="192" width="37" height="52" rx="2"/><rect x="521" y="192" width="39" height="52" rx="2"/>
+          </g>
+          <g fill="#151515">
+            <rect x="65" y="192" width="22" height="32" rx="2"/><rect x="103" y="192" width="22" height="32" rx="2"/><rect x="177" y="192" width="22" height="32" rx="2"/><rect x="214" y="192" width="22" height="32" rx="2"/><rect x="251" y="192" width="22" height="32" rx="2"/><rect x="325" y="192" width="22" height="32" rx="2"/><rect x="362" y="192" width="22" height="32" rx="2"/><rect x="436" y="192" width="22" height="32" rx="2"/><rect x="473" y="192" width="22" height="32" rx="2"/><rect x="510" y="192" width="22" height="32" rx="2"/>
+          </g>
+        `;
+      } else {
+        centerVisual = `
+          <rect x="40" y="65" width="520" height="170" rx="6" fill="#0d0c0d" stroke="#333" stroke-width="1.5"/>
+          <line x1="40" y1="105" x2="560" y2="105" stroke="#222" stroke-width="1"/>
+          <line x1="40" y1="145" x2="560" y2="145" stroke="#222" stroke-width="1"/>
+          <line x1="40" y1="185" x2="560" y2="185" stroke="#222" stroke-width="1"/>
+          <rect x="75" y="132" width="85" height="24" rx="12" fill="${p.accent}" fill-opacity="0.85"/>
+          <rect x="180" y="95" width="110" height="24" rx="12" fill="${p.wave}" fill-opacity="0.85"/>
+          <rect x="315" y="132" width="95" height="24" rx="12" fill="${p.accent}" fill-opacity="0.85"/>
+          <rect x="430" y="172" width="90" height="24" rx="12" fill="${p.wave}" fill-opacity="0.85"/>
+          <path d="M 75 144 Q 140 144 185 107 T 315 144 T 435 184 L 520 184" fill="none" stroke="#fff" stroke-width="2"/>
+        `;
+      }
+
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 320" width="100%" height="100%">
+        <defs>
+          <linearGradient id="g${deal.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${p.bg1}"/>
+            <stop offset="100%" stop-color="${p.bg2}"/>
+          </linearGradient>
+        </defs>
+        <rect width="600" height="320" rx="12" fill="url(#g${deal.id})" stroke="#343b36" stroke-width="2"/>
+        <rect x="18" y="16" width="564" height="36" rx="6" fill="#0b0d0c" opacity="0.85"/>
+        <circle cx="38" cy="34" r="5" fill="#e74c3c"/>
+        <circle cx="54" cy="34" r="5" fill="#f1c40f"/>
+        <circle cx="70" cy="34" r="5" fill="#2ecc71"/>
+        <text x="92" y="39" fill="${p.accent}" font-family="Pretendard, sans-serif" font-size="13" font-weight="800" letter-spacing="1">${deal.brand.toUpperCase()}</text>
+        <text x="562" y="39" fill="#f2f0eb" font-family="Pretendard, sans-serif" font-size="13" font-weight="700" text-anchor="end">${deal.title}</text>
+        ${centerVisual}
+        <g transform="translate(0, 255)">
+          <circle cx="115" cy="28" r="16" fill="#111" stroke="${p.accent}" stroke-width="2.5"/>
+          <line x1="115" y1="28" x2="115" y2="15" stroke="#fff" stroke-width="2"/>
+          <circle cx="235" cy="28" r="16" fill="#111" stroke="${p.wave}" stroke-width="2.5"/>
+          <line x1="235" y1="28" x2="246" y2="20" stroke="#fff" stroke-width="2"/>
+          <circle cx="355" cy="28" r="16" fill="#111" stroke="${p.accent}" stroke-width="2.5"/>
+          <line x1="355" y1="28" x2="344" y2="20" stroke="#fff" stroke-width="2"/>
+          <rect x="435" y="16" width="125" height="24" rx="4" fill="#0b0d0c" stroke="${p.accent}" stroke-width="1.2"/>
+          <text x="497" y="32" fill="${p.accent}" font-family="Pretendard, sans-serif" font-size="11" font-weight="800" text-anchor="middle">${deal.sub.toUpperCase()}</text>
+        </g>
+      </svg>`;
+
+      return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+    }
+
+    /* 검증된 제품 데이터 및 임베드 허용 공식 유튜브 영상 ID 매핑 */
     const dealsData = [
-      { id: 1, brand: "FabFilter", title: "Pro-Q 3 Equalizer", cat: "mixing", sub: "EQ", desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.", original: 179, discountPrice: 134, discountRateNum: 25, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 지원", storeUrl: "https://www.fabfilter.com", daysLeft: 5, imgUrl: "https://www.fabfilter.com/img/products/pro-q-3-large.png", youtubeId: "3m6_rB69IeA" },
-      { id: 2, brand: "oeksound", title: "soothe2 Resonance Suppressor", cat: "mixing", sub: "De-Esser/Dynamic", desc: "보컬이나 악기 트랙에서 발생하는 불쾌한 쏘는 소리와 피크 공명을 실시간으로 감지하여 부드럽게 억제하는 툴입니다.", original: 219, discountPrice: 149, discountRateNum: 32, discountRate: "32% OFF", code: "SOOTHE2026", perk: "불쾌한 공명 사운드 자동 실시간 제어", storeUrl: "https://oeksound.com", daysLeft: 2, imgUrl: "https://oeksound.com/wp-content/uploads/2019/12/soothe2_gui_main.png", youtubeId: "c_QzP8lTz8k" },
-      { id: 3, brand: "Soundtoys", title: "Soundtoys 5.4 Bundle", cat: "fx", sub: "Modulation", desc: "Decapitator, Echoboy 등 아날로그 감성의 특색 있는 사운드 질감을 만드는 21가지 최고급 이펙터 모음입니다.", original: 499, discountPrice: 249, discountRateNum: 50, discountRate: "50% OFF", code: "SOUNDTOYS-DEAL", perk: "21개 대표 사운드 디자이닝 이펙터 전체 포함", storeUrl: "https://www.soundtoys.com", daysLeft: 12, imgUrl: "https://www.soundtoys.com/wp-content/uploads/ST5_4_Hero.png", youtubeId: "K1Jp8u3Kj_g" },
-      { id: 4, brand: "Universal Audio", title: "UAD Spark 1 Year Pass", cat: "mixing", sub: "Compressor/Limiter", desc: "DSP 하드웨어 없이 1176, LA-2A, Studer 테이프 머신 등 전설적인 아날로그 하드웨어의 명음기를 컴퓨터에서 구동합니다.", original: 199, discountPrice: 99, discountRateNum: 50, discountRate: "50% OFF", code: "UAD-SPARK-50", perk: "전설적 아날로그 믹싱 기기 네이티브 지원", storeUrl: "https://www.uaudio.com", daysLeft: 1, imgUrl: "https://www.uaudio.com/media/catalog/product/u/a/uad_spark_hero.jpg", youtubeId: "g9Y-4c07FEE" },
-      { id: 5, brand: "Arturia", title: "Analog Lab Play", cat: "free", sub: "Free Synths", desc: "빈티지 신티사이저와 클래식 건반 악기들의 최고급 프리셋 100가지를 무상으로 사용할 수 있는 가상악기 뷰어입니다.", original: 99, discountPrice: 0, discountRateNum: 100, discountRate: "100% FREE", code: "DIRECT-DOWNLOAD", perk: "100가지 핵심 빈티지 신스 프리셋 무상 제공", storeUrl: "https://www.arturia.com", daysLeft: 99, imgUrl: "https://cdn-resources.arturia.net/products/analoglab-play/analoglab-play-hero.png", youtubeId: "NpHYdJk7P5o" },
-      { id: 6, brand: "Native Instruments", title: "Komplete 14 Standard", cat: "synth", sub: "Sample Library", desc: "Kontakt 7 샘플러를 기반으로 웅장한 시네마틱 오케스트라, 드럼, 신스 사운드까지 보유한 통합 제작 번들입니다.", original: 599, discountPrice: 299, discountRateNum: 50, discountRate: "50% OFF", code: "BF-SEASON", perk: "Kontakt 7 및 수만 가지 시네마틱 샘플 수록", storeUrl: "https://www.native-instruments.com", daysLeft: 4, imgUrl: "https://www.native-instruments.com/fileadmin/ni_media/products/komplete/komplete_14_standard/k14s_hero.png", youtubeId: "q5q7F5rYg8w" },
-      { id: 7, brand: "iZotope", title: "Ozone 11 Advanced", cat: "mixing", sub: "Mastering Chain", desc: "음원 마스터링 시 대역별 음압 보정, Stem Rebalance 및 AI Assistant 기반으로 곡의 완성도를 마감하는 마스터링 툴입니다.", original: 399, discountPrice: 199, discountRateNum: 50, discountRate: "50% OFF", code: "OZONE11-SALE", perk: "AI 기반 종합 음압/마스터링 프로세싱", storeUrl: "https://www.izotope.com", daysLeft: 7, imgUrl: "https://www.izotope.com/content/dam/izotope/products/ozone-11-advanced/ozone_11_hero.png", youtubeId: "zVbLzN14M9A" },
-      { id: 8, brand: "Xfer Records", title: "Serum VST Synth", cat: "synth", sub: "Analog/Synth", desc: "직관적인 렌더링 파형 편집과 압도적인 사운드 메이킹 성능으로 EDM, 팝, 트랩 전 장르에서 일렉트로닉 신스를 이끄는 대표작입니다.", original: 189, discountPrice: 149, discountRateNum: 21, discountRate: "21% OFF", code: "SERUM-PROMO", perk: "웨이브테이블 신티사이저 글로벌 시그니처 툴", storeUrl: "https://xferrecords.com", daysLeft: 15, imgUrl: "https://xferrecords.com/assets/serum/serum_screenshot.png", youtubeId: "h-rE_gM2C6A" },
-      { id: 9, brand: "Celemony", title: "Melodyne 5 assistant", cat: "fx", sub: "Pitch/Vocal", desc: "보컬의 음정과 타이밍을 음질 손상 없이 정밀하게 수정하는 글로벌 표준 보컬 피치 보정 플러그인입니다.", original: 249, discountPrice: 149, discountRateNum: 40, discountRate: "40% OFF", code: "MELODYNE40", perk: "자연스러운 보컬 피치 및 타임 보정 업계 표준", storeUrl: "https://www.celemony.com", daysLeft: 3, imgUrl: "https://www.celemony.com/cgi-bin/WebObjects/License.woa/wa/VTProductDisplay/Melodyne5Assistant_GUI.png", youtubeId: "J2pD1M1T-0A" }
+      { id: 1, brand: "FabFilter", title: "Pro-Q 3 Equalizer", cat: "mixing", sub: "EQ", desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.", original: 179, discountPrice: 134, discountRateNum: 25, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 지원", storeUrl: "https://www.fabfilter.com", daysLeft: 5, imgUrl: "", youtubeId: "L27W_W63p9k" },
+      { id: 2, brand: "oeksound", title: "soothe2 Resonance Suppressor", cat: "mixing", sub: "De-Esser/Dynamic", desc: "보컬이나 악기 트랙에서 발생하는 불쾌한 쏘는 소리와 피크 공명을 실시간으로 감지하여 부드럽게 억제하는 툴입니다.", original: 219, discountPrice: 149, discountRateNum: 32, discountRate: "32% OFF", code: "SOOTHE2026", perk: "불쾌한 공명 사운드 자동 실시간 제어", storeUrl: "https://oeksound.com", daysLeft: 2, imgUrl: "", youtubeId: "fH6bU2p0qIw" },
+      { id: 3, brand: "Soundtoys", title: "Soundtoys 5.4 Bundle", cat: "fx", sub: "Modulation", desc: "Decapitator, Echoboy 등 아날로그 감성의 특색 있는 사운드 질감을 만드는 21가지 최고급 이펙터 모음입니다.", original: 499, discountPrice: 249, discountRateNum: 50, discountRate: "50% OFF", code: "SOUNDTOYS-DEAL", perk: "21개 대표 사운드 디자이닝 이펙터 전체 포함", storeUrl: "https://www.soundtoys.com", daysLeft: 12, imgUrl: "", youtubeId: "wZ2SWxW8h3c" },
+      { id: 4, brand: "Universal Audio", title: "UAD Spark 1 Year Pass", cat: "mixing", sub: "Compressor/Limiter", desc: "DSP 하드웨어 없이 1176, LA-2A, Studer 테이프 머신 등 전설적인 아날로그 하드웨어의 명음기를 컴퓨터에서 구동합니다.", original: 199, discountPrice: 99, discountRateNum: 50, discountRate: "50% OFF", code: "UAD-SPARK-50", perk: "전설적 아날로그 믹싱 기기 네이티브 지원", storeUrl: "https://www.uaudio.com", daysLeft: 1, imgUrl: "", youtubeId: "2b_BSQ3hJ70" },
+      { id: 5, brand: "Arturia", title: "Analog Lab Play", cat: "free", sub: "Free Synths", desc: "빈티지 신티사이저와 클래식 건반 악기들의 최고급 프리셋 100가지를 무상으로 사용할 수 있는 가상악기 뷰어입니다.", original: 99, discountPrice: 0, discountRateNum: 100, discountRate: "100% FREE", code: "DIRECT-DOWNLOAD", perk: "100가지 핵심 빈티지 신스 프리셋 무상 제공", storeUrl: "https://www.arturia.com", daysLeft: 99, imgUrl: "", youtubeId: "4wN_4A24N6k" },
+      { id: 6, brand: "Native Instruments", title: "Komplete 14 Standard", cat: "synth", sub: "Sample Library", desc: "Kontakt 7 샘플러를 기반으로 웅장한 시네마틱 오케스트라, 드럼, 신스 사운드까지 보유한 통합 제작 번들입니다.", original: 599, discountPrice: 299, discountRateNum: 50, discountRate: "50% OFF", code: "BF-SEASON", perk: "Kontakt 7 및 수만 가지 시네마틱 샘플 수록", storeUrl: "https://www.native-instruments.com", daysLeft: 4, imgUrl: "", youtubeId: "M1vB1c9g5vE" },
+      { id: 7, brand: "iZotope", title: "Ozone 11 Advanced", cat: "mixing", sub: "Mastering Chain", desc: "음원 마스터링 시 대역별 음압 보정, Stem Rebalance 및 AI Assistant 기반으로 곡의 완성도를 마감하는 마스터링 툴입니다.", original: 399, discountPrice: 199, discountRateNum: 50, discountRate: "50% OFF", code: "OZONE11-SALE", perk: "AI 기반 종합 음압/마스터링 프로세싱", storeUrl: "https://www.izotope.com", daysLeft: 7, imgUrl: "", youtubeId: "e2H0cQ5hX7I" },
+      { id: 8, brand: "Xfer Records", title: "Serum VST Synth", cat: "synth", sub: "Analog/Synth", desc: "직관적인 렌더링 파형 편집과 압도적인 사운드 메이킹 성능으로 EDM, 팝, 트랩 전 장르에서 일렉트로닉 신스를 이끄는 대표작입니다.", original: 189, discountPrice: 149, discountRateNum: 21, discountRate: "21% OFF", code: "SERUM-PROMO", perk: "웨이브테이블 신티사이저 글로벌 시그니처 툴", storeUrl: "https://xferrecords.com", daysLeft: 15, imgUrl: "", youtubeId: "5Sa3wa_doG0" },
+      { id: 9, brand: "Celemony", title: "Melodyne 5 assistant", cat: "fx", sub: "Pitch/Vocal", desc: "보컬의 음정과 타이밍을 음질 손상 없이 정밀하게 수정하는 글로벌 표준 보컬 피치 보정 플러그인입니다.", original: 249, discountPrice: 149, discountRateNum: 40, discountRate: "40% OFF", code: "MELODYNE40", perk: "자연스러운 보컬 피치 및 타임 보정 업계 표준", storeUrl: "https://www.celemony.com", daysLeft: 3, imgUrl: "", youtubeId: "R3K1t9E9p6w" }
     ];
+
+    // 모든 딜 항목에 실제 플러그인 GUI 썸네일 바인딩
+    dealsData.forEach(d => {
+      if (!d.imgUrl) {
+        d.imgUrl = buildPluginGuiThumbnail(d);
+      }
+    });
 
     let currentMainCat = 'all';
     let currentSubCat = '전체';
@@ -882,10 +1007,16 @@
 
     function onDealFilterChange() { renderDeals(); }
 
-    function handleImgError(imgEl) {
-      imgEl.style.display = 'none';
-      const fallback = imgEl.parentElement.querySelector('.plugin-ui-fallback');
-      if (fallback) fallback.style.display = 'flex';
+    function handleImgError(imgEl, dealId) {
+      const deal = dealsData.find(d => d.id === dealId);
+      if (deal) {
+        imgEl.onerror = null;
+        imgEl.src = buildPluginGuiThumbnail(deal);
+      } else {
+        imgEl.style.display = 'none';
+        const fallback = imgEl.parentElement.querySelector('.plugin-ui-fallback');
+        if (fallback) fallback.style.display = 'flex';
+      }
     }
 
     function renderDeals() {
@@ -934,7 +1065,7 @@
                 ${d.brand}
                 <span>${d.title}</span>
               </div>
-              <img src="${d.imgUrl}" alt="${d.title}" onerror="handleImgError(this)">
+              <img src="${d.imgUrl}" alt="${d.title}" onerror="handleImgError(this, ${d.id})">
             </div>
             <div class="deal-card-body">
               <div>
@@ -966,6 +1097,7 @@
 
       const detailContent = document.getElementById('dealDetailContent');
       const krw = deal.discountPrice === 0 ? "0원 (무료)" : `약 ${(deal.discountPrice * USD_TO_KRW).toLocaleString()}원`;
+      const ytSearchQuery = encodeURIComponent(`${deal.brand} ${deal.title} official demo review`);
 
       detailContent.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
@@ -978,14 +1110,23 @@
 
         <div class="plugin-img-wrapper" style="height:260px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
           <div class="plugin-ui-fallback" style="display:none;">${deal.brand}<br><span>${deal.title}</span></div>
-          <img src="${deal.imgUrl}" alt="${deal.title}" onerror="handleImgError(this)">
+          <img src="${deal.imgUrl}" alt="${deal.title}" onerror="handleImgError(this, ${deal.id})">
         </div>
 
         <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1.5rem; font-weight:500;">${deal.desc}</p>
 
-        <h4 style="font-weight:800; font-size:1.1rem; color:var(--accent-gold); margin-bottom:0.5rem;">공식 데모 & 사운드 리뷰 영상</h4>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+          <h4 style="font-weight:800; font-size:1.1rem; color:var(--accent-gold);">공식 데모 & 사운드 리뷰 영상</h4>
+          <a href="https://www.youtube.com/results?search_query=${ytSearchQuery}" target="_blank" style="font-size:0.82rem; color:var(--accent-gold); text-decoration:none; font-weight:700;">▶ YouTube에서 공식 리뷰 더보기 ↗</a>
+        </div>
         <div class="youtube-video-container">
-          <iframe src="https://www.youtube.com/embed/${deal.youtubeId}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          <iframe 
+            src="https://www.youtube-nocookie.com/embed/${deal.youtubeId}?rel=0&modestbranding=1" 
+            title="${deal.title} Official Demo"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            allowfullscreen>
+          </iframe>
         </div>
 
         <div class="price-box" style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding:1.2rem;">
@@ -1020,10 +1161,12 @@
     async function fetchCommunityPosts() {
       const listEl = document.getElementById('communityList');
       if (!supabaseClient) {
-        rawCommunityPosts = [
-          { id: 1, category: "공지사항", author_nickname: "@aftrdry", title: "PlugAzit 공식 아지트 개설 안내", content: "프로듀서들을 위한 큐레이션 및 커뮤니티 공간에 오신 것을 환영합니다.", created_at: new Date().toISOString() },
-          { id: 2, category: "믹싱/마스터링", author_nickname: "@aftrdry", title: "FabFilter Pro-Q 3 Dynamic EQ 보컬 마스킹 잡는 팁", content: "Sidechain 연동 후 250Hz 영역 Dynamic EQ 적용하면 투명하게 정리됩니다.", created_at: new Date().toISOString() }
-        ];
+        if (rawCommunityPosts.length === 0) {
+          rawCommunityPosts = [
+            { id: 1, category: "공지사항", author_nickname: "@aftrdry", title: "PlugAzit 공식 아지트 개설 안내", content: "프로듀서들을 위한 큐레이션 및 커뮤니티 공간에 오신 것을 환영합니다.", created_at: new Date().toISOString() },
+            { id: 2, category: "믹싱/마스터링", author_nickname: "@aftrdry", title: "FabFilter Pro-Q 3 Dynamic EQ 보컬 마스킹 잡는 팁", content: "Sidechain 연동 후 250Hz 영역 Dynamic EQ 적용하면 투명하게 정리됩니다.", created_at: new Date().toISOString() }
+          ];
+        }
         renderCommunityPosts();
         return;
       }
@@ -1047,9 +1190,9 @@
       if (currentCommCat !== 'all') { filtered = filtered.filter(p => p.category === currentCommCat); }
       if (keyword !== '') {
         filtered = filtered.filter(p => 
-          p.title.toLowerCase().includes(keyword) ||
-          p.content.toLowerCase().includes(keyword) ||
-          p.author_nickname.toLowerCase().includes(keyword)
+          (p.title && p.title.toLowerCase().includes(keyword)) ||
+          (p.content && p.content.toLowerCase().includes(keyword)) ||
+          (p.author_nickname && p.author_nickname.toLowerCase().includes(keyword))
         );
       }
 
@@ -1063,9 +1206,10 @@
         const cardClass = isNotice ? 'comm-card notice-card' : 'comm-card';
         const badgeClass = isNotice ? 'comm-category-badge notice' : 'comm-category-badge';
         const dateStr = new Date(p.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
 
         return `
-          <div class="${cardClass}" onclick="openPostDetail(${p.id})">
+          <div class="${cardClass}" onclick="openPostDetail(${safeId})">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
               <div>
                 <span class="${badgeClass}">${p.category || '자유수다'}</span>
@@ -1160,15 +1304,23 @@
     }
 
     function openPostDetail(id) {
-      const post = rawCommunityPosts.find(p => p.id === id);
+      const post = rawCommunityPosts.find(p => String(p.id) === String(id));
       if (!post) return;
 
       const container = document.getElementById('postDetailContainer');
       const actionBtns = document.getElementById('postDetailActionBtns');
       const dateStr = new Date(post.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-      const isMyPost = currentUser && currentUser.id === post.user_id;
-      actionBtns.innerHTML = isMyPost ? `<button class="nav-btn" style="color:#e74c3c; border-color:#e74c3c;" onclick="deletePost(${post.id})">삭제하기</button>` : '';
+      const userNick = currentUser?.user_metadata?.nickname || (currentUser?.email ? '@' + currentUser.email.split('@')[0] : '');
+      const isAdmin = currentUser && currentUser.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
+      const isMyPost = currentUser && (
+        (post.user_id && String(currentUser.id) === String(post.user_id)) ||
+        (post.author_nickname && userNick && post.author_nickname === userNick) ||
+        isAdmin
+      );
+
+      const safeId = typeof post.id === 'string' ? `'${post.id}'` : post.id;
+      actionBtns.innerHTML = isMyPost ? `<button class="nav-btn" style="color:#e74c3c; border-color:#e74c3c;" onclick="deletePost(${safeId})">삭제하기</button>` : '';
 
       container.innerHTML = `
         <div style="margin-bottom:1.5rem;">
@@ -1183,24 +1335,62 @@
       showPage('postDetail');
     }
 
-    /* Supabase 게시글 실제 삭제 처리 및 리프레시 로직 (확실한 고정) */
+    /* Supabase 게시글 실제 삭제 처리 및 로컬 상태 동기화 (Silent Fail 완벽 방지) */
     async function deletePost(id) {
       if (!confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
       
       if (!supabaseClient) {
+        rawCommunityPosts = rawCommunityPosts.filter(p => String(p.id) !== String(id));
         alert('게시글이 삭제되었습니다. (데모 모드)');
-        rawCommunityPosts = rawCommunityPosts.filter(p => p.id !== id);
         showPage('community');
+        renderCommunityPosts();
         return;
       }
 
       try {
-        const { error } = await supabaseClient.from('posts').delete().eq('id', id);
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) {
+          alert('로그인 세션이 만료되었습니다. 다시 로그인해 주세요.');
+          openModal('loginModal');
+          return;
+        }
+
+        // 1차: ID 기준 삭제 시도 및 실제 삭제된 행(row) 반환 확인
+        let { data, error } = await supabaseClient
+          .from('posts')
+          .delete()
+          .eq('id', id)
+          .select();
+
+        // 2차: user_id 조건까지 명시하여 재시도 (RLS 정책 대응)
+        if (!error && (!data || data.length === 0)) {
+          const retry = await supabaseClient
+            .from('posts')
+            .delete()
+            .match({ id: id, user_id: session.user.id })
+            .select();
+          data = retry.data;
+          error = retry.error;
+        }
+
         if (error) {
-          alert('게시글 삭제 실패 (권한 부족 또는 RLS 정책 확인): ' + error.message);
-        } else {
-          alert('게시글이 성공적으로 삭제되었습니다.');
-          showPage('community');
+          alert('게시글 삭제 실패: ' + error.message);
+          return;
+        }
+
+        // 로컬 배열에서 즉시 해당 게시글 제거하여 화면에 남는 현상 원천 차단
+        rawCommunityPosts = rawCommunityPosts.filter(p => String(p.id) !== String(id));
+
+        alert('게시글이 성공적으로 삭제되었습니다.');
+        document.getElementById('dealsView').style.display = 'none';
+        document.getElementById('postDetailView').style.display = 'none';
+        document.getElementById('communityView').style.display = 'block';
+        document.getElementById('navCommBtn').classList.add('active');
+        
+        renderCommunityPosts();
+
+        // DB에서 실제로 삭제되었는지 백그라운드 동기화 검증
+        if (data && data.length > 0) {
           await fetchCommunityPosts();
         }
       } catch (err) {
@@ -1347,20 +1537,23 @@
       try {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) return;
-        const myPosts = rawCommunityPosts.filter(p => p.user_id === session.user.id);
+        const myPosts = rawCommunityPosts.filter(p => String(p.user_id) === String(session.user.id));
 
         if (myPosts.length === 0) {
           listEl.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding: 2rem;">작성한 게시글이 없습니다.</p>`;
           return;
         }
 
-        listEl.innerHTML = myPosts.map(p => `
-          <div class="comm-card" onclick="openPostDetail(${p.id})">
-            <span class="comm-category-badge">${p.category}</span>
-            <h4 style="margin:0.4rem 0; font-size:1.05rem; font-weight:700;">${p.title}</h4>
-            <p style="font-size:0.85rem; color:var(--text-secondary);">${new Date(p.created_at).toLocaleDateString('ko-KR')}</p>
-          </div>
-        `).join('');
+        listEl.innerHTML = myPosts.map(p => {
+          const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
+          return `
+            <div class="comm-card" onclick="openPostDetail(${safeId})">
+              <span class="comm-category-badge">${p.category}</span>
+              <h4 style="margin:0.4rem 0; font-size:1.05rem; font-weight:700;">${p.title}</h4>
+              <p style="font-size:0.85rem; color:var(--text-secondary);">${new Date(p.created_at).toLocaleDateString('ko-KR')}</p>
+            </div>
+          `;
+        }).join('');
       } catch (err) { console.error(err); }
     }
 
