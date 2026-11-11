@@ -15,15 +15,12 @@ if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
-/* 1. 보안 유틸리티: XSS 방지를 위한 HTML 이스케이프 및 URL 검증 */
+/* 1. 보안 유틸리티: 채팅창 복사 시 따옴표/엔티티가 절대 깨지지 않는 브라우저 내장 DOM 이스케이프 방식 */
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g, '&')
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
-    .replace(/"/g, '"')
-    .replace(/'/g, ''');
+  const div = document.createElement('div');
+  div.textContent = String(str);
+  return div.innerHTML;
 }
 
 function sanitizeUrl(url) {
@@ -33,17 +30,15 @@ function sanitizeUrl(url) {
   return '#';
 }
 
-/* 에디터 문법(**굵게**, <u>밑줄</u>, [링크], ![이미지])만 안전하게 허용하는 렌더러 */
 function renderSafeContent(rawText) {
   let safe = escapeHtml(rawText);
   safe = safe.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-  safe = safe.replace(/<u>(.+?)<\/u>/g, '<u>$1</u>');
   safe = safe.replace(/!\[이미지첨부\]\((https?:\/\/[^\s)]+)\)/g, '<img src="$1" alt="첨부 이미지" referrerpolicy="no-referrer" style="max-width:100%; border-radius:8px; margin:0.8rem 0; display:block;">');
   safe = safe.replace(/\[(링크|동영상링크)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:var(--accent-gold); text-decoration:underline; font-weight:700;">[$1 열기]</a>');
   return safe;
 }
 
-/* 2. 중복 제출 방지(Rate-limit / Double Submit Lock) 헬퍼 */
+/* 2. 중복 제출 방지 헬퍼 */
 const activeLocks = new Set();
 async function withSubmitLock(lockKey, btnEl, asyncFn) {
   if (activeLocks.has(lockKey)) return;
@@ -64,7 +59,7 @@ async function withSubmitLock(lockKey, btnEl, asyncFn) {
   }
 }
 
-/* 3. 로컬 영구 삭제 레지스트리 (게시글 및 딜) */
+/* 3. 로컬 영구 삭제 레지스트리 */
 const DELETED_POSTS_STORAGE_KEY = 'plugazit_deleted_post_ids_v1';
 const DELETED_DEALS_STORAGE_KEY = 'plugazit_deleted_deal_ids_v1';
 
@@ -170,7 +165,6 @@ function checkModalBackdropClose(event, modalId) {
   }
 }
 
-/* ESC 키를 통한 모달 닫기 (키보드 접근성) */
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     document.querySelectorAll('.modal-overlay.active').forEach(modal => {
@@ -179,7 +173,6 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-/* 법적 고지 모달 탭 전환 */
 function openLegalModal(tabType) {
   switchLegalTab(tabType || 'terms');
   openModal('termsModal');
@@ -562,7 +555,6 @@ const dealsData = [
   }
 ];
 
-/* 4. Supabase 'deals' 테이블 연동 (DB에 저장된 신규 등록 상품 불러오기) */
 function buildDefaultSeasonalityAndHistory(orig, disc, rateNum) {
   return {
     bestSeasonLabel: "Black Friday (11월)",
@@ -1138,7 +1130,6 @@ function openDealDetailModal(id) {
   openModal('dealDetailModal');
 }
 
-/* 관리자 전용 딜 삭제 (Supabase DB + 로컬 동시 제거) */
 async function deleteDealItem(dealId) {
   if (!isUserAdmin(currentUser)) {
     alert('관리자 권한이 없습니다.');
@@ -1274,7 +1265,7 @@ function formatEditorText(command) {
 
   let replacement = selectedText;
   if (command === 'bold') replacement = `**${selectedText}**`;
-  if (command === 'underline') replacement = `<u>${selectedText}</u>`;
+  if (command === 'underline') replacement = `[밑줄]${selectedText}[/밑줄]`;
 
   textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
   textarea.focus();
@@ -1548,7 +1539,6 @@ async function handlePasswordChangeSubmit(e) {
   });
 }
 
-/* 회원 탈퇴 및 작성 데이터 파기 (출시 안전성 가이드 필수 항목) */
 async function handleAccountDeleteRequest() {
   const confirmed = confirm('정말 회원 탈퇴를 진행하시겠습니까?\n탈퇴 즉시 작성하신 게시글과 프로필 데이터가 파기되며 복구할 수 없습니다.');
   if (!confirmed) return;
@@ -1695,7 +1685,6 @@ function extractYoutubeId(input) {
   return match ? match[1] : "";
 }
 
-/* 5. 관리자 신규 딜 등록: Supabase 'deals' 테이블에 실제로 영구 저장 */
 async function handleDealSubmit(e) {
   e.preventDefault();
   if (!isUserAdmin(currentUser) && supabaseClient) {
