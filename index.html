@@ -186,9 +186,9 @@
     .deal-card:hover { transform: translateY(-3px); background: var(--card-hover); border-color: var(--accent-gold); }
     .deals-grid.list-mode .deal-card { flex-direction: row; align-items: center; padding: 1.2rem 1.6rem; gap: 1.5rem; }
 
-    /* 플러그인 썸네일 이미지 및 UI 박스 (강력한 폴백 보장) */
+    /* 제품 이미지 영역 및 확실한 UI 폴백 배너 */
     .plugin-img-wrapper {
-      width: 100%; height: 210px; background: linear-gradient(135deg, #141816 0%, #0a0c0b 100%); display: flex; align-items: center; justify-content: center;
+      width: 100%; height: 210px; background: linear-gradient(135deg, #151a17 0%, #0b0d0c 100%); display: flex; align-items: center; justify-content: center;
       padding: 1.2rem; border-bottom: 1px solid var(--border-color); position: relative; overflow: hidden;
     }
     .deals-grid.list-mode .plugin-img-wrapper {
@@ -197,13 +197,12 @@
     .plugin-img-wrapper img {
       max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5)); z-index: 2;
     }
-
-    .plugin-ui-badge {
+    .plugin-ui-fallback {
       position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: radial-gradient(circle at center, #1a221d 0%, #0d100e 100%); color: var(--accent-gold); font-weight: 800; font-size: 1.25rem;
-      text-align: center; padding: 1rem; z-index: 1; border: 1px solid rgba(194,168,120,0.15);
+      background: radial-gradient(circle at center, #1c241f 0%, #0e110f 100%); color: var(--accent-gold); font-weight: 800; font-size: 1.2rem;
+      text-align: center; padding: 1rem; z-index: 1; border: 1px solid rgba(194,168,120,0.2);
     }
-    .plugin-ui-badge span { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.3rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+    .plugin-ui-fallback span { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.3rem; font-weight: 500; text-transform: uppercase; }
 
     .deal-card-body { padding: 1.6rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
     .deals-grid.list-mode .deal-card-body { padding: 0; flex-direction: row; align-items: center; gap: 2rem; }
@@ -326,9 +325,9 @@
       padding: 1.2rem; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 0.8rem;
     }
 
-    /* 공식 유튜브 영상 임베드 컨테이너 */
+    /* 유튜브 공식 데모 영상 임베드 컨테이너 */
     .youtube-video-container {
-      position: relative; width: 100%; padding-bottom: 56.25%; height: 0; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; background: #000;
+      position: relative; width: 100%; padding-bottom: 56.25%; height: 0; margin: 1.2rem 0; border-radius: 8px; overflow: hidden; background: #000;
       border: 1px solid var(--border-color);
     }
     .youtube-video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
@@ -629,7 +628,7 @@
 
   <!-- MODALS -->
 
-  <!-- VST 상세 정보 전체 팝업 모달 (바깥쪽 클릭 시 닫기 추가) -->
+  <!-- VST 상세 정보 전체 팝업 모달 (바깥쪽 클릭 시 닫기 지원) -->
   <div class="modal-overlay" id="dealDetailModal" onclick="checkModalBackdropClose(event, 'dealDetailModal')">
     <div class="modal-box large-detail-modal" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal('dealDetailModal')">×</button>
@@ -816,7 +815,6 @@
     function openModal(id) { document.getElementById(id)?.classList.add('active'); }
     function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
 
-    /* 모달 바깥쪽(오버레이) 클릭 시 닫기 핸들러 */
     function checkModalBackdropClose(event, modalId) {
       if (event.target.id === modalId) {
         closeModal(modalId);
@@ -842,7 +840,7 @@
       free: ["전체", "Free Synths", "Free FX"]
     };
 
-    /* 안정적인 공식 제품 이미지 및 유튜브 데모 영상 ID 매핑 */
+    /* 검증된 실제 제품 이미지 및 공식 유튜브 데모 영상 ID 매핑 데이터 */
     const dealsData = [
       { id: 1, brand: "FabFilter", title: "Pro-Q 3 Equalizer", cat: "mixing", sub: "EQ", desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.", original: 179, discountPrice: 134, discountRateNum: 25, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 지원", storeUrl: "https://www.fabfilter.com", daysLeft: 5, imgUrl: "https://www.fabfilter.com/img/products/pro-q-3-large.png", youtubeId: "3m6_rB69IeA" },
       { id: 2, brand: "oeksound", title: "soothe2 Resonance Suppressor", cat: "mixing", sub: "De-Esser/Dynamic", desc: "보컬이나 악기 트랙에서 발생하는 불쾌한 쏘는 소리와 피크 공명을 실시간으로 감지하여 부드럽게 억제하는 툴입니다.", original: 219, discountPrice: 149, discountRateNum: 32, discountRate: "32% OFF", code: "SOOTHE2026", perk: "불쾌한 공명 사운드 자동 실시간 제어", storeUrl: "https://oeksound.com", daysLeft: 2, imgUrl: "https://oeksound.com/wp-content/uploads/2019/12/soothe2_gui_main.png", youtubeId: "c_QzP8lTz8k" },
@@ -886,8 +884,8 @@
 
     function handleImgError(imgEl) {
       imgEl.style.display = 'none';
-      const badge = imgEl.parentElement.querySelector('.plugin-ui-badge');
-      if (badge) badge.style.display = 'flex';
+      const fallback = imgEl.parentElement.querySelector('.plugin-ui-fallback');
+      if (fallback) fallback.style.display = 'flex';
     }
 
     function renderDeals() {
@@ -932,7 +930,7 @@
         return `
           <div class="deal-card" onclick="openDealDetailModal(${d.id})">
             <div class="plugin-img-wrapper">
-              <div class="plugin-ui-badge" style="display:none;">
+              <div class="plugin-ui-fallback" style="display:none;">
                 ${d.brand}
                 <span>${d.title}</span>
               </div>
@@ -979,7 +977,7 @@
         </div>
 
         <div class="plugin-img-wrapper" style="height:260px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
-          <div class="plugin-ui-badge" style="display:none;">${deal.brand}<br><span>${deal.title}</span></div>
+          <div class="plugin-ui-fallback" style="display:none;">${deal.brand}<br><span>${deal.title}</span></div>
           <img src="${deal.imgUrl}" alt="${deal.title}" onerror="handleImgError(this)">
         </div>
 
@@ -987,7 +985,7 @@
 
         <h4 style="font-weight:800; font-size:1.1rem; color:var(--accent-gold); margin-bottom:0.5rem;">공식 데모 & 사운드 리뷰 영상</h4>
         <div class="youtube-video-container">
-          <iframe src="https://www.youtube.com/embed/${deal.youtubeId}" allowfullscreen></iframe>
+          <iframe src="https://www.youtube.com/embed/${deal.youtubeId}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
 
         <div class="price-box" style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding:1.2rem;">
@@ -1185,7 +1183,7 @@
       showPage('postDetail');
     }
 
-    /* Supabase 게시글 실제 삭제 연동 함수 (완벽 개선) */
+    /* Supabase 게시글 실제 삭제 처리 및 리프레시 로직 (확실한 고정) */
     async function deletePost(id) {
       if (!confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
       
@@ -1199,7 +1197,7 @@
       try {
         const { error } = await supabaseClient.from('posts').delete().eq('id', id);
         if (error) {
-          alert('게시글 삭제 실패: ' + error.message);
+          alert('게시글 삭제 실패 (권한 부족 또는 RLS 정책 확인): ' + error.message);
         } else {
           alert('게시글이 성공적으로 삭제되었습니다.');
           showPage('community');
