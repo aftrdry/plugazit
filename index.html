@@ -186,7 +186,6 @@
     .deal-card:hover { transform: translateY(-3px); background: var(--card-hover); border-color: var(--accent-gold); }
     .deals-grid.list-mode .deal-card { flex-direction: row; align-items: center; padding: 1.2rem 1.6rem; gap: 1.5rem; }
 
-    /* 실제 플러그인 썸네일 이미지 박스 */
     .plugin-img-wrapper {
       width: 100%; height: 210px; background: #0c0e0d; display: flex; align-items: center; justify-content: center;
       padding: 1.2rem; border-bottom: 1px solid var(--border-color); position: relative; overflow: hidden;
@@ -325,11 +324,20 @@
       padding: 1.2rem; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 0.8rem;
     }
 
-    .youtube-video-container {
-      position: relative; width: 100%; padding-bottom: 56.25%; height: 0; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; background: #000;
-      border: 1px solid var(--border-color);
+    /* 유튜브 에러 방지 대체 버튼 카드 디자인 */
+    .youtube-direct-banner {
+      width: 100%; padding: 2.2rem 1.5rem; background: linear-gradient(135deg, #1b201d 0%, #0d0f0e 100%);
+      border: 1px solid var(--border-color); border-radius: 8px; text-align: center; margin: 1.5rem 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem;
+      transition: border-color 0.2s;
     }
-    .youtube-video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+    .youtube-direct-banner:hover { border-color: var(--accent-gold); }
+    .youtube-direct-banner p { font-size: 0.95rem; color: var(--text-primary); font-weight: 600; }
+    .youtube-link-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.2rem; background: #c0392b; color: #fff;
+      font-weight: 700; font-size: 0.88rem; border-radius: 6px; text-decoration: none; transition: background 0.2s;
+    }
+    .youtube-link-btn:hover { background: #e74c3c; }
   </style>
 </head>
 <body>
@@ -833,7 +841,6 @@
       free: ["전체", "Free Synths", "Free FX"]
     };
 
-    /* 안정적인 플러그인 썸네일 이미지 매핑 및 폴백 장치 */
     const dealsData = [
       { id: 1, brand: "FabFilter", title: "Pro-Q 3 Equalizer", cat: "mixing", sub: "EQ", desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.", original: 179, discountPrice: 134, discountRateNum: 25, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 지원", storeUrl: "https://www.fabfilter.com", daysLeft: 5, imgUrl: "https://www.fabfilter.com/img/products/pro-q-3-large.png", youtubeId: "3m6_rB69IeA" },
       { id: 2, brand: "oeksound", title: "soothe2 Resonance Suppressor", cat: "mixing", sub: "De-Esser/Dynamic", desc: "보컬이나 악기 트랙에서 발생하는 불쾌한 쏘는 소리와 피크 공명을 실시간으로 감지하여 부드럽게 억제하는 툴입니다.", original: 219, discountPrice: 149, discountRateNum: 32, discountRate: "32% OFF", code: "SOOTHE2026", perk: "불쾌한 공명 사운드 자동 실시간 제어", storeUrl: "https://oeksound.com", daysLeft: 2, imgUrl: "https://oeksound.com/wp-content/uploads/2019/12/soothe2_gui_main.png", youtubeId: "c_QzP8lTz8k" },
@@ -977,8 +984,13 @@
         <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1.5rem; font-weight:500;">${deal.desc}</p>
 
         <h4 style="font-weight:800; font-size:1.1rem; color:var(--accent-gold); margin-bottom:0.5rem;">공식 데모 & 사운드 리뷰 영상</h4>
-        <div class="youtube-video-container">
-          <iframe src="https://www.youtube.com/embed/${deal.youtubeId}" allowfullscreen></iframe>
+        
+        <!-- 유튜브 임베드 차단 에러 방지용 안전 직관 링크 배너 -->
+        <div class="youtube-direct-banner">
+          <p>🎥 ${deal.brand} ${deal.title} 공식 데모 및 리뷰</p>
+          <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(deal.brand + ' ' + deal.title + ' review')}" target="_blank" class="youtube-link-btn">
+            유튜브에서 영상 시청하기 ↗
+          </a>
         </div>
 
         <div class="price-box" style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding:1.2rem;">
@@ -1176,7 +1188,6 @@
       showPage('postDetail');
     }
 
-    /* 교정된 실제 Supabase 연동 게시글 삭제 함수 */
     async function deletePost(id) {
       if (!confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
       
