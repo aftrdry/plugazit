@@ -150,7 +150,6 @@
 
     .sort-and-view-controls { display: flex; gap: 0.8rem; align-items: center; }
 
-    /* 드롭다운 셀렉트 화살표 안정적 렌더링 */
     select, .sort-select-box select, .form-group select {
       padding: 0.65rem 2.8rem 0.65rem 1.1rem !important;
       background-color: var(--card-bg) !important;
@@ -187,24 +186,15 @@
     .deal-card:hover { transform: translateY(-3px); background: var(--card-hover); border-color: var(--accent-gold); }
     .deals-grid.list-mode .deal-card { flex-direction: row; align-items: center; padding: 1.2rem 1.6rem; gap: 1.5rem; }
 
-    /* 100% 성공 보장 제품 썸네일 박스 및 SVG 폴백 컨테이너 */
+    /* 100% 로딩 보장 임베디드 SVG 플러그인 썸네일 박스 */
     .plugin-img-wrapper {
-      width: 100%; height: 210px; background: #0c0e0d; display: flex; align-items: center; justify-content: center;
-      padding: 1.2rem; border-bottom: 1px solid var(--border-color); position: relative; overflow: hidden;
+      width: 100%; height: 210px; background: linear-gradient(135deg, #141715 0%, #0a0c0b 100%);
+      display: flex; align-items: center; justify-content: center;
+      border-bottom: 1px solid var(--border-color); position: relative; overflow: hidden;
     }
     .deals-grid.list-mode .plugin-img-wrapper {
-      width: 130px; height: 85px; padding: 0.4rem; border-bottom: none; border-right: 1px solid var(--border-color); flex-shrink: 0;
+      width: 130px; height: 85px; border-bottom: none; border-right: 1px solid var(--border-color); flex-shrink: 0;
     }
-    .plugin-img-wrapper img {
-      max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.45));
-      position: relative; z-index: 2;
-    }
-    .plugin-fallback-svg {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; background: linear-gradient(135deg, #151816 0%, #0c0e0d 100%);
-      color: var(--accent-gold); font-weight: 800; font-size: 1.1rem; text-align: center; padding: 1rem; z-index: 1;
-    }
-    .plugin-fallback-svg span { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.3rem; font-weight: 500; }
 
     .deal-card-body { padding: 1.6rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
     .deals-grid.list-mode .deal-card-body { padding: 0; flex-direction: row; align-items: center; gap: 2rem; }
@@ -225,8 +215,6 @@
     .tag-discount { background: rgba(194, 168, 120, 0.15); color: var(--accent-gold); }
     .tag-free { background: rgba(74, 90, 58, 0.25); color: #8fa874; }
 
-    .perks-box { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1.4rem; line-height: 1.6; border-top: 1px solid var(--border-color); padding-top: 0.8rem; }
-
     .btn-buy {
       width: 100%; padding: 0.85rem; background: var(--accent-color); border: none; border-radius: 6px;
       color: #fff; font-weight: 700; font-size: 0.92rem; cursor: pointer; text-align: center; text-decoration: none; display: block;
@@ -234,8 +222,8 @@
     }
     .btn-buy:hover { background: var(--accent-hover); }
 
-    /* 메인 뷰 전환 컨트롤 */
-    #dealsView, #communityView, #adminView, #myPageView, #postWriteView, #postDetailView { display: none; }
+    #dealsView { display: block; }
+    #communityView, #adminView, #myPageView, #postWriteView, #postDetailView { display: none; }
 
     .comm-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.6rem; border-radius: 10px; margin-bottom: 1.2rem; cursor: pointer; transition: all 0.2s; }
     .comm-card:hover { border-color: var(--accent-gold); transform: translateY(-2px); }
@@ -244,7 +232,6 @@
     .comm-category-badge { font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 4px; background: var(--border-color); color: var(--text-primary); margin-right: 0.6rem; font-weight: 700; }
     .comm-category-badge.notice { background: var(--accent-gold); color: var(--bg-color); }
 
-    /* 리치 에디터 툴바 스타일 */
     .editor-toolbar {
       display: flex; gap: 0.4rem; background: var(--bg-color); border: 1px solid var(--border-color);
       border-bottom: none; border-top-left-radius: 6px; border-top-right-radius: 6px; padding: 0.5rem; flex-wrap: wrap; align-items: center;
@@ -263,7 +250,6 @@
     }
     .editor-textarea:focus { border-color: var(--accent-gold); }
 
-    /* 실시간 유저 가이드 오버레이 */
     .editor-guide-placeholder {
       position: absolute; top: 1rem; left: 1rem; right: 1rem; pointer-events: none;
       color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; transition: opacity 0.2s ease;
@@ -467,7 +453,6 @@
           </div>
           <div class="form-group"><label>제목</label><input type="text" id="writeTitle" required placeholder="제목을 입력하세요"></div>
           
-          <!-- 리치 텍스트 서식 툴바 & 실시간 가이드 에디터 -->
           <div class="form-group">
             <label>본문 내용</label>
             <div class="editor-toolbar">
@@ -839,17 +824,17 @@
       free: ["전체", "Free Synths", "Free FX"]
     };
 
-    /* 9가지 플러그인 소프트웨어 및 이미지 로딩 100% 보장 폴백 매핑 */
+    /* 100% 로딩 성공을 보장하는 내장 SVG 그래픽 및 딜 데이터 */
     const dealsData = [
-      { id: 1, brand: "FabFilter", title: "Pro-Q 3 Equalizer", cat: "mixing", sub: "EQ", desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.", original: 179, discountPrice: 134, discountRateNum: 25, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 지원", storeUrl: "https://www.fabfilter.com", daysLeft: 5, imgUrl: "https://www.fabfilter.com/img/products/pro-q-3-large.png", youtubeId: "3m6_rB69IeA" },
-      { id: 2, brand: "oeksound", title: "soothe2 Resonance Suppressor", cat: "mixing", sub: "De-Esser/Dynamic", desc: "보컬이나 악기 트랙에서 발생하는 불쾌한 쏘는 소리와 피크 공명을 실시간으로 감지하여 부드럽게 억제하는 툴입니다.", original: 219, discountPrice: 149, discountRateNum: 32, discountRate: "32% OFF", code: "SOOTHE2026", perk: "불쾌한 공명 사운드 자동 실시간 제어", storeUrl: "https://oeksound.com", daysLeft: 2, imgUrl: "https://oeksound.com/wp-content/uploads/2019/12/soothe2_gui_main.png", youtubeId: "c_QzP8lTz8k" },
-      { id: 3, brand: "Soundtoys", title: "Soundtoys 5.4 Bundle", cat: "fx", sub: "Modulation", desc: "Decapitator, Echoboy 등 아날로그 감성의 특색 있는 사운드 질감을 만드는 21가지 최고급 이펙터 모음입니다.", original: 499, discountPrice: 249, discountRateNum: 50, discountRate: "50% OFF", code: "SOUNDTOYS-DEAL", perk: "21개 대표 사운드 디자이닝 이펙터 전체 포함", storeUrl: "https://www.soundtoys.com", daysLeft: 12, imgUrl: "https://www.soundtoys.com/wp-content/uploads/ST5_4_Hero.png", youtubeId: "K1Jp8u3Kj_g" },
-      { id: 4, brand: "Universal Audio", title: "UAD Spark 1 Year Pass", cat: "mixing", sub: "Compressor/Limiter", desc: "DSP 하드웨어 없이 1176, LA-2A, Studer 테이프 머신 등 전설적인 아날로그 하드웨어의 명음기를 컴퓨터에서 구동합니다.", original: 199, discountPrice: 99, discountRateNum: 50, discountRate: "50% OFF", code: "UAD-SPARK-50", perk: "전설적 아날로그 믹싱 기기 네이티브 지원", storeUrl: "https://www.uaudio.com", daysLeft: 1, imgUrl: "https://www.uaudio.com/media/catalog/product/u/a/uad_spark_hero.jpg", youtubeId: "g9Y-4c07FEE" },
-      { id: 5, brand: "Arturia", title: "Analog Lab Play", cat: "free", sub: "Free Synths", desc: "빈티지 신티사이저와 클래식 건반 악기들의 최고급 프리셋 100가지를 무상으로 사용할 수 있는 가상악기 뷰어입니다.", original: 99, discountPrice: 0, discountRateNum: 100, discountRate: "100% FREE", code: "DIRECT-DOWNLOAD", perk: "100가지 핵심 빈티지 신스 프리셋 무상 제공", storeUrl: "https://www.arturia.com", daysLeft: 99, imgUrl: "https://cdn-resources.arturia.net/products/analoglab-play/analoglab-play-hero.png", youtubeId: "NpHYdJk7P5o" },
-      { id: 6, brand: "Native Instruments", title: "Komplete 14 Standard", cat: "synth", sub: "Sample Library", desc: "Kontakt 7 샘플러를 기반으로 웅장한 시네마틱 오케스트라, 드럼, 신스 사운드까지 보유한 통합 제작 번들입니다.", original: 599, discountPrice: 299, discountRateNum: 50, discountRate: "50% OFF", code: "BF-SEASON", perk: "Kontakt 7 및 수만 가지 시네마틱 샘플 수록", storeUrl: "https://www.native-instruments.com", daysLeft: 4, imgUrl: "https://www.native-instruments.com/fileadmin/ni_media/products/komplete/komplete_14_standard/k14s_hero.png", youtubeId: "q5q7F5rYg8w" },
-      { id: 7, brand: "iZotope", title: "Ozone 11 Advanced", cat: "mixing", sub: "Mastering Chain", desc: "음원 마스터링 시 대역별 음압 보정, Stem Rebalance 및 AI Assistant 기반으로 곡의 완성도를 마감하는 마스터링 툴입니다.", original: 399, discountPrice: 199, discountRateNum: 50, discountRate: "50% OFF", code: "OZONE11-SALE", perk: "AI 기반 종합 음압/마스터링 프로세싱", storeUrl: "https://www.izotope.com", daysLeft: 7, imgUrl: "https://www.izotope.com/content/dam/izotope/products/ozone-11-advanced/ozone_11_hero.png", youtubeId: "zVbLzN14M9A" },
-      { id: 8, brand: "Xfer Records", title: "Serum VST Synth", cat: "synth", sub: "Analog/Synth", desc: "직관적인 렌더링 파형 편집과 압도적인 사운드 메이킹 성능으로 EDM, 팝, 트랩 전 장르에서 일렉트로닉 신스를 이끄는 대표작입니다.", original: 189, discountPrice: 149, discountRateNum: 21, discountRate: "21% OFF", code: "SERUM-PROMO", perk: "웨이브테이블 신티사이저 글로벌 시그니처 툴", storeUrl: "https://xferrecords.com", daysLeft: 15, imgUrl: "https://xferrecords.com/assets/serum/serum_screenshot.png", youtubeId: "h-rE_gM2C6A" },
-      { id: 9, brand: "Celemony", title: "Melodyne 5 assistant", cat: "fx", sub: "Pitch/Vocal", desc: "보컬의 음정과 타이밍을 음질 손상 없이 정밀하게 수정하는 글로벌 표준 보컬 피치 보정 플러그인입니다.", original: 249, discountPrice: 149, discountRateNum: 40, discountRate: "40% OFF", code: "MELODYNE40", perk: "자연스러운 보컬 피치 및 타임 보정 업계 표준", storeUrl: "https://www.celemony.com", daysLeft: 3, imgUrl: "https://www.celemony.com/cgi-bin/WebObjects/License.woa/wa/VTProductDisplay/Melodyne5Assistant_GUI.png", youtubeId: "J2pD1M1T-0A" }
+      { id: 1, brand: "FabFilter", title: "Pro-Q 3 Equalizer", cat: "mixing", sub: "EQ", desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.", original: 179, discountPrice: 134, discountRateNum: 25, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 지원", storeUrl: "https://www.fabfilter.com", daysLeft: 5, youtubeId: "3m6_rB69IeA", svgArt: `<svg width="100%" height="100%" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1f2421"/><stop offset="100%" stop-color="#0d100e"/></linearGradient></defs><rect width="320" height="200" fill="url(#bg1)"/><path d="M20 140 Q 90 40, 160 100 T 300 60" fill="none" stroke="#4a8c5c" stroke-width="4"/><circle cx="160" cy="100" r="8" fill="#c2a878"/><text x="24" y="36" fill="#c2a878" font-size="13" font-weight="900" font-family="sans-serif">FABFILTER</text><text x="24" y="175" fill="#f2f0eb" font-size="16" font-weight="800" font-family="sans-serif">Pro-Q 3</text></svg>` },
+      { id: 2, brand: "oeksound", title: "soothe2 Resonance Suppressor", cat: "mixing", sub: "De-Esser/Dynamic", desc: "보컬이나 악기 트랙에서 발생하는 불쾌한 쏘는 소리와 피크 공명을 실시간으로 감지하여 부드럽게 억제하는 툴입니다.", original: 219, discountPrice: 149, discountRateNum: 32, discountRate: "32% OFF", code: "SOOTHE2026", perk: "불쾌한 공명 사운드 자동 실시간 제어", storeUrl: "https://oeksound.com", daysLeft: 2, youtubeId: "c_QzP8lTz8k", svgArt: `<svg width="100%" height="100%" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#182228"/><stop offset="100%" stop-color="#0a1014"/></linearGradient></defs><rect width="320" height="200" fill="url(#bg2)"/><circle cx="160" cy="100" r="50" fill="none" stroke="#528ba3" stroke-width="2" stroke-dasharray="6,4"/><circle cx="160" cy="100" r="25" fill="#528ba3" opacity="0.3"/><text x="24" y="36" fill="#528ba3" font-size="13" font-weight="900" font-family="sans-serif">OEKISOUND</text><text x="24" y="175" fill="#f2f0eb" font-size="16" font-weight="800" font-family="sans-serif">soothe2</text></svg>` },
+      { id: 3, brand: "Soundtoys", title: "Soundtoys 5.4 Bundle", cat: "fx", sub: "Modulation", desc: "Decapitator, Echoboy 등 아날로그 감성의 특색 있는 사운드 질감을 만드는 21가지 최고급 이펙터 모음입니다.", original: 499, discountPrice: 249, discountRateNum: 50, discountRate: "50% OFF", code: "SOUNDTOYS-DEAL", perk: "21개 대표 사운드 디자이닝 이펙터 전체 포함", storeUrl: "https://www.soundtoys.com", daysLeft: 12, youtubeId: "K1Jp8u3Kj_g", svgArt: `<svg width="100%" height="100%" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2c1a16"/><stop offset="100%" stop-color="#120a09"/></linearGradient></defs><rect width="320" height="200" fill="url(#bg3)"/><rect x="40" y="70" width="240" height="6" rx="3" fill="#d97757"/><circle cx="100" cy="73" r="12" fill="#f2f0eb"/><text x="24" y="36" fill="#d97757" font-size="13" font-weight="900" font-family="sans-serif">SOUNDTOYS</text><text x="24" y="175" fill="#f2f0eb" font-size="16" font-weight="800" font-family="sans-serif">Soundtoys 5</text></svg>` },
+      { id: 4, brand: "Universal Audio", title: "UAD Spark 1 Year Pass", cat: "mixing", sub: "Compressor/Limiter", desc: "DSP 하드웨어 없이 1176, LA-2A, Studer 테이프 머신 등 전설적인 아날로그 하드웨어의 명음기를 컴퓨터에서 구동합니다.", original: 199, discountPrice: 99, discountRateNum: 50, discountRate: "50% OFF", code: "UAD-SPARK-50", perk: "전설적 아날로그 믹싱 기기 네이티브 지원", storeUrl: "https://www.uaudio.com", daysLeft: 1, youtubeId: "g9Y-4c07FEE", svgArt: `<svg width="100%" height="100%" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1d2228"/><stop offset="100%" stop-color="#0b0e12"/></linearGradient></defs><rect width="320" height="200" fill="url(#bg4)"/><rect x="60" y="80" width="200" height="40" rx="6" fill="#2d3748" stroke="#c2a878" stroke-width="2"/><text x="24" y="36" fill="#c2a878" font-size="13" font-weight="900" font-family="sans-serif">UNIVERSAL AUDIO</text><text x="24" y="175" fill="#f2f0eb" font-size="16" font-weight="800" font-family="sans-serif">UAD Spark</text></svg>` },
+      { id: 5, brand: "Arturia", title: "Analog Lab Play", cat: "free", sub: "Free Synths", desc: "빈티지 신티사이저와 클래식 건반 악기들의 최고급 프리셋 100가지를 무상으로 사용할 수 있는 가상악기 뷰어입니다.", original: 99, discountPrice: 0, discountRateNum: 100, discountRate: "100% FREE", code: "DIRECT-DOWNLOAD", perk: "100가지 핵심 빈티지 신스 프리셋 무상 제공", storeUrl: "https://www.arturia.com", daysLeft: 99, youtubeId: "NpHYdJk7P5o", svgArt: `<svg width="100%" height="100%" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#282218"/><stop offset="100%" stop-color="#0e0c09"/></linearGradient></defs><rect width="320" height="200" fill="url(#bg5)"/><rect x="50" y="90" width="220" height="8" rx="4" fill="#e0a96d"/><circle cx="90" cy="94" r="5" fill="#101211"/><circle cx="130" cy="94" r="5" fill="#101211"/><text x="24" y="36" fill="#e0a96d" font-size="13" font-weight="900" font-family="sans-serif">ARTURIA</text><text x="24" y="175" fill="#f2f0eb" font-size="16" font-weight="800" font-family="sans-serif">Analog Lab Play</text></svg>` },
+      { id: 6, brand: "Native Instruments", title: "Komplete 14 Standard", cat: "synth", sub: "Sample Library", desc: "Kontakt 7 샘플러를 기반으로 웅장한 시네마틱 오케스트라, 드럼, 신스 사운드까지 보유한 통합 제작 번들입니다.", original: 599, discountPrice: 299, discountRateNum: 50, discountRate: "50% OFF", code: "BF-SEASON", perk: "Kontakt 7 및 수만 가지 시네마틱 샘플 수록", storeUrl: "https://www.native-instruments.com", daysLeft: 4, youtubeId: "q5q7F5rYg8w", svgArt: `<svg width="100%" height="100%" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg6" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#201a28"/><stop offset="100%" stop-color="#0c0910"/></linearGradient></defs><rect width="320" height="200" fill="url(#bg6)"/><polygon points="160,50 220,130 100,130" fill="#9f7aea" opacity="0.8"/><text x="24" y="36" fill="#9f7aea" font-size="13" font-weight="900" font-family="sans-serif">NATIVE INSTRUMENTS</text><text x="24" y="175" fill="#f2f0eb" font-size="16" font-weight="800" font-family="sans-serif">Komplete 14</text></svg>` },
+      { id: 7, brand: "iZotope", title: "Ozone 11 Advanced", cat: "mixing", sub: "Mastering Chain", desc: "음원 마스터링 시 대역별 음압 보정, Stem Rebalance 및 AI Assistant 기반으로 곡의 완성도를 마감하는 마스터링 툴입니다.", original: 399, discountPrice: 199, discountRateNum: 50, discountRate: "50% OFF", code: "OZONE11-SALE", perk: "AI 기반 종합 음압/마스터링 프로세싱", storeUrl: "https://www.izotope.com", daysLeft: 7, youtubeId: "zVbLzN14M9A", svgArt: `<svg width="100%" height="100%" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg7" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#162524"/><stop offset="100%" stop-color="#080e0d"/></linearGradient></defs><rect width="320" height="200" fill="url(#bg7)"/><circle cx="160" cy="100" r="45" fill="none" stroke="#319795" stroke-width="6"/><text x="24" y="36" fill="#319795" font-size="13" font-weight="900" font-family="sans-serif">IZOTOPE</text><text x="24" y="175" fill="#f2f0eb" font-size="16" font-weight="800" font-family="sans-serif">Ozone 11 Advanced</text></svg>` },
+      { id: 8, brand: "Xfer Records", title: "Serum VST Synth", cat: "synth", sub: "Analog/Synth", desc: "직관적인 렌더링 파형 편집과 압도적인 사운드 메이킹 성능으로 EDM, 팝, 트랩 전 장르에서 일렉트로닉 신스를 이끄는 대표작입니다.", original: 189, discountPrice: 149, discountRateNum: 21, discountRate: "21% OFF", code: "SERUM-PROMO", perk: "웨이브테이블 신티사이저 글로벌 시그니처 툴", storeUrl: "https://xferrecords.com", daysLeft: 15, youtubeId: "h-rE_gM2C6A", svgArt: `<svg width="100%" height="100%" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg8" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#16222b"/><stop offset="100%" stop-color="#080c10"/></linearGradient></defs><rect width="320" height="200" fill="url(#bg8)"/><path d="M20 100 L 80 50 L 140 150 L 200 80 L 260 120 L 300 90" fill="none" stroke="#3182ce" stroke-width="3"/><text x="24" y="36" fill="#3182ce" font-size="13" font-weight="900" font-family="sans-serif">XFER RECORDS</text><text x="24" y="175" fill="#f2f0eb" font-size="16" font-weight="800" font-family="sans-serif">Serum Synth</text></svg>` },
+      { id: 9, brand: "Celemony", title: "Melodyne 5 assistant", cat: "fx", sub: "Pitch/Vocal", desc: "보컬의 음정과 타이밍을 음질 손상 없이 정밀하게 수정하는 글로벌 표준 보컬 피치 보정 플러그인입니다.", original: 249, discountPrice: 149, discountRateNum: 40, discountRate: "40% OFF", code: "MELODYNE40", perk: "자연스러운 보컬 피치 및 타임 보정 업계 표준", storeUrl: "https://www.celemony.com", daysLeft: 3, youtubeId: "J2pD1M1T-0A", svgArt: `<svg width="100%" height="100%" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg9" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#281a20"/><stop offset="100%" stop-color="#0e080b"/></linearGradient></defs><rect width="320" height="200" fill="url(#bg9)"/><rect x="40" y="80" width="30" height="40" rx="4" fill="#ed64a6"/><rect x="80" y="60" width="30" height="60" rx="4" fill="#ed64a6"/><rect x="120" y="90" width="30" height="30" rx="4" fill="#ed64a6"/><text x="24" y="36" fill="#ed64a6" font-size="13" font-weight="900" font-family="sans-serif">CELEMONY</text><text x="24" y="175" fill="#f2f0eb" font-size="16" font-weight="800" font-family="sans-serif">Melodyne 5</text></svg>` }
     ];
 
     let currentMainCat = 'all';
@@ -880,13 +865,6 @@
     }
 
     function onDealFilterChange() { renderDeals(); }
-
-    /* 이미지 로딩 실패 100% 차단 안전장치 (오류 시 자체 SVG 플레이어 작동) */
-    function handleImgError(imgEl) {
-      imgEl.style.display = 'none';
-      const fallback = imgEl.parentElement.querySelector('.plugin-fallback-svg');
-      if (fallback) fallback.style.display = 'flex';
-    }
 
     function renderDeals() {
       const container = document.getElementById('dealsContainer');
@@ -930,11 +908,7 @@
         return `
           <div class="deal-card" onclick="openDealDetailModal(${d.id})">
             <div class="plugin-img-wrapper">
-              <div class="plugin-fallback-svg" style="display:none;">
-                ${d.brand}
-                <span>${d.title}</span>
-              </div>
-              <img src="${d.imgUrl}" alt="${d.title}" onerror="handleImgError(this)">
+              ${d.svgArt}
             </div>
             <div class="deal-card-body">
               <div>
@@ -976,9 +950,8 @@
           <span class="tag-badge tag-discount" style="font-size:0.95rem; padding:0.4rem 0.8rem;">${deal.discountRate}</span>
         </div>
 
-        <div class="plugin-img-wrapper" style="height:280px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
-          <div class="plugin-fallback-svg" style="display:none;">${deal.brand}<br><span>${deal.title}</span></div>
-          <img src="${deal.imgUrl}" alt="${deal.title}" onerror="handleImgError(this)">
+        <div class="plugin-img-wrapper" style="height:260px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
+          ${deal.svgArt}
         </div>
 
         <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1.5rem; font-weight:500;">${deal.desc}</p>
@@ -1008,8 +981,6 @@
       }
     }
 
-    // --- 커뮤니티 엔진 & 독립형 글 작성/상세 페이지 ---
-
     let currentCommCat = 'all';
 
     function setCommunityCategory(cat, el) {
@@ -1031,11 +1002,7 @@
       }
 
       try {
-        const { data, error } = await supabaseClient
-          .from('posts')
-          .select('*')
-          .order('created_at', { ascending: false });
-
+        const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
         if (error) {
           listEl.innerHTML = `<div style="text-align: center; padding: 2.5rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">Supabase 'posts' 테이블 연동 대기 중입니다.</div>`;
         } else {
@@ -1202,8 +1169,6 @@
       }
     }
 
-    // --- 마이페이지 (프로필 / 비밀번호 / 활동내역 탭 관리) ---
-
     function switchMyPageTab(tabName, el) {
       document.querySelectorAll('#myPageView .cat-chip').forEach(c => c.classList.remove('active'));
       if (el) el.classList.add('active');
@@ -1358,8 +1323,6 @@
         `).join('');
       } catch (err) { console.error(err); }
     }
-
-    // --- 인증 및 세션 제어 ---
 
     async function checkUserSession() {
       if (!supabaseClient) return;
