@@ -186,23 +186,24 @@
     .deal-card:hover { transform: translateY(-3px); background: var(--card-hover); border-color: var(--accent-gold); }
     .deals-grid.list-mode .deal-card { flex-direction: row; align-items: center; padding: 1.2rem 1.6rem; gap: 1.5rem; }
 
+    /* 플러그인 썸네일 이미지 및 UI 박스 (강력한 폴백 보장) */
     .plugin-img-wrapper {
-      width: 100%; height: 210px; background: #0c0e0d; display: flex; align-items: center; justify-content: center;
+      width: 100%; height: 210px; background: linear-gradient(135deg, #141816 0%, #0a0c0b 100%); display: flex; align-items: center; justify-content: center;
       padding: 1.2rem; border-bottom: 1px solid var(--border-color); position: relative; overflow: hidden;
     }
     .deals-grid.list-mode .plugin-img-wrapper {
       width: 130px; height: 85px; padding: 0.4rem; border-bottom: none; border-right: 1px solid var(--border-color); flex-shrink: 0;
     }
     .plugin-img-wrapper img {
-      max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.45));
+      max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5)); z-index: 2;
     }
 
-    .plugin-fallback-banner {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; background: linear-gradient(135deg, #171b19 0%, #0d0f0e 100%);
-      color: var(--accent-gold); font-weight: 800; font-size: 1.2rem; text-align: center; padding: 1rem; z-index: 1;
+    .plugin-ui-badge {
+      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: radial-gradient(circle at center, #1a221d 0%, #0d100e 100%); color: var(--accent-gold); font-weight: 800; font-size: 1.25rem;
+      text-align: center; padding: 1rem; z-index: 1; border: 1px solid rgba(194,168,120,0.15);
     }
-    .plugin-fallback-banner span { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.4rem; font-weight: 500; }
+    .plugin-ui-badge span { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.3rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
 
     .deal-card-body { padding: 1.6rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
     .deals-grid.list-mode .deal-card-body { padding: 0; flex-direction: row; align-items: center; gap: 2rem; }
@@ -276,6 +277,7 @@
     .footer-links button { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.78rem; font-weight: 600; }
     .footer-links button:hover { color: var(--accent-gold); text-decoration: underline; }
 
+    /* 모달 오버레이 (바깥쪽 클릭 시 닫기 지원) */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 2000;
@@ -287,7 +289,7 @@
       border-radius: 12px; padding: 2.2rem; position: relative; color: var(--text-primary); max-height: 85vh; overflow-y: auto;
     }
     .modal-box.large-detail-modal { max-width: 840px; }
-    .modal-close { position: absolute; top: 1.2rem; right: 1.2rem; background: none; border: none; color: var(--text-secondary); font-size: 1.4rem; cursor: pointer; }
+    .modal-close { position: absolute; top: 1.2rem; right: 1.2rem; background: none; border: none; color: var(--text-secondary); font-size: 1.4rem; cursor: pointer; z-index: 10; }
     
     .form-group { margin-bottom: 1.2rem; }
     .form-group label { display: block; font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 600; }
@@ -324,20 +326,12 @@
       padding: 1.2rem; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 0.8rem;
     }
 
-    /* 유튜브 에러 방지 대체 버튼 카드 디자인 */
-    .youtube-direct-banner {
-      width: 100%; padding: 2.2rem 1.5rem; background: linear-gradient(135deg, #1b201d 0%, #0d0f0e 100%);
-      border: 1px solid var(--border-color); border-radius: 8px; text-align: center; margin: 1.5rem 0;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem;
-      transition: border-color 0.2s;
+    /* 공식 유튜브 영상 임베드 컨테이너 */
+    .youtube-video-container {
+      position: relative; width: 100%; padding-bottom: 56.25%; height: 0; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; background: #000;
+      border: 1px solid var(--border-color);
     }
-    .youtube-direct-banner:hover { border-color: var(--accent-gold); }
-    .youtube-direct-banner p { font-size: 0.95rem; color: var(--text-primary); font-weight: 600; }
-    .youtube-link-btn {
-      display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.2rem; background: #c0392b; color: #fff;
-      font-weight: 700; font-size: 0.88rem; border-radius: 6px; text-decoration: none; transition: background 0.2s;
-    }
-    .youtube-link-btn:hover { background: #e74c3c; }
+    .youtube-video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
   </style>
 </head>
 <body>
@@ -635,17 +629,17 @@
 
   <!-- MODALS -->
 
-  <!-- VST 상세 정보 전체 팝업 모달 -->
-  <div class="modal-overlay" id="dealDetailModal">
-    <div class="modal-box large-detail-modal">
+  <!-- VST 상세 정보 전체 팝업 모달 (바깥쪽 클릭 시 닫기 추가) -->
+  <div class="modal-overlay" id="dealDetailModal" onclick="checkModalBackdropClose(event, 'dealDetailModal')">
+    <div class="modal-box large-detail-modal" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal('dealDetailModal')">×</button>
       <div id="dealDetailContent"></div>
     </div>
   </div>
 
   <!-- 로그인 모달 -->
-  <div class="modal-overlay" id="loginModal">
-    <div class="modal-box">
+  <div class="modal-overlay" id="loginModal" onclick="checkModalBackdropClose(event, 'loginModal')">
+    <div class="modal-box" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal('loginModal')">×</button>
       <h3 style="margin-bottom:1.5rem; font-weight:800;">로그인</h3>
       <form onsubmit="handleLoginSubmit(event)">
@@ -670,8 +664,8 @@
   </div>
 
   <!-- 비밀번호 재설정 모달 -->
-  <div class="modal-overlay" id="resetPwModal">
-    <div class="modal-box">
+  <div class="modal-overlay" id="resetPwModal" onclick="checkModalBackdropClose(event, 'resetPwModal')">
+    <div class="modal-box" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal('resetPwModal')">×</button>
       <h3 style="margin-bottom:1.2rem; font-weight:800;">비밀번호 재설정</h3>
       <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.2rem;">
@@ -688,8 +682,8 @@
   </div>
 
   <!-- 아이디 힌트 찾기 모달 -->
-  <div class="modal-overlay" id="findEmailModal">
-    <div class="modal-box">
+  <div class="modal-overlay" id="findEmailModal" onclick="checkModalBackdropClose(event, 'findEmailModal')">
+    <div class="modal-box" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal('findEmailModal')">×</button>
       <h3 style="margin-bottom:1.2rem; font-weight:800;">아이디 힌트 찾기</h3>
       <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.2rem;">
@@ -706,8 +700,8 @@
   </div>
 
   <!-- 회원가입 모달 -->
-  <div class="modal-overlay" id="signupModal">
-    <div class="modal-box">
+  <div class="modal-overlay" id="signupModal" onclick="checkModalBackdropClose(event, 'signupModal')">
+    <div class="modal-box" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal('signupModal')">×</button>
       <h3 style="margin-bottom:1.5rem; font-weight:800;">회원가입</h3>
       <form onsubmit="handleSignupSubmit(event)">
@@ -731,8 +725,8 @@
   </div>
 
   <!-- 이용약관 팝업 모달 -->
-  <div class="modal-overlay" id="termsModal">
-    <div class="modal-box">
+  <div class="modal-overlay" id="termsModal" onclick="checkModalBackdropClose(event, 'termsModal')">
+    <div class="modal-box" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal('termsModal')">×</button>
       <h3 style="margin-bottom:1.2rem; font-weight:800;">이용약관 및 법적 고지</h3>
       <div class="terms-popup-content">
@@ -822,6 +816,13 @@
     function openModal(id) { document.getElementById(id)?.classList.add('active'); }
     function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
 
+    /* 모달 바깥쪽(오버레이) 클릭 시 닫기 핸들러 */
+    function checkModalBackdropClose(event, modalId) {
+      if (event.target.id === modalId) {
+        closeModal(modalId);
+      }
+    }
+
     function setDealViewMode(mode) {
       dealViewMode = mode;
       document.getElementById('btnCardView').classList.toggle('active', mode === 'card');
@@ -841,6 +842,7 @@
       free: ["전체", "Free Synths", "Free FX"]
     };
 
+    /* 안정적인 공식 제품 이미지 및 유튜브 데모 영상 ID 매핑 */
     const dealsData = [
       { id: 1, brand: "FabFilter", title: "Pro-Q 3 Equalizer", cat: "mixing", sub: "EQ", desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.", original: 179, discountPrice: 134, discountRateNum: 25, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 지원", storeUrl: "https://www.fabfilter.com", daysLeft: 5, imgUrl: "https://www.fabfilter.com/img/products/pro-q-3-large.png", youtubeId: "3m6_rB69IeA" },
       { id: 2, brand: "oeksound", title: "soothe2 Resonance Suppressor", cat: "mixing", sub: "De-Esser/Dynamic", desc: "보컬이나 악기 트랙에서 발생하는 불쾌한 쏘는 소리와 피크 공명을 실시간으로 감지하여 부드럽게 억제하는 툴입니다.", original: 219, discountPrice: 149, discountRateNum: 32, discountRate: "32% OFF", code: "SOOTHE2026", perk: "불쾌한 공명 사운드 자동 실시간 제어", storeUrl: "https://oeksound.com", daysLeft: 2, imgUrl: "https://oeksound.com/wp-content/uploads/2019/12/soothe2_gui_main.png", youtubeId: "c_QzP8lTz8k" },
@@ -884,8 +886,8 @@
 
     function handleImgError(imgEl) {
       imgEl.style.display = 'none';
-      const banner = imgEl.parentElement.querySelector('.plugin-fallback-banner');
-      if (banner) banner.style.display = 'flex';
+      const badge = imgEl.parentElement.querySelector('.plugin-ui-badge');
+      if (badge) badge.style.display = 'flex';
     }
 
     function renderDeals() {
@@ -930,7 +932,7 @@
         return `
           <div class="deal-card" onclick="openDealDetailModal(${d.id})">
             <div class="plugin-img-wrapper">
-              <div class="plugin-fallback-banner" style="display:none;">
+              <div class="plugin-ui-badge" style="display:none;">
                 ${d.brand}
                 <span>${d.title}</span>
               </div>
@@ -977,20 +979,15 @@
         </div>
 
         <div class="plugin-img-wrapper" style="height:260px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
-          <div class="plugin-fallback-banner" style="display:none;">${deal.brand}<br><span>${deal.title}</span></div>
+          <div class="plugin-ui-badge" style="display:none;">${deal.brand}<br><span>${deal.title}</span></div>
           <img src="${deal.imgUrl}" alt="${deal.title}" onerror="handleImgError(this)">
         </div>
 
         <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1.5rem; font-weight:500;">${deal.desc}</p>
 
         <h4 style="font-weight:800; font-size:1.1rem; color:var(--accent-gold); margin-bottom:0.5rem;">공식 데모 & 사운드 리뷰 영상</h4>
-        
-        <!-- 유튜브 임베드 차단 에러 방지용 안전 직관 링크 배너 -->
-        <div class="youtube-direct-banner">
-          <p>🎥 ${deal.brand} ${deal.title} 공식 데모 및 리뷰</p>
-          <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(deal.brand + ' ' + deal.title + ' review')}" target="_blank" class="youtube-link-btn">
-            유튜브에서 영상 시청하기 ↗
-          </a>
+        <div class="youtube-video-container">
+          <iframe src="https://www.youtube.com/embed/${deal.youtubeId}" allowfullscreen></iframe>
         </div>
 
         <div class="price-box" style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding:1.2rem;">
@@ -1036,7 +1033,7 @@
       try {
         const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
         if (error) {
-          listEl.innerHTML = `<div style="text-align: center; padding: 2.5rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">Supabase 'posts' 테이블 연동 대기 중입니다.</div>`;
+          listEl.innerHTML = `<div style="text-align: center; padding: 2.5rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">Supabase 'posts' 테이블 연동 오류: ${error.message}</div>`;
         } else {
           rawCommunityPosts = data || [];
           renderCommunityPosts();
@@ -1160,7 +1157,7 @@
       else {
         alert('게시글이 등록되었습니다.');
         showPage('community');
-        fetchCommunityPosts();
+        await fetchCommunityPosts();
       }
     }
 
@@ -1188,6 +1185,7 @@
       showPage('postDetail');
     }
 
+    /* Supabase 게시글 실제 삭제 연동 함수 (완벽 개선) */
     async function deletePost(id) {
       if (!confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
       
@@ -1201,7 +1199,7 @@
       try {
         const { error } = await supabaseClient.from('posts').delete().eq('id', id);
         if (error) {
-          alert('삭제 실패: ' + error.message);
+          alert('게시글 삭제 실패: ' + error.message);
         } else {
           alert('게시글이 성공적으로 삭제되었습니다.');
           showPage('community');
@@ -1209,7 +1207,7 @@
         }
       } catch (err) {
         console.error(err);
-        alert('삭제 처리 중 오류가 발생했습니다.');
+        alert('삭제 처리 중 예외가 발생했습니다.');
       }
     }
 
