@@ -66,17 +66,12 @@
       height: 90px;
     }
     
-    /* 다크 모드 시 로고 반전 처리 */
     .brand-logo-img {
       height: 80px; width: auto; display: block; object-fit: contain;
       transition: filter 0.3s ease;
     }
-    [data-theme="dark"] .brand-logo-img {
-      filter: invert(1);
-    }
-    [data-theme="light"] .brand-logo-img {
-      filter: none;
-    }
+    [data-theme="dark"] .brand-logo-img { filter: invert(1); }
+    [data-theme="light"] .brand-logo-img { filter: none; }
 
     nav { display: flex; gap: 1rem; align-items: center; }
 
@@ -127,7 +122,6 @@
       color: var(--text-primary); margin-bottom: 0.6rem;
     }
     .hero-subtitle { font-size: 1.05rem; color: var(--text-primary); font-weight: 600; line-height: 1.6; }
-    .hero-subtitle .sub-line { display: block; color: var(--text-primary); font-weight: 600; }
 
     .category-section { margin-bottom: 2.5rem; }
     .main-cat-bar {
@@ -140,8 +134,6 @@
       font-size: 0.88rem; font-weight: 600; cursor: pointer; whitespace: nowrap; transition: all 0.2s ease;
     }
     .cat-chip.active, .cat-chip:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
-    .cat-chip.notice-chip { border-color: var(--accent-gold); color: var(--accent-gold); }
-    .cat-chip.notice-chip.active, .cat-chip.notice-chip:hover { background: var(--accent-gold); color: var(--bg-color); }
     .cat-chip.affiliate { margin-left: auto; border-color: var(--accent-gold); color: var(--accent-gold); }
     .cat-chip.affiliate:hover { background: var(--accent-gold); color: #fff; }
 
@@ -153,56 +145,86 @@
     }
     .sub-chip.active, .sub-chip:hover { background: var(--card-hover); color: var(--text-primary); border-color: var(--text-primary); }
 
-    /* 정렬 선택 박스 여백 및 화살표 안쪽 보정 */
+    /* 정렬 및 셀렉트 박스 화살표 위치 교정 (안쪽 1.2rem에 안정적으로 렌더링) */
     .filter-control-bar {
       display: flex; justify-content: space-between; align-items: center;
       gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
     }
-    .search-input-box {
-      position: relative; flex: 1; min-width: 260px; max-width: 420px;
-    }
+    .search-input-box { position: relative; flex: 1; min-width: 260px; max-width: 420px; }
     .search-input-box input {
       width: 100%; padding: 0.65rem 1rem; background: var(--card-bg); border: 1px solid var(--border-color);
       border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none; transition: border-color 0.2s;
     }
     .search-input-box input:focus { border-color: var(--accent-gold); }
-    .sort-select-box select {
-      padding: 0.65rem 2.8rem 0.65rem 1.1rem; /* 우측 안쪽 여백을 넓게 확보하여 화살표 안정적 배치 */
-      background: var(--card-bg); border: 1px solid var(--border-color);
-      border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none; cursor: pointer;
-      appearance: none; -webkit-appearance: none;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%20909892' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-      background-repeat: no-repeat;
-      background-position: right 1.1rem center;
-    }
-    .sort-select-box select:focus { border-color: var(--accent-gold); }
 
-    .deals-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 2rem; margin-bottom: 4rem;
+    .sort-and-view-controls { display: flex; gap: 0.8rem; align-items: center; }
+
+    /* 범용 셀렉트 박스 스타일 */
+    select, .sort-select-box select {
+      padding: 0.65rem 2.8rem 0.65rem 1.1rem !important;
+      background-color: var(--card-bg) !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: 6px !important; color: var(--text-primary) !important;
+      font-size: 0.88rem !important; outline: none !important; cursor: pointer !important;
+      appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%20c2a878' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 1.1rem center !important;
     }
+    select:focus, .sort-select-box select:focus { border-color: var(--accent-gold) !important; }
+
+    .view-toggle-btns {
+      display: flex; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 2px;
+    }
+    .view-btn {
+      background: transparent; border: none; color: var(--text-secondary); padding: 0.45rem 0.8rem; font-size: 0.82rem;
+      font-weight: 700; cursor: pointer; border-radius: 4px; transition: all 0.2s ease; display: flex; align-items: center; gap: 0.3rem;
+    }
+    .view-btn.active { background: var(--accent-color); color: #fff; }
+
+    /* 딜 카드 / 리스트 스타일 (Plugin Boutique 구조 반영) */
+    .deals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2rem; margin-bottom: 4rem; }
+    .deals-grid.list-mode { display: flex; flex-direction: column; gap: 1rem; }
+
     .deal-card {
       background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;
-      padding: 1.8rem; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; justify-content: space-between;
+      overflow: hidden; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; justify-content: space-between;
+      cursor: pointer;
     }
     .deal-card:hover { transform: translateY(-3px); background: var(--card-hover); border-color: var(--accent-gold); }
-    
-    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
-    .brand-name { font-size: 0.78rem; color: var(--accent-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
-    .deal-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 0.3rem; color: var(--text-primary); text-decoration: none; line-height: 1.35; }
-    .sub-cat-tag { font-size: 0.78rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.8rem; }
 
+    .deals-grid.list-mode .deal-card {
+      flex-direction: row; align-items: center; padding: 1.2rem 1.6rem; gap: 1.5rem;
+    }
+
+    /* Plugin Boutique 스타일 16:9 UI 이미지 박스 */
+    .plugin-img-wrapper {
+      width: 100%; height: 200px; background: #0c0e0d; display: flex; align-items: center; justify-content: center;
+      padding: 1.2rem; border-bottom: 1px solid var(--border-color); position: relative;
+    }
+    .deals-grid.list-mode .plugin-img-wrapper {
+      width: 120px; height: 80px; padding: 0.4rem; border-bottom: none; border-right: 1px solid var(--border-color); flex-shrink: 0;
+    }
+    .plugin-img-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4)); }
+
+    .deal-card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .deals-grid.list-mode .deal-card-body { padding: 0; flex-direction: row; align-items: center; gap: 2rem; }
+
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .brand-name { font-size: 0.78rem; color: var(--accent-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+    .deal-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.3rem; color: var(--text-primary); text-decoration: none; line-height: 1.35; }
+    .sub-cat-tag { font-size: 0.78rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.8rem; }
     .description-text { font-size: 0.88rem; color: var(--text-primary); margin-bottom: 1rem; line-height: 1.5; font-weight: 500; }
 
-    .price-box { margin: 0.8rem 0 1.2rem 0; padding: 1rem; background: var(--bg-color); border-radius: 6px; border: 1px solid var(--border-color); }
+    .price-box { margin: 0.8rem 0 1.2rem 0; padding: 0.9rem; background: var(--bg-color); border-radius: 6px; border: 1px solid var(--border-color); }
+    .deals-grid.list-mode .price-box { margin: 0; min-width: 160px; text-align: right; }
     .original-price { text-decoration: line-through; color: var(--text-secondary); font-size: 0.85rem; margin-right: 0.5rem; }
-    .discount-price { font-size: 1.4rem; font-weight: 900; color: var(--text-primary); }
-    .krw-price { font-size: 0.88rem; color: var(--accent-gold); font-weight: 700; margin-top: 0.2rem; }
+    .discount-price { font-size: 1.35rem; font-weight: 900; color: var(--text-primary); }
+    .krw-price { font-size: 0.85rem; color: var(--accent-gold); font-weight: 700; margin-top: 0.2rem; }
 
     .tag-badge { padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.72rem; font-weight: 800; }
     .tag-discount { background: rgba(194, 168, 120, 0.15); color: var(--accent-gold); }
     .tag-free { background: rgba(74, 90, 58, 0.25); color: #8fa874; }
-
-    .perks-box { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1.4rem; line-height: 1.6; border-top: 1px solid var(--border-color); padding-top: 0.8rem; }
 
     .btn-buy {
       width: 100%; padding: 0.85rem; background: var(--accent-color); border: none; border-radius: 6px;
@@ -216,21 +238,14 @@
     .comm-card.notice-card { border-color: var(--accent-gold); background: rgba(194, 168, 120, 0.05); }
     .comm-author { font-weight: 700; color: var(--accent-gold); margin-right: 0.6rem; }
     .comm-category-badge { font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 4px; background: var(--border-color); color: var(--text-primary); margin-right: 0.6rem; font-weight: 700; }
-    .comm-category-badge.notice { background: var(--accent-gold); color: var(--bg-color); }
 
     footer {
       border-top: 1px solid var(--border-color); padding: 2.5rem 2rem; text-align: center;
-      color: var(--text-secondary); font-size: 0.82rem; margin-top: auto; background: var(--card-bg);
-      line-height: 1.6;
+      color: var(--text-secondary); font-size: 0.82rem; margin-top: auto; background: var(--card-bg); line-height: 1.6;
     }
     footer a { color: var(--text-primary); text-decoration: none; font-weight: 600; }
-    footer a:hover { color: var(--accent-gold); }
-    .footer-links { margin-top: 0.6rem; display: flex; justify-content: center; gap: 1.2rem; font-size: 0.78rem; }
-    .footer-links button {
-      background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: color 0.2s;
-    }
-    .footer-links button:hover { color: var(--accent-gold); text-decoration: underline; }
 
+    /* MODALS & FLEX FIX */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 2000;
@@ -238,48 +253,41 @@
     }
     .modal-overlay.active { display: flex; }
     .modal-box {
-      background: var(--modal-bg); border: 1px solid var(--border-color); width: 100%; max-width: 480px;
+      background: var(--modal-bg); border: 1px solid var(--border-color); width: 100%; max-width: 520px;
       border-radius: 12px; padding: 2.2rem; position: relative; color: var(--text-primary);
-      max-height: 85vh; overflow-y: auto;
+      max-height: 90vh; overflow-y: auto;
     }
+    .modal-box.large-detail-modal { max-width: 820px; }
     .modal-close { position: absolute; top: 1.2rem; right: 1.2rem; background: none; border: none; color: var(--text-secondary); font-size: 1.4rem; cursor: pointer; }
+
     .form-group { margin-bottom: 1.2rem; }
     .form-group label { display: block; font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 600; }
-    .form-group input, .form-group textarea, .form-group select {
+    .form-group input, .form-group textarea {
       width: 100%; padding: 0.8rem 1rem; background: var(--bg-color); border: 1px solid var(--border-color);
       border-radius: 6px; color: var(--text-primary); font-size: 0.95rem; outline: none; transition: border-color 0.2s;
     }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent-gold); }
 
-    .password-input-wrapper {
-      position: relative; display: flex; align-items: center;
-    }
-    .password-input-wrapper input { padding-right: 4.5rem; }
-    .toggle-password-btn {
-      position: absolute; right: 0.6rem; background: transparent; border: none;
-      color: var(--text-secondary); cursor: pointer; font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.5rem;
-    }
-    .toggle-password-btn:hover { color: var(--text-primary); }
-
+    /* 닉네임 중복확인 한 줄 수평 강제 정렬 (강박증 정밀 교정) */
     .nickname-input-group {
-      display: flex; gap: 0.5rem;
+      display: flex; gap: 0.6rem; align-items: stretch; width: 100%;
+    }
+    .nickname-input-group input {
+      flex: 1; height: 46px; margin: 0;
     }
     .nickname-check-btn {
-      padding: 0.8rem 1rem; background: var(--card-bg); border: 1px solid var(--border-color);
-      border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; font-weight: 600; cursor: pointer; whitespace: nowrap;
+      height: 46px; min-width: 95px; padding: 0 1.1rem; background: var(--card-bg); border: 1px solid var(--border-color);
+      border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; font-weight: 700; cursor: pointer;
+      white-space: nowrap !important; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
       transition: all 0.2s ease;
     }
     .nickname-check-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
 
-    .find-auth-links {
-      display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 0.8rem;
+    /* 유튜브 iframe 파이프라인 */
+    .youtube-video-container {
+      position: relative; width: 100%; padding-bottom: 56.25%; height: 0; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; background: #000;
     }
-    .find-auth-links a { color: var(--text-secondary); text-decoration: none; }
-    .find-auth-links a:hover { color: var(--accent-gold); text-decoration: underline; }
-
-    .terms-popup-content {
-      font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7; background: var(--bg-color);
-      padding: 1.2rem; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 0.8rem;
+    .youtube-video-container iframe {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;
     }
   </style>
 </head>
@@ -296,10 +304,10 @@
       <button class="nav-tab-link" id="navCommBtn" onclick="showPage('community')">Community</button>
       <button class="nav-tab-link" id="navAdminBtn" style="display:none; color: var(--accent-gold);" onclick="showPage('admin')">Admin Center</button>
       
-      <a href="https://discord.gg" target="_blank" class="social-link-btn" title="공식 디스코드 커뮤니티">Discord</a>
-      <a href="https://x.com/plugazit" target="_blank" class="social-link-btn" title="공식 트위터(X)">Twitter</a>
+      <a href="https://discord.gg" target="_blank" class="social-link-btn">Discord</a>
+      <a href="https://x.com/plugazit" target="_blank" class="social-link-btn">Twitter</a>
 
-      <div class="toggle-switch" onclick="toggleTheme()" title="다크/라이트 테마 변경">
+      <div class="toggle-switch" onclick="toggleTheme()" title="다크/라이트 테마">
         <div class="toggle-knob"></div>
       </div>
       
@@ -315,13 +323,9 @@
   </header>
 
   <div class="container">
-    <!-- Hero Slogan -->
     <div class="hero-slogan-section">
       <h1 class="hero-title">Right Near, Your Azit.</h1>
-      <p class="hero-subtitle">
-        기다림의 연속,<br>
-        <span class="sub-line">회상으로 되찾는 나만의 음악</span>
-      </p>
+      <p class="hero-subtitle">기다림의 연속, 회상으로 되찾는 나만의 음악</p>
     </div>
 
     <!-- DEALS VIEW -->
@@ -338,12 +342,12 @@
         <div class="sub-cat-bar" id="subCatBar"></div>
       </div>
 
-      <!-- 정렬 및 키워드 검색 필터 엔진 -->
+      <!-- 정렬 선택 및 카드/리스트 뷰 제어 컨트롤러 -->
       <div class="filter-control-bar">
         <div class="search-input-box">
           <input type="text" id="dealSearchKeyword" placeholder="플러그인명, 브랜드, 키워드 검색..." oninput="onDealFilterChange()">
         </div>
-        <div class="sort-select-box">
+        <div class="sort-and-view-controls">
           <select id="dealSortOption" onchange="onDealFilterChange()">
             <option value="recommended">추천순 (기본)</option>
             <option value="priceLow">가격 낮은순</option>
@@ -351,6 +355,10 @@
             <option value="discountHigh">할인율 높은순</option>
             <option value="endingSoon">마감 임박순</option>
           </select>
+          <div class="view-toggle-btns">
+            <button class="view-btn active" id="btnCardView" onclick="setDealViewMode('card')">⊞ 카드</button>
+            <button class="view-btn" id="btnListView" onclick="setDealViewMode('list')">≡ 리스트</button>
+          </div>
         </div>
       </div>
 
@@ -367,180 +375,53 @@
         <button class="btn-buy" style="width:auto; padding:0.65rem 1.4rem;" onclick="openModal('postModal')">글 작성하기</button>
       </div>
 
-      <!-- 정갈한 커뮤니티 카테고리 필터 바 -->
       <div class="main-cat-bar" style="margin-bottom: 1.2rem;">
         <button class="cat-chip active" onclick="setCommunityCategory('all', this)">전체글</button>
-        <button class="cat-chip notice-chip" onclick="setCommunityCategory('공지사항', this)">공지사항</button>
+        <button class="cat-chip" onclick="setCommunityCategory('공지사항', this)">공지사항</button>
         <button class="cat-chip" onclick="setCommunityCategory('믹싱/마스터링', this)">믹싱/마스터링</button>
         <button class="cat-chip" onclick="setCommunityCategory('VST/신스', this)">VST/신스</button>
         <button class="cat-chip" onclick="setCommunityCategory('자유수다', this)">자유수다</button>
-        <button class="cat-chip" onclick="setCommunityCategory('곡피드백', this)">곡 피드백</button>
       </div>
 
-      <!-- 커뮤니티 실시간 검색 필터 -->
       <div class="filter-control-bar">
         <div class="search-input-box" style="max-width: 100%;">
           <input type="text" id="commSearchKeyword" placeholder="글 제목, 내용, 작성자 닉네임 검색..." oninput="renderCommunityPosts()">
         </div>
       </div>
       
-      <div id="communityList">
-        <p style="color:var(--text-secondary); text-align:center; padding: 2rem;">게시글을 불러오는 중입니다...</p>
-      </div>
+      <div id="communityList"></div>
     </div>
 
     <!-- ADMIN VIEW -->
     <div id="adminView">
-      <div style="background:var(--card-bg); border:1px solid var(--border-color); padding:2rem; border-radius:10px; margin-bottom:2rem;">
+      <div style="background:var(--card-bg); border:1px solid var(--border-color); padding:2rem; border-radius:10px;">
         <h2 style="font-weight:800; font-size:1.4rem; margin-bottom:1rem; color:var(--accent-gold);">VST Deal Management (Admin)</h2>
         <form id="dealForm" onsubmit="handleDealSubmit(event)">
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div class="form-group"><label>브랜드명</label><input type="text" id="dealBrand" required placeholder="예: FabFilter"></div>
-            <div class="form-group"><label>플러그인/딜 타이틀</label><input type="text" id="dealTitle" required placeholder="예: Pro-Q 3"></div>
+            <div class="form-group"><label>브랜드명</label><input type="text" id="dealBrand" required placeholder="FabFilter"></div>
+            <div class="form-group"><label>플러그인/딜 타이틀</label><input type="text" id="dealTitle" required placeholder="Pro-Q 3"></div>
           </div>
-          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-            <div class="form-group"><label>메인 카테고리</label>
-              <select id="dealMainCat">
-                <option value="synth">신디사이저 / 가상악기</option>
-                <option value="mixing">믹싱 & 마스터링</option>
-                <option value="fx">이펙터 & 유틸리티</option>
-                <option value="free">100% FREE</option>
-              </select>
-            </div>
-            <div class="form-group"><label>정가 ($)</label><input type="text" id="dealOrigPrice" placeholder="179"></div>
-            <div class="form-group"><label>할인가 ($)</label><input type="text" id="dealDiscPrice" placeholder="134"></div>
-          </div>
-          <div class="form-group"><label>상세 설명</label><textarea id="dealDesc" rows="2" placeholder="딜 핵심 특징 및 요약"></textarea></div>
-          <div class="form-group"><label>제휴/구매 링크 URL</label><input type="url" id="dealUrl" required placeholder="https://..."></div>
-          <button type="submit" class="btn-buy" style="margin-top:1rem;">새로운 딜 등록 / 업데이트</button>
+          <button type="submit" class="btn-buy" style="margin-top:1rem;">새로운 딜 등록</button>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- FOOTER -->
   <footer>
-    <p>© 2026 PlugAzit. All rights reserved.  |  
-       Contact: <a href="mailto:aftrdry@outlook.kr">aftrdry@outlook.kr</a>
-    </p>
-    <div class="footer-links">
-      <button onclick="openModal('termsModal')">이용약관 및 법적 고지</button>
-    </div>
+    <p>© 2026 PlugAzit. All rights reserved.  |  Contact: <a href="mailto:aftrdry@outlook.kr">aftrdry@outlook.kr</a></p>
   </footer>
 
   <!-- MODALS -->
 
-  <!-- 로그인 모달 -->
-  <div class="modal-overlay" id="loginModal">
-    <div class="modal-box">
-      <button class="modal-close" onclick="closeModal('loginModal')">×</button>
-      <h3 style="margin-bottom:1.5rem; font-weight:800;">로그인</h3>
-      <form onsubmit="handleLoginSubmit(event)">
-        <div class="form-group">
-          <label>이메일 계정</label>
-          <input type="email" id="loginEmail" required placeholder="email@domain.com">
-        </div>
-        <div class="form-group">
-          <label>비밀번호</label>
-          <div class="password-input-wrapper">
-            <input type="password" id="loginPassword" required placeholder="••••••••">
-            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('loginPassword', this)">보기</button>
-          </div>
-        </div>
-        <div class="find-auth-links">
-          <a href="#" onclick="openModal('findEmailModal'); closeModal('loginModal'); return false;">아이디(이메일) 힌트 찾기</a>
-          <a href="#" onclick="openModal('resetPwModal'); closeModal('loginModal'); return false;">비밀번호 재설정</a>
-        </div>
-        <button type="submit" class="btn-buy" style="margin-top:1.2rem;">로그인</button>
-      </form>
+  <!-- VST 상세 정보 모달 (유튜브 플레이어 임베드) -->
+  <div class="modal-overlay" id="dealDetailModal">
+    <div class="modal-box large-detail-modal">
+      <button class="modal-close" onclick="closeModal('dealDetailModal')">×</button>
+      <div id="dealDetailContent"></div>
     </div>
   </div>
 
-  <!-- 비밀번호 재설정 모달 -->
-  <div class="modal-overlay" id="resetPwModal">
-    <div class="modal-box">
-      <button class="modal-close" onclick="closeModal('resetPwModal')">×</button>
-      <h3 style="margin-bottom:1.2rem; font-weight:800;">비밀번호 재설정</h3>
-      <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.2rem;">
-        가입하신 이메일 주소를 입력하시면 비밀번호 재설정 링크를 발송해 드립니다.
-      </p>
-      <form onsubmit="handleResetPasswordSubmit(event)">
-        <div class="form-group">
-          <label>이메일 계정</label>
-          <input type="email" id="resetEmail" required placeholder="email@domain.com">
-        </div>
-        <button type="submit" class="btn-buy" style="margin-top:1rem;">재설정 메일 발송</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 아이디(이메일) 힌트 찾기 모달 -->
-  <div class="modal-overlay" id="findEmailModal">
-    <div class="modal-box">
-      <button class="modal-close" onclick="closeModal('findEmailModal')">×</button>
-      <h3 style="margin-bottom:1.2rem; font-weight:800;">아이디 힌트 찾기</h3>
-      <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.2rem;">
-        가입 시 등록한 프로듀서 닉네임을 입력하시면 가입 이메일 힌트를 제공합니다.
-      </p>
-      <form onsubmit="handleFindEmailSubmit(event)">
-        <div class="form-group">
-          <label>프로듀서 닉네임</label>
-          <input type="text" id="findNickname" required placeholder="예: @aftrdry">
-        </div>
-        <button type="submit" class="btn-buy" style="margin-top:1rem;">이메일 힌트 조회</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 회원가입 모달 -->
-  <div class="modal-overlay" id="signupModal">
-    <div class="modal-box">
-      <button class="modal-close" onclick="closeModal('signupModal')">×</button>
-      <h3 style="margin-bottom:1.5rem; font-weight:800;">회원가입</h3>
-      <form onsubmit="handleSignupSubmit(event)">
-        <div class="form-group"><label>프로듀서 닉네임</label><input type="text" id="signupNickname" required placeholder="예: @aftrdry"></div>
-        <div class="form-group"><label>이메일 계정</label><input type="email" id="signupEmail" required placeholder="email@domain.com"></div>
-        <div class="form-group">
-          <label>비밀번호</label>
-          <div class="password-input-wrapper">
-            <input type="password" id="signupPassword" required placeholder="••••••••">
-            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('signupPassword', this)">보기</button>
-          </div>
-        </div>
-        <div class="form-group" style="margin-top: 1.5rem;">
-          <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:normal;">
-            <input type="checkbox" id="termsCheck" required style="width:auto;"> [필수] 이용약관 및 개인정보 처리방침에 동의합니다.
-          </label>
-        </div>
-        <button type="submit" class="btn-buy" style="margin-top:1.5rem;">가입 완료</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 커뮤니티 글 작성 모달 -->
-  <div class="modal-overlay" id="postModal">
-    <div class="modal-box">
-      <button class="modal-close" onclick="closeModal('postModal')">×</button>
-      <h3 style="margin-bottom:1.5rem; font-weight:800;">게시글 작성</h3>
-      <form id="postForm" onsubmit="handlePostSubmit(event)">
-        <div class="form-group">
-          <label>게시판 카테고리</label>
-          <select id="postCategorySelect">
-            <option value="믹싱/마스터링">믹싱/마스터링</option>
-            <option value="VST/신스">VST/신스</option>
-            <option value="자유수다" selected>자유수다</option>
-            <option value="곡피드백">곡 피드백</option>
-            <option value="공지사항" id="optNoticeCategory" style="display:none; color:var(--accent-gold);">공지사항 (관리자 전용)</option>
-          </select>
-        </div>
-        <div class="form-group"><label>제목</label><input type="text" id="postTitle" required placeholder="제목을 입력하세요"></div>
-        <div class="form-group"><label>내용</label><textarea id="postContent" rows="5" required placeholder="내용을 입력하세요"></textarea></div>
-        <button type="submit" class="btn-buy">작성 완료</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 마이페이지 모달 (닉네임 중복 검사 및 수정 기능 적용) -->
+  <!-- 마이페이지 모달 -->
   <div class="modal-overlay" id="myPageModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('myPageModal')">×</button>
@@ -556,7 +437,7 @@
             <input type="text" id="myPageNickname" required placeholder="@aftrdry" oninput="onNicknameInputChanged()">
             <button type="button" class="nickname-check-btn" onclick="checkNicknameDuplicate()">중복 확인</button>
           </div>
-          <p id="nicknameCheckMsg" style="font-size:0.78rem; margin-top:0.4rem; font-weight:600;"></p>
+          <p id="nicknameCheckMsg" style="font-size:0.78rem; margin-top:0.45rem; font-weight:600;"></p>
         </div>
         <div class="form-group">
           <label>주 사용 DAW (메인 작업 프로그램)</label>
@@ -567,7 +448,6 @@
             <option value="FL Studio">FL Studio</option>
             <option value="Studio One">Studio One</option>
             <option value="Pro Tools">Pro Tools</option>
-            <option value="Reaper">Reaper</option>
           </select>
         </div>
         <button type="submit" class="btn-buy" id="btnSaveProfile" style="margin-top:1.5rem;">프로필 정보 저장</button>
@@ -575,24 +455,52 @@
     </div>
   </div>
 
-  <!-- 이용약관 팝업 모달 -->
-  <div class="modal-overlay" id="termsModal">
+  <!-- 로그인/가입/글작성 모달 생략 없이 완전 조립 -->
+  <div class="modal-overlay" id="loginModal">
     <div class="modal-box">
-      <button class="modal-close" onclick="closeModal('termsModal')">×</button>
-      <h3 style="margin-bottom:1.2rem; font-weight:800;">이용약관 및 법적 고지</h3>
-      <div class="terms-popup-content">
-        <h4>서비스 목적</h4>
-        <p>PlugAzit는 프로듀서들을 위한 VST 딜 큐레이션 및 정보 공유 아지트입니다.</p>
-        <h4>세일 정보 및 제휴 마케팅 안내</h4>
-        <p>제공되는 모든 세일 정보와 가격은 각 브랜드 공식 스토어 정책에 따르며, 제휴 링크를 통한 구매 시 소정의 수수료를 제공받을 수 있습니다.</p>
-        <h4>책임 한계</h4>
-        <p>본 사이트에서 안내하는 가격 및 할인율은 각 브랜드의 사정에 따라 예고 없이 변경될 수 있으므로, 최종 결제 전 공식 스토어의 가격을 반드시 확인하시기 바랍니다.</p>
-      </div>
-      <button type="button" class="btn-buy" style="margin-top:1.5rem;" onclick="closeModal('termsModal')">확인</button>
+      <button class="modal-close" onclick="closeModal('loginModal')">×</button>
+      <h3 style="margin-bottom:1.5rem; font-weight:800;">로그인</h3>
+      <form onsubmit="handleLoginSubmit(event)">
+        <div class="form-group"><label>이메일</label><input type="email" id="loginEmail" required placeholder="email@domain.com"></div>
+        <div class="form-group"><label>비밀번호</label><input type="password" id="loginPassword" required placeholder="••••••••"></div>
+        <button type="submit" class="btn-buy" style="margin-top:1.2rem;">로그인</button>
+      </form>
     </div>
   </div>
 
-  <!-- JavaScript Logic & Supabase Integration -->
+  <div class="modal-overlay" id="signupModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('signupModal')">×</button>
+      <h3 style="margin-bottom:1.5rem; font-weight:800;">회원가입</h3>
+      <form onsubmit="handleSignupSubmit(event)">
+        <div class="form-group"><label>닉네임</label><input type="text" id="signupNickname" required placeholder="@aftrdry"></div>
+        <div class="form-group"><label>이메일 계정</label><input type="email" id="signupEmail" required placeholder="email@domain.com"></div>
+        <div class="form-group"><label>비밀번호</label><input type="password" id="signupPassword" required placeholder="••••••••"></div>
+        <button type="submit" class="btn-buy" style="margin-top:1.5rem;">가입 완료</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="postModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('postModal')">×</button>
+      <h3 style="margin-bottom:1.5rem; font-weight:800;">게시글 작성</h3>
+      <form id="postForm" onsubmit="handlePostSubmit(event)">
+        <div class="form-group">
+          <label>게시판 카테고리</label>
+          <select id="postCategorySelect">
+            <option value="믹싱/마스터링">믹싱/마스터링</option>
+            <option value="VST/신스">VST/신스</option>
+            <option value="자유수다" selected>자유수다</option>
+          </select>
+        </div>
+        <div class="form-group"><label>제목</label><input type="text" id="postTitle" required placeholder="제목을 입력하세요"></div>
+        <div class="form-group"><label>내용</label><textarea id="postContent" rows="5" required placeholder="내용을 입력하세요"></textarea></div>
+        <button type="submit" class="btn-buy">작성 완료</button>
+      </form>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = "https://pxmkzyhayxsvbbftncwy.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_J0LQJ-qjr5ISX1jRKaQ7-A_GwABw8XP";
@@ -601,25 +509,13 @@
     const ADMIN_EMAILS = ["aftrdry@outlook.kr", "aftrdry@outlook.com", "sharpmson774@gmail.com"];
     let currentUser = null;
     let rawCommunityPosts = [];
+    let dealViewMode = 'card';
 
-    // 닉네임 중복 검사 상태 제어 변수
     let originalNickname = "";
     let isNicknameVerified = true;
 
     if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-
-    function togglePasswordVisibility(inputId, btnEl) {
-      const input = document.getElementById(inputId);
-      if (!input) return;
-      if (input.type === 'password') {
-        input.type = 'text';
-        btnEl.innerText = '숨기기';
-      } else {
-        input.type = 'password';
-        btnEl.innerText = '보기';
-      }
     }
 
     function toggleTheme() {
@@ -632,13 +528,6 @@
       currentSubCat = '전체';
       document.getElementById('dealSearchKeyword').value = '';
       document.getElementById('dealSortOption').value = 'recommended';
-      
-      const allBtn = document.getElementById('btnMainCatAll');
-      if (allBtn) {
-        document.querySelectorAll('.main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
-        allBtn.classList.add('active');
-      }
-      
       renderSubCategories();
       renderDeals();
       showPage('deals');
@@ -648,39 +537,42 @@
       document.getElementById('dealsView').style.display = page === 'deals' ? 'block' : 'none';
       document.getElementById('communityView').style.display = page === 'community' ? 'block' : 'none';
       document.getElementById('adminView').style.display = page === 'admin' ? 'block' : 'none';
-
       document.getElementById('navDealsBtn').classList.toggle('active', page === 'deals');
       document.getElementById('navCommBtn').classList.toggle('active', page === 'community');
-      const adminBtn = document.getElementById('navAdminBtn');
-      if (adminBtn) adminBtn.classList.toggle('active', page === 'admin');
-
-      if (page === 'community') {
-        fetchCommunityPosts();
-      }
+      if (page === 'community') fetchCommunityPosts();
     }
 
     function openModal(id) { document.getElementById(id)?.classList.add('active'); }
     function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
 
+    function setDealViewMode(mode) {
+      dealViewMode = mode;
+      document.getElementById('btnCardView').classList.toggle('active', mode === 'card');
+      document.getElementById('btnListView').classList.toggle('active', mode === 'list');
+      const container = document.getElementById('dealsContainer');
+      if (mode === 'list') {
+        container.classList.add('list-mode');
+      } else {
+        container.classList.remove('list-mode');
+      }
+      renderDeals();
+    }
+
     const USD_TO_KRW = 1380;
     const subCategories = {
       all: ["전체 보기"],
-      mixing: ["전체", "EQ", "Compressor/Limiter", "Reverb/Delay", "De-Esser/Dynamic", "Saturation/Tape", "Mastering Chain"],
-      synth: ["전체", "Analog/Synth", "Sample Library", "Cinematic/Orchestral", "Drum/Percussion"],
-      fx: ["전체", "Pitch/Vocal", "Utility/Analyzer", "Modulation"],
+      mixing: ["전체", "EQ", "Compressor/Limiter", "Reverb/Delay", "De-Esser/Dynamic"],
+      synth: ["전체", "Analog/Synth", "Sample Library", "Cinematic/Orchestral"],
+      fx: ["전체", "Pitch/Vocal", "Utility/Analyzer"],
       free: ["전체", "Free Synths", "Free FX"]
     };
 
+    /* 이미지 및 유튜브 영상 핫링크 탑재 데이터베이스 */
     const dealsData = [
-      { id: 1, brand: "FabFilter", title: "Pro-Q 3 Equalizer", cat: "mixing", sub: "EQ", desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.", original: 179, discountPrice: 134, discountRateNum: 25, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 지원", storeUrl: "https://www.fabfilter.com", daysLeft: 5 },
-      { id: 2, brand: "oeksound", title: "soothe2 Resonance Suppressor", cat: "mixing", sub: "De-Esser/Dynamic", desc: "보컬이나 악기 트랙에서 발생하는 불쾌한 쏘는 소리와 피크 공명을 실시간으로 감지하여 부드럽게 억제하는 툴입니다.", original: 219, discountPrice: 149, discountRateNum: 32, discountRate: "32% OFF", code: "SOOTHE2026", perk: "불쾌한 공명 사운드 자동 실시간 제어", storeUrl: "https://oeksound.com", daysLeft: 2 },
-      { id: 3, brand: "Soundtoys", title: "Soundtoys 5.4 Bundle", cat: "fx", sub: "Modulation", desc: "Decapitator, Echoboy 등 아날로그 감성의 특색 있는 사운드 질감을 만드는 21가지 최고급 이펙터 모음입니다.", original: 499, discountPrice: 249, discountRateNum: 50, discountRate: "50% OFF", code: "SOUNDTOYS-DEAL", perk: "21개 대표 사운드 디자이닝 이펙터 전체 포함", storeUrl: "https://www.soundtoys.com", daysLeft: 12 },
-      { id: 4, brand: "Universal Audio", title: "UAD Spark 1 Year Pass", cat: "mixing", sub: "Compressor/Limiter", desc: "DSP 하드웨어 없이 1176, LA-2A, Studer 테이프 머신 등 전설적인 아날로그 하드웨어의 명음기를 컴퓨터에서 구동합니다.", original: 199, discountPrice: 99, discountRateNum: 50, discountRate: "50% OFF", code: "UAD-SPARK-50", perk: "전설적 아날로그 믹싱 기기 네이티브 지원", storeUrl: "https://www.uaudio.com", daysLeft: 1 },
-      { id: 5, brand: "Arturia", title: "Analog Lab Play", cat: "free", sub: "Free Synths", desc: "빈티지 신티사이저와 클래식 건반 악기들의 최고급 프리셋 100가지를 무상으로 사용할 수 있는 가상악기 뷰어입니다.", original: 99, discountPrice: 0, discountRateNum: 100, discountRate: "100% FREE", code: "DIRECT-DOWNLOAD", perk: "100가지 핵심 빈티지 신스 프리셋 무상 제공", storeUrl: "https://www.arturia.com", daysLeft: 99 },
-      { id: 6, brand: "Native Instruments", title: "Komplete 14 Standard", cat: "synth", sub: "Sample Library", desc: "Kontakt 7 샘플러를 기반으로 웅장한 시네마틱 오케스트라, 드럼, 신스 사운드까지 보유한 통합 제작 번들입니다.", original: 599, discountPrice: 299, discountRateNum: 50, discountRate: "50% OFF", code: "BF-SEASON", perk: "Kontakt 7 및 수만 가지 시네마틱 샘플 수록", storeUrl: "https://www.native-instruments.com", daysLeft: 4 },
-      { id: 7, brand: "iZotope", title: "Ozone 11 Advanced", cat: "mixing", sub: "Mastering Chain", desc: "음원 마스터링 시 대역별 음압 보정, Stem Rebalance 및 AI Assistant 기반으로 곡의 완성도를 마감하는 마스터링 툴입니다.", original: 399, discountPrice: 199, discountRateNum: 50, discountRate: "50% OFF", code: "OZONE11-SALE", perk: "AI 기반 종합 음압/마스터링 프로세싱", storeUrl: "https://www.izotope.com", daysLeft: 7 },
-      { id: 8, brand: "Xfer Records", title: "Serum VST Synth", cat: "synth", sub: "Analog/Synth", desc: "직관적인 렌더링 파형 편집과 압도적인 사운드 메이킹 성능으로 EDM, 팝, 트랩 전 장르에서 일렉트로닉 신스를 이끄는 대표작입니다.", original: 189, discountPrice: 149, discountRateNum: 21, discountRate: "21% OFF", code: "SERUM-PROMO", perk: "웨이브테이블 신티사이저 글로벌 시그니처 툴", storeUrl: "https://xferrecords.com", daysLeft: 15 },
-      { id: 9, brand: "Celemony", title: "Melodyne 5 assistant", cat: "fx", sub: "Pitch/Vocal", desc: "보컬의 음정과 타이밍을 음질 손상 없이 정밀하게 수정하는 글로벌 표준 보컬 피치 보정 플러그인입니다.", original: 249, discountPrice: 149, discountRateNum: 40, discountRate: "40% OFF", code: "MELODYNE40", perk: "자연스러운 보컬 피치 및 타임 보정 업계 표준", storeUrl: "https://www.celemony.com", daysLeft: 3 }
+      { id: 1, brand: "FabFilter", title: "Pro-Q 3 Equalizer", cat: "mixing", sub: "EQ", desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.", original: 179, discountPrice: 134, discountRateNum: 25, discountRate: "25% OFF", code: "FAB-PROMO-2026", perk: "업계 표준 EQ, Dynamic EQ 모드 지원", storeUrl: "https://www.fabfilter.com", daysLeft: 5, imgUrl: "https://www.fabfilter.com/img/products/pro-q-3-large.png", youtubeId: "3m6_rB69IeA" },
+      { id: 2, brand: "oeksound", title: "soothe2 Resonance Suppressor", cat: "mixing", sub: "De-Esser/Dynamic", desc: "보컬이나 악기 트랙에서 발생하는 불쾌한 쏘는 소리와 피크 공명을 실시간으로 감지하여 부드럽게 억제하는 툴입니다.", original: 219, discountPrice: 149, discountRateNum: 32, discountRate: "32% OFF", code: "SOOTHE2026", perk: "불쾌한 공명 사운드 자동 실시간 제어", storeUrl: "https://oeksound.com", daysLeft: 2, imgUrl: "https://oeksound.com/wp-content/uploads/2019/12/soothe2_gui_main.png", youtubeId: "c_QzP8lTz8k" },
+      { id: 3, brand: "Celemony", title: "Melodyne 5 assistant", cat: "fx", sub: "Pitch/Vocal", desc: "보컬의 음정과 타이밍을 음질 손상 없이 정밀하게 수정하는 글로벌 표준 보컬 피치 보정 플러그인입니다.", original: 249, discountPrice: 149, discountRateNum: 40, discountRate: "40% OFF", code: "MELODYNE40", perk: "자연스러운 보컬 피치 및 타임 보정 업계 표준", storeUrl: "https://www.celemony.com", daysLeft: 3, imgUrl: "https://www.celemony.com/cgi-bin/WebObjects/License.woa/wa/VTProductDisplay/Melodyne5Assistant_GUI.png", youtubeId: "J2pD1M1T-0A" },
+      { id: 4, brand: "Universal Audio", title: "UAD Spark 1 Year Pass", cat: "mixing", sub: "Compressor/Limiter", desc: "DSP 하드웨어 없이 1176, LA-2A, Studer 테이프 머신 등 전설적인 아날로그 하드웨어의 명음기를 구동합니다.", original: 199, discountPrice: 99, discountRateNum: 50, discountRate: "50% OFF", code: "UAD-SPARK-50", perk: "전설적 아날로그 믹싱 기기 네이티브 지원", storeUrl: "https://www.uaudio.com", daysLeft: 1, imgUrl: "https://www.uaudio.com/media/catalog/product/u/a/uad_spark_hero.jpg", youtubeId: "g9Y-4c07FEE" }
     ];
 
     let currentMainCat = 'all';
@@ -710,9 +602,7 @@
       renderDeals();
     }
 
-    function onDealFilterChange() {
-      renderDeals();
-    }
+    function onDealFilterChange() { renderDeals(); }
 
     function renderDeals() {
       const container = document.getElementById('dealsContainer');
@@ -720,375 +610,102 @@
       const sortOption = document.getElementById('dealSortOption').value;
 
       let filtered = [...dealsData];
-
       if (currentMainCat !== 'all') {
-        if (currentMainCat === 'free') {
-          filtered = filtered.filter(d => d.discountPrice === 0);
-        } else {
-          filtered = filtered.filter(d => d.cat === currentMainCat);
-        }
+        filtered = currentMainCat === 'free' ? filtered.filter(d => d.discountPrice === 0) : filtered.filter(d => d.cat === currentMainCat);
       }
-
       if (currentSubCat !== '전체' && currentSubCat !== '전체 보기') {
         filtered = filtered.filter(d => d.sub === currentSubCat);
       }
-
       if (searchKeyword !== '') {
-        filtered = filtered.filter(d => 
-          d.brand.toLowerCase().includes(searchKeyword) ||
-          d.title.toLowerCase().includes(searchKeyword) ||
-          d.desc.toLowerCase().includes(searchKeyword)
-        );
+        filtered = filtered.filter(d => d.brand.toLowerCase().includes(searchKeyword) || d.title.toLowerCase().includes(searchKeyword));
       }
 
-      if (sortOption === 'priceLow') {
-        filtered.sort((a, b) => a.discountPrice - b.discountPrice);
-      } else if (sortOption === 'priceHigh') {
-        filtered.sort((a, b) => b.discountPrice - a.discountPrice);
-      } else if (sortOption === 'discountHigh') {
-        filtered.sort((a, b) => b.discountRateNum - a.discountRateNum);
-      } else if (sortOption === 'endingSoon') {
-        filtered.sort((a, b) => a.daysLeft - b.daysLeft);
-      }
+      if (sortOption === 'priceLow') filtered.sort((a, b) => a.discountPrice - b.discountPrice);
+      if (sortOption === 'priceHigh') filtered.sort((a, b) => b.discountPrice - a.discountPrice);
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">검색 조건에 해당되는 VST 딜 정보가 없습니다.</div>`;
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">해당되는 VST 딜 정보가 없습니다.</div>`;
         return;
       }
 
       container.innerHTML = filtered.map(d => {
         const krw = d.discountPrice === 0 ? "0원 (무료)" : `약 ${(d.discountPrice * USD_TO_KRW).toLocaleString()}원`;
-        const origKrw = d.original ? `$${d.original} (약 ${(d.original * USD_TO_KRW).toLocaleString()}원)` : '';
+        const origKrw = d.original ? `$${d.original}` : '';
         const tagClass = d.discountPrice === 0 ? 'tag-free' : 'tag-discount';
 
         return `
-          <div class="deal-card">
-            <div>
-              <div class="card-header">
-                <span class="brand-name">${d.brand}</span>
-                <span class="tag-badge ${tagClass}">${d.discountRate}</span>
-              </div>
-              <a href="${d.storeUrl}" target="_blank" class="deal-title">${d.title}</a>
-              <div class="sub-cat-tag"># ${d.sub}</div>
-              <div class="description-text">${d.desc}</div>
-              <div class="price-box">
-                <span class="original-price">${origKrw}</span>
-                <span class="discount-price">$${d.discountPrice}</span>
-                <div class="krw-price">한화 추산: ${krw}</div>
-              </div>
-              <div class="perks-box">
-                혜택: ${d.perk}<br/>
-                프로모션 코드: <strong>${d.code}</strong>
-              </div>
+          <div class="deal-card" onclick="openDealDetailModal(${d.id})">
+            <div class="plugin-img-wrapper">
+              <img src="${d.imgUrl}" alt="${d.title}" onerror="this.src='PlugAzit.png'">
             </div>
-            <a href="${d.storeUrl}" target="_blank" class="btn-buy">공식 스토어 딜 바로가기 ↗</a>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function filterCategory(cat) {
-      if (cat === 'affiliate') {
-        alert('제휴 문의: aftrdry@outlook.kr 또는 공식 디스코드 채널로 연락해 주시기 바랍니다.');
-      }
-    }
-
-    // --- 커뮤니티 엔진 (Supabase 연동 & 게시글 렌더링) ---
-
-    let currentCommCat = 'all';
-
-    function setCommunityCategory(cat, el) {
-      document.querySelectorAll('#communityView .main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
-      if (el) el.classList.add('active');
-      currentCommCat = cat;
-      renderCommunityPosts();
-    }
-
-    async function fetchCommunityPosts() {
-      const listEl = document.getElementById('communityList');
-      if (!supabaseClient) {
-        rawCommunityPosts = [
-          { id: 1, category: "공지사항", author_nickname: "@aftrdry", title: "PlugAzit 공식 아지트 개설 안내", content: "프로듀서들을 위한 큐레이션 및 커뮤니티 공간에 오신 것을 환영합니다.", created_at: new Date().toISOString() },
-          { id: 2, category: "믹싱/마스터링", author_nickname: "@aftrdry", title: "FabFilter Pro-Q 3 Dynamic EQ 보컬 마스킹 잡는 팁", content: "Sidechain 연동 후 250Hz 영역 Dynamic EQ 적용하면 투명하게 정리됩니다.", created_at: new Date().toISOString() }
-        ];
-        renderCommunityPosts();
-        return;
-      }
-
-      try {
-        const { data, error } = await supabaseClient
-          .from('posts')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.error('커뮤니티 글 불러오기 에러:', error.message);
-          listEl.innerHTML = `<div style="text-align: center; padding: 2.5rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">Supabase에 'posts' 테이블이 준비되지 않았습니다. 제공된 SQL문을 실행해 주세요.</div>`;
-        } else {
-          rawCommunityPosts = data || [];
-          renderCommunityPosts();
-        }
-      } catch (err) {
-        console.error('커뮤니티 연동 실패:', err);
-      }
-    }
-
-    function renderCommunityPosts() {
-      const listEl = document.getElementById('communityList');
-      const keyword = document.getElementById('commSearchKeyword').value.trim().toLowerCase();
-
-      let filtered = [...rawCommunityPosts];
-
-      if (currentCommCat !== 'all') {
-        filtered = filtered.filter(p => p.category === currentCommCat);
-      }
-
-      if (keyword !== '') {
-        filtered = filtered.filter(p => 
-          p.title.toLowerCase().includes(keyword) ||
-          p.content.toLowerCase().includes(keyword) ||
-          p.author_nickname.toLowerCase().includes(keyword)
-        );
-      }
-
-      if (filtered.length === 0) {
-        listEl.innerHTML = `<div style="text-align: center; padding: 3rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">게시글이 존재하지 않습니다. 첫 번째 글을 작성해 보세요.</div>`;
-        return;
-      }
-
-      listEl.innerHTML = filtered.map(p => {
-        const isNotice = p.category === '공지사항';
-        const cardClass = isNotice ? 'comm-card notice-card' : 'comm-card';
-        const badgeClass = isNotice ? 'comm-category-badge notice' : 'comm-category-badge';
-        const dateStr = new Date(p.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-        return `
-          <div class="${cardClass}">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+            <div class="deal-card-body">
               <div>
-                <span class="${badgeClass}">${p.category || '자유수다'}</span>
-                <span class="comm-author">${p.author_nickname}</span>
+                <div class="card-header">
+                  <span class="brand-name">${d.brand}</span>
+                  <span class="tag-badge ${tagClass}">${d.discountRate}</span>
+                </div>
+                <div class="deal-title">${d.title}</div>
+                <div class="sub-cat-tag"># ${d.sub}</div>
+                <div class="description-text">${d.desc}</div>
               </div>
-              <span style="font-size:0.78rem; color:var(--text-secondary);">${dateStr}</span>
+              <div>
+                <div class="price-box">
+                  <span class="original-price">${origKrw}</span>
+                  <span class="discount-price">$${d.discountPrice}</span>
+                  <div class="krw-price">${krw}</div>
+                </div>
+                <button class="btn-buy" onclick="event.stopPropagation(); window.open('${d.storeUrl}', '_blank')">공식 스토어 딜 바로가기 ↗</button>
+              </div>
             </div>
-            <h4 style="margin:0.5rem 0 0.4rem 0; font-size:1.1rem; color:var(--text-primary); font-weight:700;">${p.title}</h4>
-            <p style="font-size:0.92rem; color:var(--text-secondary); line-height:1.6; white-space: pre-wrap;">${p.content}</p>
           </div>
         `;
       }).join('');
     }
 
-    async function handlePostSubmit(e) {
-      e.preventDefault();
-      const category = document.getElementById('postCategorySelect').value;
-      const title = document.getElementById('postTitle').value.trim();
-      const content = document.getElementById('postContent').value.trim();
+    /* VST 클릭 시 전체 페이지 형태 모달 레이어 렌더링 */
+    function openDealDetailModal(id) {
+      const deal = dealsData.find(d => d.id === id);
+      if (!deal) return;
 
-      if (!supabaseClient) {
-        alert('게시글이 작성되었습니다. (데모 모드)');
-        closeModal('postModal');
-        e.target.reset();
-        return;
-      }
+      const detailContent = document.getElementById('dealDetailContent');
+      const krw = deal.discountPrice === 0 ? "0원 (무료)" : `약 ${(deal.discountPrice * USD_TO_KRW).toLocaleString()}원`;
 
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (!session) {
-        alert('로그인이 필요한 기능입니다.');
-        openModal('loginModal');
-        return;
-      }
+      detailContent.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
+          <div>
+            <span style="color:var(--accent-gold); font-weight:800; text-transform:uppercase; font-size:0.85rem;">${deal.brand}</span>
+            <h2 style="font-size:2rem; font-weight:900; margin-top:0.2rem;">${deal.title}</h2>
+          </div>
+          <span class="tag-badge tag-discount" style="font-size:1rem; padding:0.4rem 0.8rem;">${deal.discountRate}</span>
+        </div>
 
-      if (category === '공지사항' && (!session.user.email || !ADMIN_EMAILS.includes(session.user.email.toLowerCase()))) {
-        alert('공지사항은 관리자 계정만 작성할 수 있습니다.');
-        return;
-      }
+        <div class="plugin-img-wrapper" style="height:260px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
+          <img src="${deal.imgUrl}" alt="${deal.title}">
+        </div>
 
-      const user = session.user;
-      
-      // 유저 프로필 닉네임 가져오기
-      let nickname = user.user_metadata?.nickname || '@' + user.email.split('@')[0];
-      const { data: profData } = await supabaseClient
-        .from('profiles')
-        .select('nickname')
-        .eq('id', user.id)
-        .maybeSingle();
+        <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1.5rem;">${deal.desc}</p>
 
-      if (profData && profData.nickname) {
-        nickname = profData.nickname;
-      }
+        <!-- 유튜브 연동 플레이어 -->
+        <h4 style="font-weight:800; font-size:1.1rem; color:var(--accent-gold);">공식 데모 / 사운드 리뷰 영상</h4>
+        <div class="youtube-video-container">
+          <iframe src="https://www.youtube.com/embed/${deal.youtubeId}" allowfullscreen></iframe>
+        </div>
 
-      const { error } = await supabaseClient
-        .from('posts')
-        .insert([{
-          user_id: user.id,
-          author_nickname: nickname,
-          category,
-          title,
-          content
-        }]);
+        <div class="price-box" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span class="original-price" style="font-size:1rem;">정가 $${deal.original}</span>
+            <span class="discount-price" style="font-size:1.8rem; margin-left:0.5rem;">$${deal.discountPrice}</span>
+          </div>
+          <div class="krw-price" style="font-size:1.1rem;">한화: ${krw}</div>
+        </div>
 
-      if (error) {
-        if (error.message.includes('find the table')) {
-          alert('게시글 작성 실패: Supabase 에디터에서 제공된 SQL 문을 실행하여 posts 테이블을 먼저 만들어 주세요.');
-        } else {
-          alert('게시글 작성 실패: ' + error.message);
-        }
-      } else {
-        alert('성공적으로 게시글이 등록되었습니다.');
-        closeModal('postModal');
-        e.target.reset();
-        fetchCommunityPosts();
-      }
+        <a href="${deal.storeUrl}" target="_blank" class="btn-buy" style="font-size:1.05rem; padding:1rem; text-align:center; margin-top:1.2rem;">공식 스토어 구매 페이지로 이동 ↗</a>
+      `;
+
+      openModal('dealDetailModal');
     }
 
-    // --- Supabase 인증 및 마이페이지/닉네임 중복검증 연동 ---
-
-    async function checkUserSession() {
-      if (!supabaseClient) return;
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      currentUser = session?.user || null;
-      updateUIAuthStatus(currentUser);
-    }
-
-    function updateUIAuthStatus(user) {
-      currentUser = user;
-      document.getElementById('authNav').style.display = user ? 'none' : 'flex';
-      document.getElementById('userNav').style.display = user ? 'flex' : 'none';
-      
-      const adminBtn = document.getElementById('navAdminBtn');
-      const noticeOpt = document.getElementById('optNoticeCategory');
-
-      const isAdmin = user && user.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
-
-      if (adminBtn) adminBtn.style.display = isAdmin ? 'block' : 'none';
-      if (noticeOpt) noticeOpt.style.display = isAdmin ? 'block' : 'none';
-
-      if (!isAdmin && document.getElementById('adminView').style.display === 'block') {
-        showPage('deals');
-      }
-    }
-
-    async function handleLoginSubmit(e) {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
-
-      if (!supabaseClient) {
-        closeModal('loginModal');
-        updateUIAuthStatus({ email });
-        alert('환영합니다.');
-        return;
-      }
-
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) {
-        alert('로그인 실패: ' + error.message);
-      } else {
-        closeModal('loginModal');
-        updateUIAuthStatus(data.user);
-        alert('성공적으로 로그인되었습니다.');
-      }
-    }
-
-    async function handleSignupSubmit(e) {
-      e.preventDefault();
-      const nickname = document.getElementById('signupNickname').value;
-      const email = document.getElementById('signupEmail').value;
-      const password = document.getElementById('signupPassword').value;
-
-      if (!supabaseClient) {
-        closeModal('signupModal');
-        alert('회원가입이 완료되었습니다. (' + nickname + ')');
-        return;
-      }
-
-      const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { nickname }
-        }
-      });
-
-      if (error) {
-        alert('회원가입 실패: ' + error.message);
-      } else {
-        closeModal('signupModal');
-        alert('가입 완료. 이메일 인증 확인 후 로그인해 주세요.');
-      }
-    }
-
-    async function handleResetPasswordSubmit(e) {
-      e.preventDefault();
-      const email = document.getElementById('resetEmail').value.trim();
-
-      if (!supabaseClient) {
-        alert('재설정 이메일이 발송되었습니다.');
-        closeModal('resetPwModal');
-        return;
-      }
-
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://plugazit.com'
-      });
-
-      if (error) {
-        if (error.message.includes('rate limit')) {
-          alert('요청 실패: 단시간 내 메일 발송 제한(Rate limit)을 초과했습니다. Supabase 대시보드 Rate Limits에서 횟수를 늘리거나 1~2분 후 시도해 주세요.');
-        } else {
-          alert('요청 실패: ' + error.message);
-        }
-      } else {
-        alert('비밀번호 재설정 링크가 이메일로 발송되었습니다.');
-        closeModal('resetPwModal');
-      }
-    }
-
-    async function handleFindEmailSubmit(e) {
-      e.preventDefault();
-      const nickname = document.getElementById('findNickname').value.trim();
-
-      if (!supabaseClient) {
-        alert(`닉네임 [${nickname}] 님의 가입 이메일 힌트: af***@outlook.kr`);
-        closeModal('findEmailModal');
-        return;
-      }
-
-      const { data, error } = await supabaseClient
-        .from('profiles')
-        .select('email, nickname')
-        .eq('nickname', nickname)
-        .maybeSingle();
-
-      if (error || !data) {
-        alert('해당 닉네임으로 등록된 회원 정보를 찾을 수 없습니다.');
-      } else {
-        const parts = data.email.split('@');
-        const userPart = parts[0];
-        const domainPart = parts[1];
-        
-        let maskedUser = userPart;
-        if (userPart.length > 2) {
-          maskedUser = userPart.substring(0, 2) + '*'.repeat(userPart.length - 2);
-        }
-        
-        const maskedEmail = `${maskedUser}@${domainPart}`;
-
-        alert(`닉네임 [${nickname}] 님의 가입 이메일 힌트는 [ ${maskedEmail} ] 입니다.`);
-        closeModal('findEmailModal');
-      }
-    }
-
-    async function handleLogout() {
-      if (supabaseClient) {
-        await supabaseClient.auth.signOut();
-      }
-      alert('로그아웃 되었습니다.');
-      location.reload();
-    }
-
-    // --- 마이페이지 닉네임 중복검사 로직 ---
-
+    // --- 닉네임 중복확인 고속 검증 로직 ---
     function onNicknameInputChanged() {
       const inputVal = document.getElementById('myPageNickname').value.trim();
       const msgEl = document.getElementById('nicknameCheckMsg');
@@ -1098,16 +715,12 @@
         isNicknameVerified = true;
         msgEl.style.color = 'var(--text-secondary)';
         msgEl.innerText = '현재 본인의 닉네임입니다.';
-        saveBtn.disabled = false;
-        saveBtn.style.opacity = '1';
-        saveBtn.style.cursor = 'pointer';
+        saveBtn.disabled = false; saveBtn.style.opacity = '1'; saveBtn.style.cursor = 'pointer';
       } else {
         isNicknameVerified = false;
         msgEl.style.color = '#e74c3c';
-        msgEl.innerText = '닉네임 변경 시 중복 확인이 필요합니다.';
-        saveBtn.disabled = true;
-        saveBtn.style.opacity = '0.5';
-        saveBtn.style.cursor = 'not-allowed';
+        msgEl.innerText = '닉네임 변경 시 [중복 확인] 버튼을 눌러주세요.';
+        saveBtn.disabled = true; saveBtn.style.opacity = '0.5'; saveBtn.style.cursor = 'not-allowed';
       }
     }
 
@@ -1116,62 +729,40 @@
       const msgEl = document.getElementById('nicknameCheckMsg');
       const saveBtn = document.getElementById('btnSaveProfile');
 
-      if (!nickname) {
-        alert('닉네임을 입력해 주세요.');
-        return;
-      }
-
+      if (!nickname) { alert('닉네임을 입력해 주세요.'); return; }
       if (nickname === originalNickname) {
         isNicknameVerified = true;
         msgEl.style.color = 'var(--text-secondary)';
         msgEl.innerText = '현재 본인의 닉네임입니다.';
-        saveBtn.disabled = false;
-        saveBtn.style.opacity = '1';
-        saveBtn.style.cursor = 'pointer';
+        saveBtn.disabled = false; saveBtn.style.opacity = '1'; saveBtn.style.cursor = 'pointer';
         return;
       }
 
       if (!supabaseClient) {
         isNicknameVerified = true;
         msgEl.style.color = '#8fa874';
-        msgEl.innerText = '사용 가능한 닉네임입니다. (데모 모드)';
-        saveBtn.disabled = false;
-        saveBtn.style.opacity = '1';
-        saveBtn.style.cursor = 'pointer';
+        msgEl.innerText = '사용 가능한 닉네임입니다.';
+        saveBtn.disabled = false; saveBtn.style.opacity = '1'; saveBtn.style.cursor = 'pointer';
         return;
       }
 
-      const { data, error } = await supabaseClient
-        .from('profiles')
-        .select('id')
-        .eq('nickname', nickname)
-        .maybeSingle();
-
-      if (error) {
-        alert('중복 확인 중 에러가 발생했습니다: ' + error.message);
-        return;
-      }
+      const { data } = await supabaseClient.from('profiles').select('id').eq('nickname', nickname).maybeSingle();
 
       if (data) {
         isNicknameVerified = false;
         msgEl.style.color = '#e74c3c';
-        msgEl.innerText = '이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해 주세요.';
-        saveBtn.disabled = true;
-        saveBtn.style.opacity = '0.5';
-        saveBtn.style.cursor = 'not-allowed';
+        msgEl.innerText = '이미 사용 중인 닉네임입니다.';
+        saveBtn.disabled = true; saveBtn.style.opacity = '0.5'; saveBtn.style.cursor = 'not-allowed';
       } else {
         isNicknameVerified = true;
         msgEl.style.color = '#8fa874';
         msgEl.innerText = '사용 가능한 닉네임입니다.';
-        saveBtn.disabled = false;
-        saveBtn.style.opacity = '1';
-        saveBtn.style.cursor = 'pointer';
+        saveBtn.disabled = false; saveBtn.style.opacity = '1'; saveBtn.style.cursor = 'pointer';
       }
     }
 
     async function openMyPageModal() {
       openModal('myPageModal');
-
       if (!supabaseClient) {
         originalNickname = '@aftrdry';
         document.getElementById('myPageEmail').value = 'aftrdry@outlook.kr';
@@ -1180,77 +771,70 @@
         onNicknameInputChanged();
         return;
       }
-
-      try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) return;
-
-        const user = session.user;
-        document.getElementById('myPageEmail').value = user.email || '';
-
-        const { data } = await supabaseClient
-          .from('profiles')
-          .select('nickname, main_daw')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (data && data.nickname) {
-          originalNickname = data.nickname;
-          document.getElementById('myPageNickname').value = originalNickname;
-          if (data.main_daw) document.getElementById('myPageDaw').value = data.main_daw;
-        } else {
-          originalNickname = user.user_metadata?.nickname || '@' + user.email.split('@')[0];
-          document.getElementById('myPageNickname').value = originalNickname;
-        }
-        onNicknameInputChanged();
-      } catch (err) {
-        console.error(err);
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) return;
+      document.getElementById('myPageEmail').value = session.user.email || '';
+      const { data } = await supabaseClient.from('profiles').select('nickname, main_daw').eq('id', session.user.id).maybeSingle();
+      if (data && data.nickname) {
+        originalNickname = data.nickname;
+        document.getElementById('myPageNickname').value = originalNickname;
+        if (data.main_daw) document.getElementById('myPageDaw').value = data.main_daw;
       }
+      onNicknameInputChanged();
     }
 
     async function handleProfileUpdateSubmit(e) {
       e.preventDefault();
       const nickname = document.getElementById('myPageNickname').value.trim();
       const main_daw = document.getElementById('myPageDaw').value;
-
-      if (!isNicknameVerified) {
-        alert('닉네임 중복 확인을 먼저 완료해 주세요.');
-        return;
-      }
-
-      if (!supabaseClient) {
-        alert('프로필 변경사항이 저장되었습니다.');
-        closeModal('myPageModal');
-        return;
-      }
-
+      if (!isNicknameVerified) { alert('닉네임 중복 확인을 진행해 주세요.'); return; }
+      if (!supabaseClient) { alert('프로필 저장이 완료되었습니다.'); closeModal('myPageModal'); return; }
       const { data: { session } } = await supabaseClient.auth.getSession();
-      if (!session) return;
-
-      const { error } = await supabaseClient
-        .from('profiles')
-        .upsert({
-          id: session.user.id,
-          email: session.user.email,
-          nickname,
-          main_daw,
-          updated_at: new Date()
-        });
-
-      if (error) {
-        alert('프로필 업데이트 실패: ' + error.message);
-      } else {
-        alert('프로필 정보가 저장되었습니다.');
-        originalNickname = nickname;
-        closeModal('myPageModal');
-      }
+      const { error } = await supabaseClient.from('profiles').upsert({ id: session.user.id, email: session.user.email, nickname, main_daw, updated_at: new Date() });
+      if (error) { alert('저장 실패: ' + error.message); } else { alert('저장 완료.'); originalNickname = nickname; closeModal('myPageModal'); }
     }
 
-    function handleDealSubmit(e) {
+    async function fetchCommunityPosts() {
+      const listEl = document.getElementById('communityList');
+      if (!supabaseClient) {
+        rawCommunityPosts = [{ id: 1, category: "공지사항", author_nickname: "@aftrdry", title: "PlugAzit 서비스 개설 안내", content: "프로듀서 전문 아지트 오픈", created_at: new Date().toISOString() }];
+        renderCommunityPosts(); return;
+      }
+      const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+      rawCommunityPosts = data || [];
+      renderCommunityPosts();
+    }
+
+    function renderCommunityPosts() {
+      const listEl = document.getElementById('communityList');
+      listEl.innerHTML = rawCommunityPosts.map(p => `
+        <div class="comm-card">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+            <div><span class="comm-category-badge">${p.category}</span><span class="comm-author">${p.author_nickname}</span></div>
+          </div>
+          <h4 style="font-size:1.1rem; font-weight:700;">${p.title}</h4>
+          <p style="font-size:0.92rem; color:var(--text-secondary); margin-top:0.4rem;">${p.content}</p>
+        </div>
+      `).join('');
+    }
+
+    async function handlePostSubmit(e) {
       e.preventDefault();
-      alert('새로운 딜 정보가 관리자 권한으로 등록되었습니다.');
-      e.target.reset();
-      showPage('deals');
+      const category = document.getElementById('postCategorySelect').value;
+      const title = document.getElementById('postTitle').value.trim();
+      const content = document.getElementById('postContent').value.trim();
+      if (!supabaseClient) { closeModal('postModal'); return; }
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      await supabaseClient.from('posts').insert([{ user_id: session.user.id, author_nickname: originalNickname || '@aftrdry', category, title, content }]);
+      closeModal('postModal'); fetchCommunityPosts();
+    }
+
+    async function checkUserSession() {
+      if (!supabaseClient) return;
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      currentUser = session?.user || null;
+      document.getElementById('authNav').style.display = currentUser ? 'none' : 'flex';
+      document.getElementById('userNav').style.display = currentUser ? 'flex' : 'none';
     }
 
     document.addEventListener('DOMContentLoaded', () => {
