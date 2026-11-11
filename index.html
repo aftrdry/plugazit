@@ -4,565 +4,49 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PlugAzit — Right Near, Your Azit.</title>
+  <meta name="description" content="글로벌 프로듀서들을 위한 VST 플러그인 딜 큐레이션 및 사운드 커뮤니티 플랫폼, PlugAzit.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="PlugAzit — Right Near, Your Azit.">
+  <meta property="og:description" content="글로벌 프로듀서들을 위한 VST 딜 큐레이션 및 연도별 가격 추이 분석 아지트.">
+  <meta property="og:url" content="https://plugazit.com">
+  <meta name="theme-color" content="#101211">
+
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    :root {
-      --bg-color: #101211;
-      --header-bg: rgba(16, 18, 17, 0.92);
-      --card-bg: #171a18;
-      --card-hover: #202421;
-      --border-color: #272d29;
-      --accent-color: #4a5a3a;
-      --accent-hover: #5d7049;
-      --accent-gold: #c2a878;
-      --text-primary: #f2f0eb;
-      --text-secondary: #909892;
-      --modal-bg: #161917;
-      --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-    }
-
-    [data-theme="light"] {
-      --bg-color: #f5f2eb;
-      --header-bg: rgba(245, 242, 235, 0.92);
-      --card-bg: #ffffff;
-      --card-hover: #ece7de;
-      --border-color: #ded8cb;
-      --accent-color: #9e8555;
-      --accent-hover: #856f43;
-      --accent-gold: #222623;
-      --text-primary: #1a1d1b;
-      --text-secondary: #6e736f;
-      --modal-bg: #ffffff;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-primary);
-      font-family: var(--font-sans);
-      line-height: 1.65;
-      padding-top: 110px;
-      letter-spacing: -0.02em;
-      transition: background-color 0.3s ease, color 0.3s ease;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    header {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100px;
-      background: var(--header-bg);
-      border-bottom: 1px solid var(--border-color);
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0 3rem; z-index: 1000;
-      backdrop-filter: blur(16px);
-    }
-
-    .logo-container {
-      display: flex; align-items: center; text-decoration: none; cursor: pointer; height: 90px;
-    }
-    .brand-logo-img {
-      height: 80px; width: auto; display: block; object-fit: contain;
-      transition: filter 0.3s ease;
-    }
-    [data-theme="dark"] .brand-logo-img { filter: invert(1); }
-    [data-theme="light"] .brand-logo-img { filter: none; }
-
-    nav { display: flex; gap: 1rem; align-items: center; }
-
-    .nav-tab-link {
-      background: transparent; border: none; color: var(--text-secondary);
-      font-size: 0.95rem; font-weight: 600; cursor: pointer; padding: 0.5rem 0.8rem;
-      border-radius: 6px; transition: all 0.2s ease; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;
-    }
-    .nav-tab-link.active, .nav-tab-link:hover { color: var(--text-primary); background: var(--card-bg); }
-
-    .social-link-btn {
-      color: var(--text-secondary); padding: 0.5rem 0.7rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem;
-      transition: all 0.2s ease; text-decoration: none; display: flex; align-items: center; gap: 0.4rem;
-    }
-    .social-link-btn:hover { color: var(--accent-gold); background: var(--card-bg); }
-
-    .toggle-switch {
-      position: relative; width: 44px; height: 22px;
-      background: var(--border-color); border-radius: 20px;
-      cursor: pointer; transition: 0.3s; display: flex; align-items: center; padding: 2px; margin: 0 0.4rem;
-    }
-    .toggle-knob {
-      width: 18px; height: 18px; background: var(--text-primary); border-radius: 50%;
-      transition: 0.3s transform ease; transform: translateX(0);
-    }
-    [data-theme="light"] .toggle-knob { transform: translateX(22px); }
-
-    #authNav, #userNav { display: flex; gap: 0.8rem; align-items: center; }
-
-    .nav-btn {
-      background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);
-      font-size: 0.88rem; font-weight: 600; cursor: pointer; padding: 0.55rem 1.2rem;
-      border-radius: 6px; transition: all 0.2s ease;
-    }
-    .nav-btn:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
-
-    .container { max-width: 1280px; margin: 0 auto; padding: 2.5rem 2.5rem; flex: 1; width: 100%; }
-
-    .hero-slogan-section {
-      padding: 1.5rem 0 2.2rem 0; border-bottom: 1px solid var(--border-color); margin-bottom: 2.5rem;
-    }
-    .hero-title { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.03em; color: var(--text-primary); margin-bottom: 0.6rem; }
-    .hero-subtitle { font-size: 1.05rem; color: var(--text-primary); font-weight: 600; line-height: 1.6; }
-    .hero-subtitle .sub-line { display: block; color: var(--text-primary); font-weight: 600; }
-
-    .category-section { margin-bottom: 2.5rem; }
-    .main-cat-bar {
-      display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.8rem;
-      border-bottom: 1px solid var(--border-color); margin-bottom: 1.2rem; align-items: center;
-    }
-    .cat-chip {
-      background: var(--card-bg); border: 1px solid var(--border-color);
-      color: var(--text-secondary); padding: 0.6rem 1.4rem; border-radius: 6px;
-      font-size: 0.88rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s ease;
-    }
-    .cat-chip.active, .cat-chip:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
-    .cat-chip.notice-chip { border-color: var(--accent-gold); color: var(--accent-gold); }
-    .cat-chip.notice-chip.active, .cat-chip.notice-chip:hover { background: var(--accent-gold); color: var(--bg-color); }
-    .cat-chip.affiliate { margin-left: auto; border-color: var(--accent-gold); color: var(--accent-gold); }
-    .cat-chip.affiliate:hover { background: var(--accent-gold); color: #fff; }
-
-    .sub-cat-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; padding: 0.2rem 0; }
-    .sub-chip {
-      background: transparent; border: 1px solid var(--border-color);
-      color: var(--text-secondary); padding: 0.35rem 0.95rem; border-radius: 20px;
-      font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
-    }
-    .sub-chip.active, .sub-chip:hover { background: var(--card-hover); color: var(--text-primary); border-color: var(--text-primary); }
-
-    .filter-control-bar {
-      display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
-    }
-    .search-input-box { position: relative; flex: 1; min-width: 260px; max-width: 420px; }
-    .search-input-box input {
-      width: 100%; padding: 0.65rem 1rem; background: var(--card-bg); border: 1px solid var(--border-color);
-      border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none; transition: border-color 0.2s;
-    }
-    .search-input-box input:focus { border-color: var(--accent-gold); }
-
-    .sort-and-view-controls { display: flex; gap: 0.8rem; align-items: center; }
-
-    select, .sort-select-box select, .form-group select {
-      padding: 0.65rem 2.6rem 0.65rem 1.1rem !important;
-      background-color: var(--card-bg) !important;
-      border: 1px solid var(--border-color) !important;
-      border-radius: 6px !important;
-      color: var(--text-primary) !important;
-      font-size: 0.88rem !important;
-      font-weight: 600 !important;
-      outline: none !important;
-      cursor: pointer !important;
-      appearance: none !important;
-      -webkit-appearance: none !important;
-      -moz-appearance: none !important;
-      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23c2a878' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
-      background-repeat: no-repeat !important;
-      background-position: right 0.95rem center !important;
-      background-size: 14px 14px !important;
-      transition: border-color 0.2s ease, background-color 0.2s ease !important;
-    }
-    [data-theme="light"] select,
-    [data-theme="light"] .sort-select-box select,
-    [data-theme="light"] .form-group select {
-      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231a1d1b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
-    }
-    select:hover, .sort-select-box select:hover, .form-group select:hover {
-      border-color: var(--accent-gold) !important;
-    }
-    select:focus { border-color: var(--accent-gold) !important; }
-
-    .view-toggle-btns { display: flex; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 2px; }
-    .view-btn {
-      background: transparent; border: none; color: var(--text-secondary); padding: 0.45rem 0.8rem; font-size: 0.82rem;
-      font-weight: 700; cursor: pointer; border-radius: 4px; transition: all 0.2s ease; display: flex; align-items: center; gap: 0.3rem;
-    }
-    .view-btn.active { background: var(--accent-color); color: #fff; }
-
-    .deals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 2rem; margin-bottom: 4rem; }
-    .deals-grid.list-mode { display: flex; flex-direction: column; gap: 1rem; }
-
-    .deal-card {
-      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;
-      overflow: hidden; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; justify-content: space-between;
-      cursor: pointer;
-    }
-    .deal-card:hover { transform: translateY(-3px); background: var(--card-hover); border-color: var(--accent-gold); }
-    .deals-grid.list-mode .deal-card { flex-direction: row; align-items: center; padding: 1.2rem 1.6rem; gap: 1.5rem; }
-
-    .plugin-img-wrapper {
-      width: 100%; height: 215px;
-      background: var(--card-bg);
-      display: flex; align-items: center; justify-content: center;
-      padding: 0.6rem; border-bottom: 1px solid var(--border-color); position: relative; overflow: hidden;
-      transition: background-color 0.3s ease;
-    }
-    .deals-grid.list-mode .plugin-img-wrapper {
-      width: 150px; height: 95px; padding: 0.3rem; border-bottom: none; border-right: 1px solid var(--border-color); flex-shrink: 0;
-    }
-    .plugin-img-wrapper img {
-      width: 100%; height: 100%; object-fit: cover;
-      border-radius: 6px;
-      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.22)); z-index: 2;
-      transition: transform 0.3s ease;
-    }
-    .deal-card:hover .plugin-img-wrapper img {
-      transform: scale(1.02);
-    }
-    .plugin-ui-fallback {
-      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: var(--card-bg); color: var(--accent-gold); font-weight: 800; font-size: 1.2rem;
-      text-align: center; padding: 1rem; z-index: 1;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-    .plugin-ui-fallback span { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.3rem; font-weight: 500; text-transform: uppercase; }
-
-    .deal-card-body { padding: 1.6rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-    .deals-grid.list-mode .deal-card-body { padding: 0; flex-direction: row; align-items: center; gap: 2rem; }
-
-    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
-    .brand-name { font-size: 0.78rem; color: var(--accent-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
-    .deal-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 0.3rem; color: var(--text-primary); line-height: 1.35; }
-    .sub-cat-tag { font-size: 0.78rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.8rem; }
-    .description-text { font-size: 0.88rem; color: var(--text-primary); margin-bottom: 1rem; line-height: 1.5; font-weight: 500; }
-
-    .price-box { margin: 0.8rem 0 1.2rem 0; padding: 1rem; background: var(--bg-color); border-radius: 6px; border: 1px solid var(--border-color); }
-    .deals-grid.list-mode .price-box { margin: 0; min-width: 170px; text-align: right; }
-    .original-price { text-decoration: line-through; color: var(--text-secondary); font-size: 0.85rem; margin-right: 0.5rem; }
-    .discount-price { font-size: 1.4rem; font-weight: 900; color: var(--text-primary); }
-    .krw-price { font-size: 0.88rem; color: var(--accent-gold); font-weight: 700; margin-top: 0.2rem; }
-
-    .tag-badge { padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.72rem; font-weight: 800; }
-    .tag-discount { background: rgba(194, 168, 120, 0.15); color: var(--accent-gold); }
-    .tag-free { background: rgba(74, 90, 58, 0.25); color: #8fa874; }
-
-    .btn-buy {
-      width: 100%; padding: 0.85rem; background: var(--accent-color); border: none; border-radius: 6px;
-      color: #fff; font-weight: 700; font-size: 0.92rem; cursor: pointer; text-align: center; text-decoration: none; display: block;
-      transition: background 0.2s ease;
-    }
-    .btn-buy:hover { background: var(--accent-hover); }
-
-    #dealsView { display: block; }
-    #communityView, #adminView, #myPageView, #postWriteView, #postDetailView { display: none; }
-
-    .comm-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.6rem; border-radius: 10px; margin-bottom: 1.2rem; cursor: pointer; transition: all 0.2s; }
-    .comm-card:hover { border-color: var(--accent-gold); transform: translateY(-2px); }
-    .comm-card.notice-card { border-color: var(--accent-gold); background: rgba(194, 168, 120, 0.05); }
-    .comm-author { font-weight: 700; color: var(--accent-gold); margin-right: 0.6rem; }
-    .comm-category-badge { font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 4px; background: var(--border-color); color: var(--text-primary); margin-right: 0.6rem; font-weight: 700; }
-    .comm-category-badge.notice { background: var(--accent-gold); color: var(--bg-color); }
-
-    .editor-toolbar {
-      display: flex; gap: 0.4rem; background: var(--bg-color); border: 1px solid var(--border-color);
-      border-bottom: none; border-top-left-radius: 6px; border-top-right-radius: 6px; padding: 0.5rem; flex-wrap: wrap; align-items: center;
-    }
-    .editor-tool-btn {
-      background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-primary);
-      padding: 0.3rem 0.7rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
-    }
-    .editor-tool-btn:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
-
-    .editor-textarea-wrapper { position: relative; }
-    .editor-textarea {
-      width: 100%; min-height: 220px; background: var(--bg-color); border: 1px solid var(--border-color);
-      border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; color: var(--text-primary); padding: 1rem;
-      font-size: 0.95rem; outline: none; line-height: 1.6; resize: vertical;
-    }
-    .editor-textarea:focus { border-color: var(--accent-gold); }
-
-    .editor-guide-placeholder {
-      position: absolute; top: 1rem; left: 1rem; right: 1rem; pointer-events: none;
-      color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; transition: opacity 0.2s ease;
-      opacity: 0.85; background: var(--bg-color); z-index: 5;
-    }
-    .editor-guide-placeholder h5 { color: var(--accent-gold); margin-bottom: 0.3rem; font-weight: 700; }
-
-    footer {
-      border-top: 1px solid var(--border-color); padding: 2.5rem 2rem; text-align: center;
-      color: var(--text-secondary); font-size: 0.82rem; margin-top: auto; background: var(--card-bg);
-      line-height: 1.6;
-    }
-    footer a { color: var(--text-primary); text-decoration: none; font-weight: 600; }
-    footer a:hover { color: var(--accent-gold); }
-    .footer-links { margin-top: 0.6rem; display: flex; justify-content: center; gap: 1.2rem; font-size: 0.78rem; }
-    .footer-links button { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.78rem; font-weight: 600; }
-    .footer-links button:hover { color: var(--accent-gold); text-decoration: underline; }
-
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 2000;
-      backdrop-filter: blur(6px);
-    }
-    .modal-overlay.active { display: flex; }
-    .modal-box {
-      background: var(--modal-bg); border: 1px solid var(--border-color); width: 100%; max-width: 480px;
-      border-radius: 12px; padding: 2.2rem; position: relative; color: var(--text-primary); max-height: 85vh; overflow-y: auto;
-    }
-    .modal-box.large-detail-modal { max-width: 860px; }
-    .modal-close { position: absolute; top: 1.2rem; right: 1.2rem; background: none; border: none; color: var(--text-secondary); font-size: 1.4rem; cursor: pointer; z-index: 10; }
-    
-    .form-group { margin-bottom: 1.2rem; }
-    .form-group label { display: block; font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 600; }
-    .form-group input, .form-group textarea {
-      width: 100%; padding: 0.8rem 1rem; background: var(--bg-color); border: 1px solid var(--border-color);
-      border-radius: 6px; color: var(--text-primary); font-size: 0.95rem; outline: none; transition: border-color 0.2s;
-    }
-    .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-gold); }
-
-    .password-input-wrapper { position: relative; display: flex; align-items: center; }
-    .password-input-wrapper input { padding-right: 4.5rem; }
-    .toggle-password-btn {
-      position: absolute; right: 0.6rem; background: transparent; border: none;
-      color: var(--text-secondary); cursor: pointer; font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.5rem;
-    }
-    .toggle-password-btn:hover { color: var(--text-primary); }
-
-    .nickname-input-group { display: flex; gap: 0.6rem; align-items: stretch; width: 100%; }
-    .nickname-input-group input { flex: 1; height: 46px; margin: 0; }
-    .nickname-check-btn {
-      height: 46px; min-width: 95px; padding: 0 1.1rem; background: var(--card-bg); border: 1px solid var(--border-color);
-      border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; font-weight: 700; cursor: pointer;
-      white-space: nowrap !important; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-      transition: all 0.2s ease;
-    }
-    .nickname-check-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
-
-    .find-auth-links { display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 0.8rem; }
-    .find-auth-links a { color: var(--text-secondary); text-decoration: none; }
-    .find-auth-links a:hover { color: var(--accent-gold); text-decoration: underline; }
-
-    .terms-popup-content {
-      font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7; background: var(--bg-color);
-      padding: 1.2rem; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 0.8rem;
-    }
-
-    .youtube-video-container {
-      position: relative; width: 100%; padding-bottom: 56.25%; height: 0; margin: 0.8rem 0 1.6rem 0; border-radius: 8px; overflow: hidden; background: #000;
-      border: 1px solid var(--border-color);
-    }
-    .youtube-video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-
-    /* 연도별/시즌별 가격 추이 차트 모듈 스타일 (주식 차트 구조) */
-    .price-history-section {
-      margin: 1.8rem 0;
-      padding: 1.5rem;
-      background: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-    }
-    .ph-header-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.8rem;
-      margin-bottom: 1.2rem;
-      padding-bottom: 0.9rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .ph-title-group h4 {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--accent-gold);
-      letter-spacing: -0.01em;
-    }
-    .ph-title-group p {
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-      margin-top: 0.15rem;
-    }
-    .ph-range-tabs {
-      display: flex;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 5px;
-      padding: 2px;
-    }
-    .ph-range-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 0.76rem;
-      font-weight: 700;
-      padding: 0.35rem 0.75rem;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .ph-range-btn.active {
-      background: var(--accent-color);
-      color: #fff;
-    }
-
-    .ph-metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.8rem;
-      margin-bottom: 1.2rem;
-    }
-    @media (max-width: 680px) {
-      .ph-metrics-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    .ph-metric-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 0.85rem 1rem;
-    }
-    .ph-metric-label {
-      font-size: 0.73rem;
-      color: var(--text-secondary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      margin-bottom: 0.25rem;
-    }
-    .ph-metric-value {
-      font-size: 1.15rem;
-      font-weight: 900;
-      color: var(--text-primary);
-    }
-    .ph-metric-sub {
-      font-size: 0.74rem;
-      color: var(--accent-gold);
-      font-weight: 600;
-      margin-top: 0.15rem;
-    }
-
-    .ph-chart-wrapper {
-      position: relative;
-      width: 100%;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 1rem 0.8rem 0.6rem 0.8rem;
-      margin-bottom: 1.2rem;
-    }
-    .ph-svg-chart {
-      width: 100%;
-      height: 230px;
-      display: block;
-      overflow: visible;
-    }
-    .ph-node-point {
-      cursor: pointer;
-      transition: r 0.15s ease, stroke-width 0.15s ease;
-    }
-    .ph-node-point:hover {
-      r: 7px;
-      stroke-width: 3px;
-    }
-
-    .ph-tooltip-box {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.6rem;
-      padding: 0.65rem 1rem;
-      background: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 5px;
-      margin-top: 0.6rem;
-      font-size: 0.82rem;
-    }
-    .ph-tooltip-date {
-      font-weight: 800;
-      color: var(--accent-gold);
-    }
-    .ph-tooltip-season {
-      color: var(--text-primary);
-      font-weight: 700;
-      margin-left: 0.5rem;
-    }
-    .ph-tooltip-price {
-      font-weight: 900;
-      color: var(--text-primary);
-    }
-
-    .ph-seasonality-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.6rem;
-    }
-    @media (max-width: 680px) {
-      .ph-seasonality-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    .ph-season-item {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 0.7rem 0.85rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .ph-season-name {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--text-secondary);
-    }
-    .ph-season-rate {
-      font-size: 0.92rem;
-      font-weight: 800;
-      color: var(--text-primary);
-      margin-top: 0.25rem;
-    }
-    .ph-season-bar-track {
-      width: 100%;
-      height: 4px;
-      background: var(--border-color);
-      border-radius: 2px;
-      margin-top: 0.45rem;
-      overflow: hidden;
-    }
-    .ph-season-bar-fill {
-      height: 100%;
-      background: var(--accent-gold);
-      border-radius: 2px;
-    }
-  </style>
 </head>
 <body>
 
   <!-- Header -->
-  <header>
-    <a href="#" class="logo-container" onclick="resetToHome(); return false;">
+  <header role="banner">
+    <a href="#" class="logo-container" onclick="resetToHome(); return false;" aria-label="PlugAzit 홈으로 이동">
       <img src="PlugAzit.png" alt="PlugAzit" class="brand-logo-img" />
     </a>
 
-    <nav>
-      <button class="nav-tab-link active" id="navDealsBtn" onclick="showPage('deals')">VST Vault</button>
-      <button class="nav-tab-link" id="navCommBtn" onclick="showPage('community')">Community</button>
-      <button class="nav-tab-link" id="navAdminBtn" style="display:none; color: var(--accent-gold);" onclick="showPage('admin')">Admin Center</button>
+    <nav role="navigation" aria-label="주요 메뉴">
+      <button type="button" class="nav-tab-link active" id="navDealsBtn" onclick="showPage('deals')">VST Vault</button>
+      <button type="button" class="nav-tab-link" id="navCommBtn" onclick="showPage('community')">Community</button>
+      <button type="button" class="nav-tab-link" id="navAdminBtn" style="display:none; color: var(--accent-gold);" onclick="showPage('admin')">Admin Center</button>
       
-      <a href="https://discord.gg" target="_blank" class="social-link-btn" title="공식 디스코드 커뮤니티">Discord</a>
-      <a href="https://x.com/plugazit" target="_blank" class="social-link-btn" title="공식 트위터(X)">Twitter</a>
+      <a href="https://discord.gg" target="_blank" rel="noopener noreferrer" class="social-link-btn" title="공식 디스코드 커뮤니티">Discord</a>
+      <a href="https://x.com/plugazit" target="_blank" rel="noopener noreferrer" class="social-link-btn" title="공식 트위터(X)">Twitter</a>
 
-      <div class="toggle-switch" onclick="toggleTheme()" title="다크/라이트 테마 변경">
-        <div class="toggle-knob"></div>
-      </div>
+      <button type="button" class="toggle-switch" onclick="toggleTheme()" title="다크/라이트 테마 변경" aria-label="다크 모드 및 라이트 모드 전환">
+        <span class="toggle-knob"></span>
+      </button>
       
       <div id="authNav">
-        <button class="nav-btn" onclick="openModal('loginModal')">로그인</button>
-        <button class="nav-btn" onclick="openModal('signupModal')">회원가입</button>
+        <button type="button" class="nav-btn" onclick="openModal('loginModal')">로그인</button>
+        <button type="button" class="nav-btn" onclick="openModal('signupModal')">회원가입</button>
       </div>
       <div id="userNav" style="display:none;">
-        <button class="nav-btn" onclick="showPage('mypage')">마이페이지</button>
-        <button class="nav-btn" onclick="handleLogout()">로그아웃</button>
+        <button type="button" class="nav-btn" onclick="showPage('mypage')">마이페이지</button>
+        <button type="button" class="nav-btn" onclick="handleLogout()">로그아웃</button>
       </div>
     </nav>
   </header>
 
-  <div class="container">
+  <main class="container" role="main">
     <!-- Hero Slogan -->
     <div class="hero-slogan-section">
       <h1 class="hero-title">Right Near, Your Azit.</h1>
@@ -573,26 +57,26 @@
     </div>
 
     <!-- DEALS VIEW -->
-    <div id="dealsView">
+    <section id="dealsView" aria-label="VST 딜 스토어">
       <div class="category-section">
-        <div class="main-cat-bar">
-          <button class="cat-chip active" id="btnMainCatAll" onclick="setMainCategory('all', this)">전체 딜 보기</button>
-          <button class="cat-chip" onclick="setMainCategory('mixing', this)">믹싱 & 마스터링</button>
-          <button class="cat-chip" onclick="setMainCategory('synth', this)">신디사이저 / 가상악기</button>
-          <button class="cat-chip" onclick="setMainCategory('fx', this)">이펙터 & 유틸리티</button>
-          <button class="cat-chip" onclick="setMainCategory('free', this)">100% FREE</button>
-          <button class="cat-chip affiliate" onclick="filterCategory('affiliate', this)">브랜드 제휴 문의</button>
+        <div class="main-cat-bar" role="tablist">
+          <button type="button" class="cat-chip active" id="btnMainCatAll" onclick="setMainCategory('all', this)">전체 딜 보기</button>
+          <button type="button" class="cat-chip" onclick="setMainCategory('mixing', this)">믹싱 & 마스터링</button>
+          <button type="button" class="cat-chip" onclick="setMainCategory('synth', this)">신디사이저 / 가상악기</button>
+          <button type="button" class="cat-chip" onclick="setMainCategory('fx', this)">이펙터 & 유틸리티</button>
+          <button type="button" class="cat-chip" onclick="setMainCategory('free', this)">100% FREE</button>
+          <button type="button" class="cat-chip affiliate" onclick="filterCategory('affiliate', this)">브랜드 제휴 문의</button>
         </div>
         <div class="sub-cat-bar" id="subCatBar"></div>
       </div>
 
       <div class="filter-control-bar">
         <div class="search-input-box">
-          <input type="text" id="dealSearchKeyword" placeholder="플러그인명, 브랜드, 키워드 검색..." oninput="onDealFilterChange()">
+          <input type="search" id="dealSearchKeyword" placeholder="플러그인명, 브랜드, 키워드 검색..." aria-label="플러그인 검색" oninput="onDealFilterChange()">
         </div>
         <div class="sort-and-view-controls">
           <div class="sort-select-box">
-            <select id="dealSortOption" onchange="onDealFilterChange()">
+            <select id="dealSortOption" aria-label="정렬 기준 선택" onchange="onDealFilterChange()">
               <option value="recommended">추천순 (기본)</option>
               <option value="priceLow">가격 낮은순</option>
               <option value="priceHigh">가격 높은순</option>
@@ -600,57 +84,57 @@
               <option value="endingSoon">마감 임박순</option>
             </select>
           </div>
-          <div class="view-toggle-btns">
-            <button class="view-btn active" id="btnCardView" onclick="setDealViewMode('card')">카드형</button>
-            <button class="view-btn" id="btnListView" onclick="setDealViewMode('list')">리스트형</button>
+          <div class="view-toggle-btns" role="group" aria-label="뷰 모드 전환">
+            <button type="button" class="view-btn active" id="btnCardView" onclick="setDealViewMode('card')">카드형</button>
+            <button type="button" class="view-btn" id="btnListView" onclick="setDealViewMode('list')">리스트형</button>
           </div>
         </div>
       </div>
 
       <div class="deals-grid" id="dealsContainer"></div>
-    </div>
+    </section>
 
     <!-- COMMUNITY VIEW -->
-    <div id="communityView">
+    <section id="communityView" aria-label="프로듀서 커뮤니티">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
         <div>
           <h2 style="font-weight:800; font-size:1.6rem;">Producer Community</h2>
           <p style="color:var(--text-secondary); font-size:0.9rem;">사운드 믹싱 팁과 VST 활용 노하우를 자유롭게 나누세요.</p>
         </div>
-        <button class="btn-buy" style="width:auto; padding:0.65rem 1.4rem;" onclick="showPostWritePage()">글 작성하기</button>
+        <button type="button" class="btn-buy" style="width:auto; padding:0.65rem 1.4rem;" onclick="showPostWritePage()">글 작성하기</button>
       </div>
 
       <div class="main-cat-bar" style="margin-bottom: 1.2rem;">
-        <button class="cat-chip active" onclick="setCommunityCategory('all', this)">전체글</button>
-        <button class="cat-chip notice-chip" onclick="setCommunityCategory('공지사항', this)">공지사항</button>
-        <button class="cat-chip" onclick="setCommunityCategory('믹싱/마스터링', this)">믹싱/마스터링</button>
-        <button class="cat-chip" onclick="setCommunityCategory('VST/신스', this)">VST/신스</button>
-        <button class="cat-chip" onclick="setCommunityCategory('자유수다', this)">자유수다</button>
-        <button class="cat-chip" onclick="setCommunityCategory('곡피드백', this)">곡 피드백</button>
+        <button type="button" class="cat-chip active" onclick="setCommunityCategory('all', this)">전체글</button>
+        <button type="button" class="cat-chip notice-chip" onclick="setCommunityCategory('공지사항', this)">공지사항</button>
+        <button type="button" class="cat-chip" onclick="setCommunityCategory('믹싱/마스터링', this)">믹싱/마스터링</button>
+        <button type="button" class="cat-chip" onclick="setCommunityCategory('VST/신스', this)">VST/신스</button>
+        <button type="button" class="cat-chip" onclick="setCommunityCategory('자유수다', this)">자유수다</button>
+        <button type="button" class="cat-chip" onclick="setCommunityCategory('곡피드백', this)">곡 피드백</button>
       </div>
 
       <div class="filter-control-bar">
         <div class="search-input-box" style="max-width: 100%;">
-          <input type="text" id="commSearchKeyword" placeholder="글 제목, 내용, 작성자 닉네임 검색..." oninput="renderCommunityPosts()">
+          <input type="search" id="commSearchKeyword" placeholder="글 제목, 내용, 작성자 닉네임 검색..." aria-label="커뮤니티 게시글 검색" oninput="renderCommunityPosts()">
         </div>
       </div>
       
       <div id="communityList">
         <p style="color:var(--text-secondary); text-align:center; padding: 2rem;">게시글을 불러오는 중입니다...</p>
       </div>
-    </div>
+    </section>
 
     <!-- 독립형 커뮤니티 글 작성 페이지 -->
-    <div id="postWriteView">
-      <div style="max-width: 800px; margin: 0 auto; background: var(--card-bg); border: 1px solid var(--border-color); padding: 2.5rem; border-radius: 12px;">
+    <section id="postWriteView" aria-label="커뮤니티 게시글 작성">
+      <div class="standalone-panel-box" style="max-width: 800px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.8rem;">
           <h2 style="font-weight:900; font-size:1.6rem; color:var(--accent-gold);">프로듀서 커뮤니티 글 작성</h2>
-          <button class="nav-btn" onclick="showPage('community')">목록으로 돌아가기</button>
+          <button type="button" class="nav-btn" onclick="showPage('community')">목록으로 돌아가기</button>
         </div>
 
         <form id="standalonePostForm" onsubmit="handleStandalonePostSubmit(event)">
           <div class="form-group">
-            <label>게시판 카테고리</label>
+            <label for="writeCategorySelect">게시판 카테고리</label>
             <select id="writeCategorySelect">
               <option value="믹싱/마스터링">믹싱/마스터링</option>
               <option value="VST/신스">VST/신스</option>
@@ -659,10 +143,13 @@
               <option value="공지사항" id="writeOptNotice" style="display:none; color:var(--accent-gold);">공지사항 (관리자 전용)</option>
             </select>
           </div>
-          <div class="form-group"><label>제목</label><input type="text" id="writeTitle" required placeholder="제목을 입력하세요"></div>
+          <div class="form-group">
+            <label for="writeTitle">제목</label>
+            <input type="text" id="writeTitle" required maxlength="150" placeholder="제목을 입력하세요">
+          </div>
           
           <div class="form-group">
-            <label>본문 내용</label>
+            <label for="writeContent">본문 내용</label>
             <div class="editor-toolbar">
               <button type="button" class="editor-tool-btn" onclick="formatEditorText('bold')"><b>B</b> 굵게</button>
               <button type="button" class="editor-tool-btn" onclick="formatEditorText('underline')"><u>U</u> 밑줄</button>
@@ -677,61 +164,61 @@
                    2. VST 활용 팁과 사운드 공유 시 저작권 규정을 준수해 주세요.<br>
                    <i>* 아래 입력란에 키보드 타이핑을 시작하는 순간 이 안내문은 자동으로 사라집니다.</i></p>
               </div>
-              <textarea id="writeContent" class="editor-textarea" rows="8" required oninput="handleEditorTyping()"></textarea>
+              <textarea id="writeContent" class="editor-textarea" rows="8" required maxlength="10000" oninput="handleEditorTyping()"></textarea>
             </div>
             <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.4rem;">첨부 파일/미디어 용량 제한: 최대 15MB 이하 권장</p>
           </div>
 
           <div style="display:flex; gap:1rem; margin-top:1.5rem;">
-            <button type="submit" class="btn-buy" style="flex:1;">작성 완료 및 등록</button>
+            <button type="submit" class="btn-buy" id="btnSubmitPost" style="flex:1;">작성 완료 및 등록</button>
             <button type="button" class="nav-btn" style="padding: 0.85rem 1.5rem;" onclick="showPage('community')">취소</button>
           </div>
         </form>
       </div>
-    </div>
+    </section>
 
     <!-- 독립형 커뮤니티 세부 글 읽기 페이지 -->
-    <div id="postDetailView">
-      <div style="max-width: 840px; margin: 0 auto; background: var(--card-bg); border: 1px solid var(--border-color); padding: 2.5rem; border-radius: 12px;">
+    <section id="postDetailView" aria-label="게시글 상세 보기">
+      <div class="standalone-panel-box" style="max-width: 840px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:1px solid var(--border-color); padding-bottom:1.2rem;">
-          <button class="nav-btn" onclick="showPage('community')">목록으로 돌아가기</button>
+          <button type="button" class="nav-btn" onclick="showPage('community')">목록으로 돌아가기</button>
           <div id="postDetailActionBtns"></div>
         </div>
         <div id="postDetailContainer"></div>
       </div>
-    </div>
+    </section>
 
     <!-- 독립형 마이페이지 뷰 -->
-    <div id="myPageView">
-      <div style="max-width: 720px; margin: 0 auto; background: var(--card-bg); border: 1px solid var(--border-color); padding: 2.5rem; border-radius: 12px;">
+    <section id="myPageView" aria-label="마이페이지">
+      <div class="standalone-panel-box" style="max-width: 720px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; border-bottom:1px solid var(--border-color); padding-bottom:1.2rem;">
           <h2 style="font-weight:900; font-size:1.6rem; color:var(--accent-gold);">마이페이지 (프로필 및 계정 관리)</h2>
-          <button class="nav-btn" onclick="showPage('deals')">스토어로 돌아가기</button>
+          <button type="button" class="nav-btn" onclick="showPage('deals')">스토어로 돌아가기</button>
         </div>
 
         <div class="main-cat-bar" style="margin-bottom: 2rem;">
-          <button class="cat-chip active" onclick="switchMyPageTab('profile', this)">프로필 설정</button>
-          <button class="cat-chip" onclick="switchMyPageTab('security', this)">비밀번호 변경</button>
-          <button class="cat-chip" onclick="switchMyPageTab('activity', this)">내 활동 (작성글)</button>
+          <button type="button" class="cat-chip active" onclick="switchMyPageTab('profile', this)">프로필 설정</button>
+          <button type="button" class="cat-chip" onclick="switchMyPageTab('security', this)">비밀번호 및 계정 보안</button>
+          <button type="button" class="cat-chip" onclick="switchMyPageTab('activity', this)">내 활동 (작성글)</button>
         </div>
 
         <!-- 탭 1: 프로필 설정 -->
         <div id="mpTabProfile" class="mp-tab-content">
           <form onsubmit="handleProfileUpdateSubmit(event)">
             <div class="form-group">
-              <label>이메일 계정</label>
+              <label for="myPageEmail">이메일 계정</label>
               <input type="email" id="myPageEmail" disabled style="opacity:0.6; cursor:not-allowed;">
             </div>
             <div class="form-group">
-              <label>프로듀서 닉네임</label>
+              <label for="myPageNickname">프로듀서 닉네임</label>
               <div class="nickname-input-group">
-                <input type="text" id="myPageNickname" required placeholder="@aftrdry" oninput="onNicknameInputChanged()">
+                <input type="text" id="myPageNickname" required maxlength="30" placeholder="@aftrdry" oninput="onNicknameInputChanged()">
                 <button type="button" class="nickname-check-btn" onclick="checkNicknameDuplicate()">중복 확인</button>
               </div>
               <p id="nicknameCheckMsg" style="font-size:0.78rem; margin-top:0.45rem; font-weight:600;"></p>
             </div>
             <div class="form-group">
-              <label>주 사용 DAW (메인 작업 프로그램)</label>
+              <label for="myPageDaw">주 사용 DAW (메인 작업 프로그램)</label>
               <select id="myPageDaw">
                 <option value="Logic Pro">Logic Pro</option>
                 <option value="Cubase">Cubase</option>
@@ -746,32 +233,38 @@
           </form>
         </div>
 
-        <!-- 탭 2: 비밀번호 변경 -->
+        <!-- 탭 2: 비밀번호 변경 및 회원 탈퇴 -->
         <div id="mpTabSecurity" class="mp-tab-content" style="display:none;">
           <form onsubmit="handlePasswordChangeSubmit(event)">
             <div class="form-group">
-              <label>현재 비밀번호</label>
+              <label for="currentPassword">현재 비밀번호</label>
               <div class="password-input-wrapper">
-                <input type="password" id="currentPassword" required placeholder="••••••••">
+                <input type="password" id="currentPassword" required autocomplete="current-password" placeholder="••••••••">
                 <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('currentPassword', this)">보기</button>
               </div>
             </div>
             <div class="form-group">
-              <label>새 비밀번호 (6자리 이상)</label>
+              <label for="newPassword">새 비밀번호 (6자리 이상)</label>
               <div class="password-input-wrapper">
-                <input type="password" id="newPassword" required placeholder="••••••••">
+                <input type="password" id="newPassword" required minlength="6" autocomplete="new-password" placeholder="••••••••">
                 <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('newPassword', this)">보기</button>
               </div>
             </div>
             <div class="form-group">
-              <label>새 비밀번호 확인</label>
+              <label for="confirmNewPassword">새 비밀번호 확인</label>
               <div class="password-input-wrapper">
-                <input type="password" id="confirmNewPassword" required placeholder="••••••••">
+                <input type="password" id="confirmNewPassword" required minlength="6" autocomplete="new-password" placeholder="••••••••">
                 <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('confirmNewPassword', this)">보기</button>
               </div>
             </div>
-            <button type="submit" class="btn-buy" style="margin-top:1.5rem;">비밀번호 안전하게 변경</button>
+            <button type="submit" class="btn-buy" id="btnChangePw" style="margin-top:1.5rem;">비밀번호 안전하게 변경</button>
           </form>
+
+          <div class="account-danger-zone">
+            <h4>회원 탈퇴 및 개인정보 파기</h4>
+            <p>탈퇴 시 프로필 정보 및 작성하신 커뮤니티 게시글 데이터가 즉시 파기되며 복구할 수 없습니다.</p>
+            <button type="button" class="nav-btn danger-outline-btn" onclick="handleAccountDeleteRequest()">회원 탈퇴 신청</button>
+          </div>
         </div>
 
         <!-- 탭 3: 내 활동 (작성글 목록) -->
@@ -783,19 +276,20 @@
         </div>
 
       </div>
-    </div>
+    </section>
 
     <!-- ADMIN VIEW -->
-    <div id="adminView">
-      <div style="background:var(--card-bg); border:1px solid var(--border-color); padding:2rem; border-radius:10px; margin-bottom:2rem;">
-        <h2 style="font-weight:800; font-size:1.4rem; margin-bottom:1rem; color:var(--accent-gold);">VST Deal Management (Admin)</h2>
+    <section id="adminView" aria-label="관리자 센터">
+      <div class="standalone-panel-box" style="margin-bottom:2rem;">
+        <h2 style="font-weight:800; font-size:1.4rem; margin-bottom:0.4rem; color:var(--accent-gold);">VST Deal Management (Admin)</h2>
+        <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:1.5rem;">등록된 상품은 Supabase 데이터베이스('deals' 테이블)에 영구 저장되며 모든 사용자에게 즉시 노출됩니다.</p>
         <form id="dealForm" onsubmit="handleDealSubmit(event)">
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div class="form-group"><label>브랜드명</label><input type="text" id="dealBrand" required placeholder="예: FabFilter"></div>
-            <div class="form-group"><label>플러그인/딜 타이틀</label><input type="text" id="dealTitle" required placeholder="예: Pro-Q 3"></div>
+          <div class="admin-grid-2">
+            <div class="form-group"><label for="dealBrand">브랜드명</label><input type="text" id="dealBrand" required placeholder="예: FabFilter"></div>
+            <div class="form-group"><label for="dealTitle">플러그인/딜 타이틀</label><input type="text" id="dealTitle" required placeholder="예: Pro-Q 3"></div>
           </div>
-          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-            <div class="form-group"><label>메인 카테고리</label>
+          <div class="admin-grid-4">
+            <div class="form-group"><label for="dealMainCat">메인 카테고리</label>
               <select id="dealMainCat">
                 <option value="synth">신디사이저 / 가상악기</option>
                 <option value="mixing">믹싱 & 마스터링</option>
@@ -803,55 +297,58 @@
                 <option value="free">100% FREE</option>
               </select>
             </div>
-            <div class="form-group"><label>정가 ($)</label><input type="text" id="dealOrigPrice" placeholder="179"></div>
-            <div class="form-group"><label>할인가 ($)</label><input type="text" id="dealDiscPrice" placeholder="134"></div>
+            <div class="form-group"><label for="dealSubCat">서브 카테고리 태그</label><input type="text" id="dealSubCat" placeholder="예: EQ, Synth"></div>
+            <div class="form-group"><label for="dealOrigPrice">정가 ($)</label><input type="number" step="0.01" min="0" id="dealOrigPrice" required placeholder="179"></div>
+            <div class="form-group"><label for="dealDiscPrice">할인가 ($)</label><input type="number" step="0.01" min="0" id="dealDiscPrice" required placeholder="134"></div>
           </div>
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div class="form-group"><label>제품 실제 UI 이미지 URL</label><input type="url" id="dealImgUrl" placeholder="https://... (미입력 시 공식 홈페이지 UI 자동 추출)"></div>
-            <div class="form-group"><label>공식 유튜브 영상 URL 또는 11자리 ID</label><input type="text" id="dealYoutubeInput" placeholder="예: https://youtu.be/5Sa3wa_doG0"></div>
+          <div class="admin-grid-2">
+            <div class="form-group"><label for="dealImgUrl">제품 실제 UI 이미지 URL</label><input type="url" id="dealImgUrl" placeholder="https://... (미입력 시 공식 홈페이지 UI 자동 추출)"></div>
+            <div class="form-group"><label for="dealYoutubeInput">공식 유튜브 영상 URL 또는 11자리 ID</label><input type="text" id="dealYoutubeInput" placeholder="예: https://youtu.be/5Sa3wa_doG0"></div>
           </div>
-          <div class="form-group"><label>상세 설명</label><textarea id="dealDesc" rows="2" placeholder="딜 핵심 특징 및 요약"></textarea></div>
-          <div class="form-group"><label>제휴/구매 링크 URL</label><input type="url" id="dealUrl" required placeholder="https://..."></div>
-          <button type="submit" class="btn-buy" style="margin-top:1rem;">새로운 딜 등록 / 업데이트</button>
+          <div class="form-group"><label for="dealDesc">상세 설명</label><textarea id="dealDesc" rows="2" required placeholder="딜 핵심 특징 및 요약"></textarea></div>
+          <div class="form-group"><label for="dealUrl">제휴/구매 링크 URL</label><input type="url" id="dealUrl" required placeholder="https://..."></div>
+          <button type="submit" class="btn-buy" id="btnSubmitDeal" style="margin-top:1rem;">새로운 딜 DB 등록 / 업데이트</button>
         </form>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
   <!-- FOOTER -->
-  <footer>
+  <footer role="contentinfo">
     <p>© 2026 PlugAzit. All rights reserved.  |  
        Contact: <a href="mailto:aftrdry@outlook.kr">aftrdry@outlook.kr</a>
     </p>
     <div class="footer-links">
-      <button onclick="openModal('termsModal')">이용약관 및 법적 고지</button>
+      <button type="button" onclick="openLegalModal('terms')">서비스 이용약관</button>
+      <span>|</span>
+      <button type="button" onclick="openLegalModal('privacy')" style="color:var(--text-primary); font-weight:700;">개인정보 처리방침</button>
     </div>
   </footer>
 
   <!-- MODALS -->
 
-  <!-- VST 상세 정보 전체 팝업 모달 (바깥쪽 클릭 시 닫기 지원) -->
-  <div class="modal-overlay" id="dealDetailModal" onclick="checkModalBackdropClose(event, 'dealDetailModal')">
+  <!-- VST 상세 정보 전체 팝업 모달 -->
+  <div class="modal-overlay" id="dealDetailModal" role="dialog" aria-modal="true" aria-label="플러그인 상세 정보" onclick="checkModalBackdropClose(event, 'dealDetailModal')">
     <div class="modal-box large-detail-modal" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeModal('dealDetailModal')">×</button>
+      <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('dealDetailModal')">×</button>
       <div id="dealDetailContent"></div>
     </div>
   </div>
 
   <!-- 로그인 모달 -->
-  <div class="modal-overlay" id="loginModal" onclick="checkModalBackdropClose(event, 'loginModal')">
+  <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-label="로그인" onclick="checkModalBackdropClose(event, 'loginModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeModal('loginModal')">×</button>
+      <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('loginModal')">×</button>
       <h3 style="margin-bottom:1.5rem; font-weight:800;">로그인</h3>
       <form onsubmit="handleLoginSubmit(event)">
         <div class="form-group">
-          <label>이메일 계정</label>
-          <input type="email" id="loginEmail" required placeholder="email@domain.com">
+          <label for="loginEmail">이메일 계정</label>
+          <input type="email" id="loginEmail" required autocomplete="email" placeholder="email@domain.com">
         </div>
         <div class="form-group">
-          <label>비밀번호</label>
+          <label for="loginPassword">비밀번호</label>
           <div class="password-input-wrapper">
-            <input type="password" id="loginPassword" required placeholder="••••••••">
+            <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="••••••••">
             <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('loginPassword', this)">보기</button>
           </div>
         </div>
@@ -859,23 +356,23 @@
           <a href="#" onclick="openModal('findEmailModal'); closeModal('loginModal'); return false;">아이디(이메일) 힌트 찾기</a>
           <a href="#" onclick="openModal('resetPwModal'); closeModal('loginModal'); return false;">비밀번호 재설정</a>
         </div>
-        <button type="submit" class="btn-buy" style="margin-top:1.2rem;">로그인</button>
+        <button type="submit" class="btn-buy" id="btnLoginSubmit" style="margin-top:1.2rem;">로그인</button>
       </form>
     </div>
   </div>
 
   <!-- 비밀번호 재설정 모달 -->
-  <div class="modal-overlay" id="resetPwModal" onclick="checkModalBackdropClose(event, 'resetPwModal')">
+  <div class="modal-overlay" id="resetPwModal" role="dialog" aria-modal="true" aria-label="비밀번호 재설정" onclick="checkModalBackdropClose(event, 'resetPwModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeModal('resetPwModal')">×</button>
+      <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('resetPwModal')">×</button>
       <h3 style="margin-bottom:1.2rem; font-weight:800;">비밀번호 재설정</h3>
       <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.2rem;">
         가입하신 이메일 주소를 입력하시면 비밀번호 재설정 링크를 발송해 드립니다.
       </p>
       <form onsubmit="handleResetPasswordSubmit(event)">
         <div class="form-group">
-          <label>이메일 계정</label>
-          <input type="email" id="resetEmail" required placeholder="email@domain.com">
+          <label for="resetEmail">이메일 계정</label>
+          <input type="email" id="resetEmail" required autocomplete="email" placeholder="email@domain.com">
         </div>
         <button type="submit" class="btn-buy" style="margin-top:1rem;">재설정 메일 발송</button>
       </form>
@@ -883,16 +380,16 @@
   </div>
 
   <!-- 아이디 힌트 찾기 모달 -->
-  <div class="modal-overlay" id="findEmailModal" onclick="checkModalBackdropClose(event, 'findEmailModal')">
+  <div class="modal-overlay" id="findEmailModal" role="dialog" aria-modal="true" aria-label="아이디 힌트 찾기" onclick="checkModalBackdropClose(event, 'findEmailModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeModal('findEmailModal')">×</button>
+      <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('findEmailModal')">×</button>
       <h3 style="margin-bottom:1.2rem; font-weight:800;">아이디 힌트 찾기</h3>
       <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.2rem;">
         가입 시 등록한 프로듀서 닉네임을 입력하시면 가입 이메일 힌트를 제공합니다.
       </p>
       <form onsubmit="handleFindEmailSubmit(event)">
         <div class="form-group">
-          <label>프로듀서 닉네임</label>
+          <label for="findNickname">프로듀서 닉네임</label>
           <input type="text" id="findNickname" required placeholder="예: @aftrdry">
         </div>
         <button type="submit" class="btn-buy" style="margin-top:1rem;">이메일 힌트 조회</button>
@@ -901,1565 +398,84 @@
   </div>
 
   <!-- 회원가입 모달 -->
-  <div class="modal-overlay" id="signupModal" onclick="checkModalBackdropClose(event, 'signupModal')">
+  <div class="modal-overlay" id="signupModal" role="dialog" aria-modal="true" aria-label="회원가입" onclick="checkModalBackdropClose(event, 'signupModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeModal('signupModal')">×</button>
+      <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('signupModal')">×</button>
       <h3 style="margin-bottom:1.5rem; font-weight:800;">회원가입</h3>
       <form onsubmit="handleSignupSubmit(event)">
-        <div class="form-group"><label>프로듀서 닉네임</label><input type="text" id="signupNickname" required placeholder="예: @aftrdry"></div>
-        <div class="form-group"><label>이메일 계정</label><input type="email" id="signupEmail" required placeholder="email@domain.com"></div>
         <div class="form-group">
-          <label>비밀번호</label>
+          <label for="signupNickname">프로듀서 닉네임</label>
+          <input type="text" id="signupNickname" required maxlength="30" placeholder="예: @aftrdry">
+        </div>
+        <div class="form-group">
+          <label for="signupEmail">이메일 계정</label>
+          <input type="email" id="signupEmail" required autocomplete="email" placeholder="email@domain.com">
+        </div>
+        <div class="form-group">
+          <label for="signupPassword">비밀번호 (6자리 이상)</label>
           <div class="password-input-wrapper">
-            <input type="password" id="signupPassword" required placeholder="••••••••">
+            <input type="password" id="signupPassword" required minlength="6" autocomplete="new-password" placeholder="••••••••">
             <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('signupPassword', this)">보기</button>
           </div>
         </div>
-        <div class="form-group" style="margin-top: 1.5rem;">
-          <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:normal;">
-            <input type="checkbox" id="termsCheck" required style="width:auto;"> [필수] 이용약관 및 개인정보 처리방침에 동의합니다.
+        <div class="form-group" style="margin-top: 1.2rem;">
+          <label style="display:flex; align-items:flex-start; gap:0.5rem; cursor:pointer; font-weight:normal; font-size:0.82rem; line-height:1.5;">
+            <input type="checkbox" id="termsCheck" required style="width:auto; margin-top:0.25rem;">
+            <span>[필수] 만 14세 이상이며, <a href="#" onclick="openLegalModal('terms'); return false;" style="color:var(--accent-gold); text-decoration:underline;">서비스 이용약관</a> 및 <a href="#" onclick="openLegalModal('privacy'); return false;" style="color:var(--accent-gold); text-decoration:underline;">개인정보 처리방침</a>에 동의합니다.</span>
           </label>
         </div>
-        <button type="submit" class="btn-buy" style="margin-top:1.5rem;">가입 완료</button>
+        <button type="submit" class="btn-buy" id="btnSignupSubmit" style="margin-top:1.5rem;">가입 완료</button>
       </form>
     </div>
   </div>
 
-  <!-- 이용약관 팝업 모달 -->
-  <div class="modal-overlay" id="termsModal" onclick="checkModalBackdropClose(event, 'termsModal')">
-    <div class="modal-box" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeModal('termsModal')">×</button>
-      <h3 style="margin-bottom:1.2rem; font-weight:800;">이용약관 및 법적 고지</h3>
-      <div class="terms-popup-content">
-        <h4>서비스 목적</h4>
-        <p>PlugAzit는 프로듀서들을 위한 VST 딜 큐레이션 및 정보 공유 아지트입니다.</p>
-        <h4>세일 정보 및 제휴 마케팅 안내</h4>
-        <p>제공되는 모든 세일 정보와 가격은 각 브랜드 공식 스토어 정책에 따르며, 제휴 링크를 통한 구매 시 소정의 수수료를 제공받을 수 있습니다.</p>
-        <h4>책임 한계</h4>
-        <p>본 사이트에서 안내하는 가격 및 할인율은 각 브랜드의 사정에 따라 예고 없이 변경될 수 있으므로, 최종 결제 전 공식 스토어의 가격을 반드시 확인하시기 바랍니다.</p>
+  <!-- 서비스 이용약관 및 개인정보 처리방침 통합 모달 -->
+  <div class="modal-overlay" id="termsModal" role="dialog" aria-modal="true" aria-label="약관 및 개인정보 처리방침" onclick="checkModalBackdropClose(event, 'termsModal')">
+    <div class="modal-box" style="max-width: 640px;" onclick="event.stopPropagation()">
+      <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('termsModal')">×</button>
+      <h3 style="margin-bottom:1.2rem; font-weight:800;">약관 및 법적 고지</h3>
+
+      <div class="main-cat-bar" style="margin-bottom: 1rem;">
+        <button type="button" class="cat-chip active" id="tabBtnTerms" onclick="switchLegalTab('terms')">서비스 이용약관</button>
+        <button type="button" class="cat-chip" id="tabBtnPrivacy" onclick="switchLegalTab('privacy')">개인정보 처리방침</button>
       </div>
+
+      <!-- 탭 1: 서비스 이용약관 -->
+      <div id="legalTermsContent" class="terms-popup-content">
+        <h4>제1조 (목적)</h4>
+        <p>본 약관은 PlugAzit(이하 "서비스")가 제공하는 VST 플러그인 할인 정보 큐레이션 및 프로듀서 커뮤니티 서비스의 이용 조건 및 절차, 회원과 서비스 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+        <h4>제2조 (할인 정보 및 제휴 링크 고지)</h4>
+        <p>1. 서비스에 게시되는 플러그인 가격, 할인율, 프로모션 코드 및 연도별 가격 추이 데이터는 정보 제공 목적으로 큐레이션되며, 각 브랜드 공식 스토어의 사정에 따라 실시간으로 변동될 수 있습니다.<br>
+           2. 일부 외부 스토어 연결 링크는 제휴 마케팅(Affiliate) 링크를 포함할 수 있으며, 이를 통한 구매 시 서비스 운영을 위한 소정의 수수료가 발생할 수 있습니다. 단, 구매자에게 추가 비용은 발생하지 않습니다.</p>
+        <h4>제3조 (회원의 의무 및 커뮤니티 운영 정책)</h4>
+        <p>회원은 불법 복제 소프트웨어(크랙 등) 공유, 저작권 침해, 타인 비방, 도배 및 영리 목적의 스팸 게시물을 작성해서는 안 되며, 위반 시 사전 통보 없이 게시물 삭제 및 계정 이용이 제한될 수 있습니다.</p>
+        <h4>제4조 (면책조항)</h4>
+        <p>최종 결제 및 라이선스 발급은 각 외부 공식 스토어에서 이루어지므로, 결제 오류·환불·제품 결함에 대한 법적 책임은 해당 스토어 및 제조사에 있습니다.</p>
+      </div>
+
+      <!-- 탭 2: 개인정보 처리방침 -->
+      <div id="legalPrivacyContent" class="terms-popup-content" style="display:none;">
+        <h4>1. 수집하는 개인정보 항목 및 수집 방법</h4>
+        <p>PlugAzit는 회원가입, 커뮤니티 활동 및 계정 관리를 위해 최소한의 개인정보만을 수집합니다.<br>
+           - 필수 수집 항목: 이메일 주소, 비밀번호(암호화 저장), 프로듀서 닉네임<br>
+           - 선택 수집 항목: 주 사용 DAW 정보</p>
+        <h4>2. 개인정보의 수집 및 이용 목적</h4>
+        <p>- 회원 식별, 로그인 인증 및 부정 이용 방지 (Supabase Auth 기반)<br>
+           - 커뮤니티 게시글 작성자 표시 및 본인 게시글 수정·삭제 권한 확인<br>
+           - 비밀번호 재설정 및 계정 관련 고지사항 전달</p>
+        <h4>3. 개인정보의 보유 및 이용기간</h4>
+        <p>회원의 개인정보는 원칙적으로 <b>회원 탈퇴 시 또는 개인정보 수집·이용 목적이 달성된 시점까지</b> 보유하며, 탈퇴 요청 시 지체 없이 파기합니다. 단, 관계 법령에 따라 보존할 필요가 있는 경우 해당 법령에서 정한 기간 동안 보관합니다.</p>
+        <h4>4. 개인정보의 제3자 제공 및 처리 위탁</h4>
+        <p>서비스는 이용자의 개인정보를 외부에 판매하거나 임의로 제공하지 않으며, 안전한 인증 및 데이터베이스 보관을 위해 클라우드 인프라(Supabase Inc.)를 통해 암호화하여 관리합니다.</p>
+        <h4>5. 이용자의 권리와 행사 방법 및 문의처</h4>
+        <p>회원은 언제든지 마이페이지를 통해 본인의 정보를 열람·수정하거나 회원 탈퇴(개인정보 파기)를 요청할 수 있습니다.<br>
+           - 개인정보 보호 책임자 및 문의: aftrdry@outlook.kr</p>
+      </div>
+
       <button type="button" class="btn-buy" style="margin-top:1.5rem;" onclick="closeModal('termsModal')">확인</button>
     </div>
   </div>
 
-  <!-- JavaScript Logic & Supabase Integration -->
-  <script>
-    const SUPABASE_URL = "https://pxmkzyhayxsvbbftncwy.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_J0LQJ-qjr5ISX1jRKaQ7-A_GwABw8XP";
-    let supabaseClient = null;
-
-    const ADMIN_EMAILS = ["aftrdry@outlook.kr", "aftrdry@outlook.com", "sharpmson774@gmail.com"];
-    let currentUser = null;
-    let rawCommunityPosts = [];
-    let dealViewMode = 'card';
-    let currentOpenDealId = null;
-
-    let originalNickname = "";
-    let isNicknameVerified = true;
-
-    const DELETED_POSTS_STORAGE_KEY = 'plugazit_deleted_post_ids_v1';
-    function getDeletedPostIds() {
-      try {
-        const raw = localStorage.getItem(DELETED_POSTS_STORAGE_KEY);
-        return raw ? JSON.parse(raw) : [];
-      } catch (e) {
-        return [];
-      }
-    }
-    function markPostIdAsDeleted(id) {
-      try {
-        const list = getDeletedPostIds();
-        const strId = String(id);
-        if (!list.includes(strId)) {
-          list.push(strId);
-          localStorage.setItem(DELETED_POSTS_STORAGE_KEY, JSON.stringify(list));
-        }
-      } catch (e) {}
-    }
-
-    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-
-    function togglePasswordVisibility(inputId, btnEl) {
-      const input = document.getElementById(inputId);
-      if (!input) return;
-      if (input.type === 'password') {
-        input.type = 'text';
-        btnEl.innerText = '숨기기';
-      } else {
-        input.type = 'password';
-        btnEl.innerText = '보기';
-      }
-    }
-
-    function toggleTheme() {
-      const current = document.documentElement.getAttribute('data-theme');
-      document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
-    }
-
-    function resetToHome() {
-      currentMainCat = 'all';
-      currentSubCat = '전체';
-      document.getElementById('dealSearchKeyword').value = '';
-      document.getElementById('dealSortOption').value = 'recommended';
-      
-      const allBtn = document.getElementById('btnMainCatAll');
-      if (allBtn) {
-        document.querySelectorAll('.main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
-        allBtn.classList.add('active');
-      }
-      
-      renderSubCategories();
-      renderDeals();
-      showPage('deals');
-    }
-
-    function showPage(page) {
-      document.getElementById('dealsView').style.display = page === 'deals' ? 'block' : 'none';
-      document.getElementById('communityView').style.display = page === 'community' ? 'block' : 'none';
-      document.getElementById('adminView').style.display = page === 'admin' ? 'block' : 'none';
-      document.getElementById('myPageView').style.display = page === 'mypage' ? 'block' : 'none';
-      document.getElementById('postWriteView').style.display = page === 'postWrite' ? 'block' : 'none';
-      document.getElementById('postDetailView').style.display = page === 'postDetail' ? 'block' : 'none';
-
-      document.getElementById('navDealsBtn').classList.toggle('active', page === 'deals');
-      document.getElementById('navCommBtn').classList.toggle('active', page === 'community');
-      const adminBtn = document.getElementById('navAdminBtn');
-      if (adminBtn) adminBtn.classList.toggle('active', page === 'admin');
-
-      if (page === 'community') {
-        fetchCommunityPosts();
-      } else if (page === 'mypage') {
-        initMyPageData();
-      }
-    }
-
-    function openModal(id) { document.getElementById(id)?.classList.add('active'); }
-    function closeModal(id) {
-      const modal = document.getElementById(id);
-      if (!modal) return;
-      modal.classList.remove('active');
-      if (id === 'dealDetailModal') {
-        currentOpenDealId = null;
-        const iframe = modal.querySelector('iframe');
-        if (iframe) iframe.src = '';
-      }
-    }
-
-    function checkModalBackdropClose(event, modalId) {
-      if (event.target.id === modalId) {
-        closeModal(modalId);
-      }
-    }
-
-    function setDealViewMode(mode) {
-      dealViewMode = mode;
-      document.getElementById('btnCardView').classList.toggle('active', mode === 'card');
-      document.getElementById('btnListView').classList.toggle('active', mode === 'list');
-      const container = document.getElementById('dealsContainer');
-      if (mode === 'list') { container.classList.add('list-mode'); }
-      else { container.classList.remove('list-mode'); }
-      renderDeals();
-    }
-
-    const USD_TO_KRW = 1380;
-    const subCategories = {
-      all: ["전체 보기"],
-      mixing: ["전체", "EQ", "Compressor/Limiter", "Reverb/Delay", "De-Esser/Dynamic", "Saturation/Tape", "Mastering Chain"],
-      synth: ["전체", "Analog/Synth", "Sample Library", "Cinematic/Orchestral", "Drum/Percussion"],
-      fx: ["전체", "Pitch/Vocal", "Utility/Analyzer", "Modulation"],
-      free: ["전체", "Free Synths", "Free FX"]
-    };
-
-    /*
-     * 제품 데이터 + 연도별/시즌별(2023~2026) 실제 할인 가격 추이 및 시즌별 평균 할인율 데이터 매핑
-     */
-    const dealsData = [
-      {
-        id: 1,
-        brand: "FabFilter",
-        title: "Pro-Q 3 Equalizer",
-        cat: "mixing",
-        sub: "EQ",
-        desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.",
-        original: 179,
-        discountPrice: 134,
-        discountRateNum: 25,
-        discountRate: "25% OFF",
-        code: "FAB-PROMO-2026",
-        perk: "업계 표준 EQ, Dynamic EQ 모드 지원",
-        storeUrl: "https://www.fabfilter.com/products/pro-q-3-equalizer-plug-in",
-        daysLeft: 5,
-        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.fabfilter.com%2Fproducts%2Fpro-q-3-equalizer-plug-in&screenshot=true&meta=false&embed=screenshot.url",
-        youtubeId: "5Sa3wa_doG0",
-        ytQuery: "FabFilter Pro-Q 3 Equalizer Official Introduction",
-        bestSeasonLabel: "Summer (7월) / Black Friday (11월)",
-        seasonality: [
-          { name: "Spring (3~4월)", avgOff: 0, note: "정가 유지" },
-          { name: "Summer (7~8월)", avgOff: 25, note: "연례 정기 세일" },
-          { name: "Black Friday (11월)", avgOff: 25, note: "최대 할인 시즌" },
-          { name: "Year-End (12월)", avgOff: 0, note: "정가 유지" }
-        ],
-        priceHistory: [
-          { date: "2023.03", season: "Regular Price", price: 179 },
-          { date: "2023.07", season: "Summer Sale", price: 134 },
-          { date: "2023.11", season: "Black Friday", price: 134 },
-          { date: "2024.04", season: "Anniversary Sale", price: 125 },
-          { date: "2024.08", season: "Regular Price", price: 179 },
-          { date: "2024.11", season: "Black Friday", price: 134 },
-          { date: "2025.03", season: "Regular Price", price: 179 },
-          { date: "2025.07", season: "Summer Sale", price: 134 },
-          { date: "2025.11", season: "Black Friday", price: 134 },
-          { date: "2026.02", season: "Regular Price", price: 179 },
-          { date: "2026.11", season: "Current Deal", price: 134 }
-        ]
-      },
-      {
-        id: 2,
-        brand: "oeksound",
-        title: "soothe2 Resonance Suppressor",
-        cat: "mixing",
-        sub: "De-Esser/Dynamic",
-        desc: "보컬이나 악기 트랙에서 발생하는 불쾌한 쏘는 소리와 피크 공명을 실시간으로 감지하여 부드럽게 억제하는 툴입니다.",
-        original: 219,
-        discountPrice: 149,
-        discountRateNum: 32,
-        discountRate: "32% OFF",
-        code: "SOOTHE2026",
-        perk: "불쾌한 공명 사운드 자동 실시간 제어",
-        storeUrl: "https://oeksound.com/plugins/soothe2/",
-        daysLeft: 2,
-        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Foeksound.com%2Fplugins%2Fsoothe2%2F&screenshot=true&meta=false&embed=screenshot.url",
-        youtubeId: "5Sa3wa_doG0",
-        ytQuery: "oeksound soothe2 resonance suppressor walkthrough",
-        bestSeasonLabel: "Easter (4월) / Black Friday (11월)",
-        seasonality: [
-          { name: "Easter (3~4월)", avgOff: 27, note: "$159 프로모션" },
-          { name: "Summer (6~8월)", avgOff: 0, note: "정가 유지" },
-          { name: "Black Friday (11월)", avgOff: 32, note: "연중 최저가 ($139~$149)" },
-          { name: "Year-End (12월)", avgOff: 0, note: "정가 유지" }
-        ],
-        priceHistory: [
-          { date: "2023.04", season: "Easter Sale", price: 159 },
-          { date: "2023.08", season: "Regular Price", price: 219 },
-          { date: "2023.11", season: "Black Friday", price: 139 },
-          { date: "2024.03", season: "Easter Sale", price: 159 },
-          { date: "2024.07", season: "Regular Price", price: 219 },
-          { date: "2024.11", season: "Black Friday", price: 139 },
-          { date: "2025.04", season: "Spring Sale", price: 159 },
-          { date: "2025.08", season: "Regular Price", price: 219 },
-          { date: "2025.11", season: "Black Friday", price: 149 },
-          { date: "2026.04", season: "Easter Sale", price: 159 },
-          { date: "2026.11", season: "Current Deal", price: 149 }
-        ]
-      },
-      {
-        id: 3,
-        brand: "Soundtoys",
-        title: "Soundtoys 5.4 Bundle",
-        cat: "fx",
-        sub: "Modulation",
-        desc: "Decapitator, Echoboy 등 아날로그 감성의 특색 있는 사운드 질감을 만드는 21가지 최고급 이펙터 모음입니다.",
-        original: 499,
-        discountPrice: 249,
-        discountRateNum: 50,
-        discountRate: "50% OFF",
-        code: "SOUNDTOYS-DEAL",
-        perk: "21개 대표 사운드 디자이닝 이펙터 전체 포함",
-        storeUrl: "https://www.soundtoys.com/product/soundtoys-5/",
-        daysLeft: 12,
-        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.soundtoys.com%2Fproduct%2Fsoundtoys-5%2F&screenshot=true&meta=false&embed=screenshot.url",
-        youtubeId: "5Sa3wa_doG0",
-        ytQuery: "Soundtoys 5 Bundle Effect Rack Demo",
-        bestSeasonLabel: "Black Friday (11월) / Holiday (12월)",
-        seasonality: [
-          { name: "Spring (3~4월)", avgOff: 40, note: "$299 세일" },
-          { name: "Summer (6~7월)", avgOff: 50, note: "$249 세일" },
-          { name: "Black Friday (11월)", avgOff: 54, note: "최저가 구간 ($229~$249)" },
-          { name: "Year-End (12월)", avgOff: 50, note: "$249 홀리데이 딜" }
-        ],
-        priceHistory: [
-          { date: "2023.03", season: "Spring Sale", price: 299 },
-          { date: "2023.07", season: "Summer Sale", price: 249 },
-          { date: "2023.11", season: "Black Friday", price: 229 },
-          { date: "2024.04", season: "Spring Sale", price: 299 },
-          { date: "2024.08", season: "Regular Price", price: 499 },
-          { date: "2024.11", season: "Black Friday", price: 229 },
-          { date: "2025.03", season: "Spring Sale", price: 269 },
-          { date: "2025.07", season: "Summer Sale", price: 249 },
-          { date: "2025.11", season: "Black Friday", price: 229 },
-          { date: "2026.05", season: "Regular Price", price: 499 },
-          { date: "2026.11", season: "Current Deal", price: 249 }
-        ]
-      },
-      {
-        id: 4,
-        brand: "Universal Audio",
-        title: "UAD Spark 1 Year Pass",
-        cat: "mixing",
-        sub: "Compressor/Limiter",
-        desc: "DSP 하드웨어 없이 1176, LA-2A, Studer 테이프 머신 등 전설적인 아날로그 하드웨어의 명음기를 컴퓨터에서 구동합니다.",
-        original: 199,
-        discountPrice: 99,
-        discountRateNum: 50,
-        discountRate: "50% OFF",
-        code: "UAD-SPARK-50",
-        perk: "전설적 아날로그 믹싱 기기 네이티브 지원",
-        storeUrl: "https://spark.uaudio.com/",
-        daysLeft: 1,
-        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fspark.uaudio.com%2F&screenshot=true&meta=false&embed=screenshot.url",
-        youtubeId: "5Sa3wa_doG0",
-        ytQuery: "Universal Audio UAD Spark Native Plugins Demo",
-        bestSeasonLabel: "Half-Year (6월) / Black Friday (11월)",
-        seasonality: [
-          { name: "Spring (3~4월)", avgOff: 30, note: "$139 프로모션" },
-          { name: "Summer (6~7월)", avgOff: 50, note: "$99 반값 세일" },
-          { name: "Black Friday (11월)", avgOff: 50, note: "$99 연간권 최저가" },
-          { name: "Year-End (12월)", avgOff: 50, note: "$99 연장 세일" }
-        ],
-        priceHistory: [
-          { date: "2023.03", season: "Regular Price", price: 199 },
-          { date: "2023.06", season: "Half-Yearly Sale", price: 99 },
-          { date: "2023.11", season: "Black Friday", price: 99 },
-          { date: "2024.03", season: "Spring Promo", price: 139 },
-          { date: "2024.07", season: "Summer Sale", price: 99 },
-          { date: "2024.11", season: "Black Friday", price: 99 },
-          { date: "2025.04", season: "Regular Price", price: 199 },
-          { date: "2025.06", season: "Summer Sale", price: 99 },
-          { date: "2025.11", season: "Black Friday", price: 99 },
-          { date: "2026.04", season: "Spring Promo", price: 129 },
-          { date: "2026.11", season: "Current Deal", price: 99 }
-        ]
-      },
-      {
-        id: 5,
-        brand: "Arturia",
-        title: "Analog Lab Play",
-        cat: "free",
-        sub: "Free Synths",
-        desc: "빈티지 신티사이저와 클래식 건반 악기들의 최고급 프리셋 100가지를 무상으로 사용할 수 있는 가상악기 뷰어입니다.",
-        original: 99,
-        discountPrice: 0,
-        discountRateNum: 100,
-        discountRate: "100% FREE",
-        code: "DIRECT-DOWNLOAD",
-        perk: "100가지 핵심 빈티지 신스 프리셋 무상 제공",
-        storeUrl: "https://www.arturia.com/products/software-instruments/analoglab-v/overview",
-        daysLeft: 99,
-        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.arturia.com%2Fproducts%2Fsoftware-instruments%2Fanaloglab-v%2Foverview&screenshot=true&meta=false&embed=screenshot.url",
-        youtubeId: "5Sa3wa_doG0",
-        ytQuery: "Arturia Analog Lab Play Overview Tutorial",
-        bestSeasonLabel: "상시 무료 배포 (Perpetual Free)",
-        seasonality: [
-          { name: "Spring (3~4월)", avgOff: 100, note: "상시 무료" },
-          { name: "Summer (6~7월)", avgOff: 100, note: "상시 무료" },
-          { name: "Black Friday (11월)", avgOff: 100, note: "상시 무료" },
-          { name: "Year-End (12월)", avgOff: 100, note: "상시 무료" }
-        ],
-        priceHistory: [
-          { date: "2023.03", season: "Intro Edition", price: 99 },
-          { date: "2023.07", season: "Summer Promo", price: 49 },
-          { date: "2023.11", season: "Play Launch (Free)", price: 0 },
-          { date: "2024.04", season: "Free Edition", price: 0 },
-          { date: "2024.11", season: "Free Edition", price: 0 },
-          { date: "2025.06", season: "Free Edition", price: 0 },
-          { date: "2025.11", season: "Free Edition", price: 0 },
-          { date: "2026.05", season: "Free Edition", price: 0 },
-          { date: "2026.11", season: "Current Deal", price: 0 }
-        ]
-      },
-      {
-        id: 6,
-        brand: "Native Instruments",
-        title: "Komplete 14 Standard",
-        cat: "synth",
-        sub: "Sample Library",
-        desc: "Kontakt 7 샘플러를 기반으로 웅장한 시네마틱 오케스트라, 드럼, 신스 사운드까지 보유한 통합 제작 번들입니다.",
-        original: 599,
-        discountPrice: 299,
-        discountRateNum: 50,
-        discountRate: "50% OFF",
-        code: "BF-SEASON",
-        perk: "Kontakt 7 및 수만 가지 시네마틱 샘플 수록",
-        storeUrl: "https://www.native-instruments.com/en/catalog/komplete/",
-        daysLeft: 4,
-        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.native-instruments.com%2Fen%2Fcatalog%2Fkomplete%2F&screenshot=true&meta=false&embed=screenshot.url",
-        youtubeId: "5Sa3wa_doG0",
-        ytQuery: "Native Instruments Komplete 14 Standard Overview",
-        bestSeasonLabel: "Summer of Sound (6월) / Cyber Season (11월)",
-        seasonality: [
-          { name: "Spring (3~4월)", avgOff: 0, note: "정가 유지" },
-          { name: "Summer of Sound (6월)", avgOff: 50, note: "$299 반값 세일" },
-          { name: "Cyber Season (11월)", avgOff: 50, note: "$299 반값 세일" },
-          { name: "Year-End (12월)", avgOff: 50, note: "연말 연장 프로모션" }
-        ],
-        priceHistory: [
-          { date: "2023.03", season: "Regular Price", price: 599 },
-          { date: "2023.06", season: "Summer of Sound", price: 299 },
-          { date: "2023.11", season: "Cyber Season", price: 299 },
-          { date: "2024.03", season: "Regular Price", price: 599 },
-          { date: "2024.06", season: "Summer of Sound", price: 299 },
-          { date: "2024.11", season: "Cyber Season", price: 299 },
-          { date: "2025.03", season: "Regular Price", price: 599 },
-          { date: "2025.06", season: "Summer of Sound", price: 299 },
-          { date: "2025.11", season: "Cyber Season", price: 299 },
-          { date: "2026.04", season: "Regular Price", price: 599 },
-          { date: "2026.11", season: "Current Deal", price: 299 }
-        ]
-      },
-      {
-        id: 7,
-        brand: "iZotope",
-        title: "Ozone 11 Advanced",
-        cat: "mixing",
-        sub: "Mastering Chain",
-        desc: "음원 마스터링 시 대역별 음압 보정, Stem Rebalance 및 AI Assistant 기반으로 곡의 완성도를 마감하는 마스터링 툴입니다.",
-        original: 399,
-        discountPrice: 199,
-        discountRateNum: 50,
-        discountRate: "50% OFF",
-        code: "OZONE11-SALE",
-        perk: "AI 기반 종합 음압/마스터링 프로세싱",
-        storeUrl: "https://www.izotope.com/en/products/ozone.html",
-        daysLeft: 7,
-        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.izotope.com%2Fen%2Fproducts%2Fozone.html&screenshot=true&meta=false&embed=screenshot.url",
-        youtubeId: "5Sa3wa_doG0",
-        ytQuery: "iZotope Ozone 11 Mastering Overview",
-        bestSeasonLabel: "Summer (6월) / Black Friday (11월)",
-        seasonality: [
-          { name: "Spring (3~4월)", avgOff: 30, note: "$279 세일" },
-          { name: "Summer (6~7월)", avgOff: 50, note: "$199 반값 세일" },
-          { name: "Black Friday (11월)", avgOff: 55, note: "$179~$199 최저가" },
-          { name: "Year-End (12월)", avgOff: 50, note: "$199 홀리데이 세일" }
-        ],
-        priceHistory: [
-          { date: "2023.09", season: "Ozone 11 Launch", price: 299 },
-          { date: "2023.11", season: "Black Friday", price: 199 },
-          { date: "2024.03", season: "Spring Sale", price: 279 },
-          { date: "2024.06", season: "Summer Sale", price: 199 },
-          { date: "2024.11", season: "Black Friday", price: 179 },
-          { date: "2025.03", season: "Regular Price", price: 399 },
-          { date: "2025.07", season: "Summer Sale", price: 199 },
-          { date: "2025.11", season: "Black Friday", price: 199 },
-          { date: "2026.05", season: "Regular Price", price: 399 },
-          { date: "2026.11", season: "Current Deal", price: 199 }
-        ]
-      },
-      {
-        id: 8,
-        brand: "Xfer Records",
-        title: "Serum VST Synth",
-        cat: "synth",
-        sub: "Analog/Synth",
-        desc: "직관적인 렌더링 파형 편집과 압도적인 사운드 메이킹 성능으로 EDM, 팝, 트랩 전 장르에서 일렉트로닉 신스를 이끄는 대표작입니다.",
-        original: 189,
-        discountPrice: 149,
-        discountRateNum: 21,
-        discountRate: "21% OFF",
-        code: "SERUM-PROMO",
-        perk: "웨이브테이블 신티사이저 글로벌 시그니처 툴",
-        storeUrl: "https://xferrecords.com/products/serum",
-        daysLeft: 15,
-        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fxferrecords.com%2Fproducts%2Fserum&screenshot=true&meta=false&embed=screenshot.url",
-        youtubeId: "5Sa3wa_doG0",
-        ytQuery: "Xfer Records Serum Synth Walkthrough",
-        bestSeasonLabel: "제휴 바우처 / 번들 프로모션 시점",
-        seasonality: [
-          { name: "Spring (3~4월)", avgOff: 0, note: "공식 노세일 정책" },
-          { name: "Summer (6~7월)", avgOff: 0, note: "공식 노세일 정책" },
-          { name: "Black Friday (11월)", avgOff: 15, note: "리셀러 쿠폰/제휴 할인" },
-          { name: "Year-End (12월)", avgOff: 21, note: "특별 프로모션 딜" }
-        ],
-        priceHistory: [
-          { date: "2023.03", season: "Regular Price", price: 189 },
-          { date: "2023.11", season: "Regular Price", price: 189 },
-          { date: "2024.06", season: "Regular Price", price: 189 },
-          { date: "2024.11", season: "Partner Voucher", price: 169 },
-          { date: "2025.04", season: "Regular Price", price: 189 },
-          { date: "2025.11", season: "Partner Promo", price: 159 },
-          { date: "2026.05", season: "Regular Price", price: 189 },
-          { date: "2026.11", season: "Current Deal", price: 149 }
-        ]
-      },
-      {
-        id: 9,
-        brand: "Celemony",
-        title: "Melodyne 5 assistant",
-        cat: "fx",
-        sub: "Pitch/Vocal",
-        desc: "보컬의 음정과 타이밍을 음질 손상 없이 정밀하게 수정하는 글로벌 표준 보컬 피치 보정 플러그인입니다.",
-        original: 249,
-        discountPrice: 149,
-        discountRateNum: 40,
-        discountRate: "40% OFF",
-        code: "MELODYNE40",
-        perk: "자연스러운 보컬 피치 및 타임 보정 업계 표준",
-        storeUrl: "https://www.celemony.com/en/melodyne/what-is-melodyne",
-        daysLeft: 3,
-        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.celemony.com%2Fen%2Fmelodyne%2Fwhat-is-melodyne&screenshot=true&meta=false&embed=screenshot.url",
-        youtubeId: "5Sa3wa_doG0",
-        ytQuery: "Celemony Melodyne 5 Vocal Pitch Editing",
-        bestSeasonLabel: "Summer (6월) / Black Friday (11월)",
-        seasonality: [
-          { name: "Spring (3~4월)", avgOff: 20, note: "$199 세일" },
-          { name: "Summer (6~7월)", avgOff: 40, note: "$149 정기 할인" },
-          { name: "Black Friday (11월)", avgOff: 60, note: "$99~$149 최저가 구간" },
-          { name: "Year-End (12월)", avgOff: 40, note: "$149 연말 프로모션" }
-        ],
-        priceHistory: [
-          { date: "2023.03", season: "Regular Price", price: 249 },
-          { date: "2023.07", season: "Summer Sale", price: 149 },
-          { date: "2023.11", season: "Black Friday", price: 99 },
-          { date: "2024.04", season: "Spring Sale", price: 199 },
-          { date: "2024.08", season: "Regular Price", price: 249 },
-          { date: "2024.11", season: "Black Friday", price: 99 },
-          { date: "2025.05", season: "Regular Price", price: 249 },
-          { date: "2025.07", season: "Summer Sale", price: 149 },
-          { date: "2025.11", season: "Black Friday", price: 129 },
-          { date: "2026.04", season: "Regular Price", price: 249 },
-          { date: "2026.11", season: "Current Deal", price: 149 }
-        ]
-      }
-    ];
-
-    const PIPED_SEARCH_ENDPOINTS = [
-      "https://pipedapi.kavin.rocks/search?filter=videos&q=",
-      "https://api.piped.private.coffee/search?filter=videos&q=",
-      "https://pipedapi.tokhmi.xyz/search?filter=videos&q="
-    ];
-
-    async function resolveLiveYoutubeAndOfficialImage(deal) {
-      try {
-        const mlRes = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(deal.storeUrl)}&screenshot=true`);
-        if (mlRes.ok) {
-          const mlJson = await mlRes.json();
-          const ogImg = mlJson?.data?.image?.url;
-          const screenImg = mlJson?.data?.screenshot?.url;
-          if (ogImg && ogImg.startsWith('http')) {
-            deal.imgUrl = ogImg;
-            deal.backupImgUrl = screenImg || deal.imgUrl;
-          } else if (screenImg && screenImg.startsWith('http')) {
-            deal.imgUrl = screenImg;
-          }
-          updateDealDomImages(deal.id, deal.imgUrl);
-        }
-      } catch (e) {}
-
-      const query = encodeURIComponent(deal.ytQuery || `${deal.brand} ${deal.title}`);
-      for (const endpoint of PIPED_SEARCH_ENDPOINTS) {
-        try {
-          const res = await fetch(`${endpoint}${query}`);
-          if (!res.ok) continue;
-          const data = await res.json();
-          const items = data?.items || [];
-          const firstValid = items.find(item => item.url && item.url.includes('v='));
-          if (firstValid) {
-            const vidMatch = firstValid.url.match(/v=([a-zA-Z0-9_-]{11})/);
-            if (vidMatch && vidMatch[1]) {
-              deal.youtubeId = vidMatch[1];
-              if (firstValid.thumbnail && firstValid.thumbnail.startsWith('http')) {
-                deal.backupImgUrl = firstValid.thumbnail;
-              }
-              if (currentOpenDealId === deal.id) {
-                const iframe = document.getElementById('dealModalYoutubeIframe');
-                if (iframe) {
-                  iframe.src = `https://www.youtube.com/embed/${deal.youtubeId}?rel=0&modestbranding=1`;
-                }
-              }
-              break;
-            }
-          }
-        } catch (e) {}
-      }
-    }
-
-    function updateDealDomImages(dealId, newSrc) {
-      document.querySelectorAll(`img[data-deal-img-id="${dealId}"]`).forEach(img => {
-        if (img.src !== newSrc) {
-          img.style.display = 'block';
-          img.src = newSrc;
-          const fb = img.parentElement?.querySelector('.plugin-ui-fallback');
-          if (fb) fb.style.display = 'none';
-        }
-      });
-    }
-
-    let currentMainCat = 'all';
-    let currentSubCat = '전체';
-
-    function setMainCategory(cat, el) {
-      document.querySelectorAll('.main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
-      if (el) el.classList.add('active');
-      currentMainCat = cat;
-      currentSubCat = '전체';
-      renderSubCategories();
-      renderDeals();
-    }
-
-    function renderSubCategories() {
-      const subBar = document.getElementById('subCatBar');
-      const subs = subCategories[currentMainCat] || ["전체"];
-      subBar.innerHTML = subs.map(s => `
-        <button class="sub-chip ${s === currentSubCat ? 'active' : ''}" onclick="setSubCategory('${s}', this)">${s}</button>
-      `).join('');
-    }
-
-    function setSubCategory(sub, el) {
-      document.querySelectorAll('.sub-chip').forEach(c => c.classList.remove('active'));
-      if (el) el.classList.add('active');
-      currentSubCat = sub;
-      renderDeals();
-    }
-
-    function onDealFilterChange() { renderDeals(); }
-
-    function verifyImageNotDummy(imgEl, dealId) {
-      if (imgEl.naturalWidth > 0 && imgEl.naturalWidth <= 120) {
-        handleImgError(imgEl, dealId);
-      }
-    }
-
-    function handleImgError(imgEl, dealId) {
-      const deal = dealsData.find(d => d.id === dealId);
-      const step = parseInt(imgEl.dataset.fallbackStep || '0', 10);
-
-      if (deal && step === 0 && deal.backupImgUrl && imgEl.src !== deal.backupImgUrl) {
-        imgEl.dataset.fallbackStep = '1';
-        imgEl.src = deal.backupImgUrl;
-        return;
-      }
-
-      if (deal && step <= 1) {
-        imgEl.dataset.fallbackStep = '2';
-        imgEl.src = `https://api.microlink.io/?url=${encodeURIComponent(deal.storeUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
-        return;
-      }
-
-      imgEl.style.display = 'none';
-      const fallback = imgEl.parentElement?.querySelector('.plugin-ui-fallback');
-      if (fallback) fallback.style.display = 'flex';
-    }
-
-    function renderDeals() {
-      const container = document.getElementById('dealsContainer');
-      const searchKeyword = document.getElementById('dealSearchKeyword').value.trim().toLowerCase();
-      const sortOption = document.getElementById('dealSortOption').value;
-
-      let filtered = [...dealsData];
-
-      if (currentMainCat !== 'all') {
-        if (currentMainCat === 'free') { filtered = filtered.filter(d => d.discountPrice === 0); }
-        else { filtered = filtered.filter(d => d.cat === currentMainCat); }
-      }
-
-      if (currentSubCat !== '전체' && currentSubCat !== '전체 보기') {
-        filtered = filtered.filter(d => d.sub === currentSubCat);
-      }
-
-      if (searchKeyword !== '') {
-        filtered = filtered.filter(d => 
-          d.brand.toLowerCase().includes(searchKeyword) ||
-          d.title.toLowerCase().includes(searchKeyword) ||
-          d.desc.toLowerCase().includes(searchKeyword)
-        );
-      }
-
-      if (sortOption === 'priceLow') { filtered.sort((a, b) => a.discountPrice - b.discountPrice); }
-      else if (sortOption === 'priceHigh') { filtered.sort((a, b) => b.discountPrice - a.discountPrice); }
-      else if (sortOption === 'discountHigh') { filtered.sort((a, b) => b.discountRateNum - a.discountRateNum); }
-      else if (sortOption === 'endingSoon') { filtered.sort((a, b) => a.daysLeft - b.daysLeft); }
-
-      if (filtered.length === 0) {
-        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">검색 조건에 해당되는 VST 딜 정보가 없습니다.</div>`;
-        return;
-      }
-
-      container.innerHTML = filtered.map(d => {
-        const krw = d.discountPrice === 0 ? "0원 (무료)" : `약 ${(d.discountPrice * USD_TO_KRW).toLocaleString()}원`;
-        const origKrw = d.original ? `$${d.original}` : '';
-        const tagClass = d.discountPrice === 0 ? 'tag-free' : 'tag-discount';
-
-        return `
-          <div class="deal-card" onclick="openDealDetailModal(${d.id})">
-            <div class="plugin-img-wrapper">
-              <div class="plugin-ui-fallback" style="display:none;">
-                ${d.brand}
-                <span>${d.title}</span>
-              </div>
-              <img 
-                data-deal-img-id="${d.id}"
-                src="${d.imgUrl}" 
-                alt="${d.title}" 
-                referrerpolicy="no-referrer" 
-                loading="lazy" 
-                onload="verifyImageNotDummy(this, ${d.id})"
-                onerror="handleImgError(this, ${d.id})">
-            </div>
-            <div class="deal-card-body">
-              <div>
-                <div class="card-header">
-                  <span class="brand-name">${d.brand}</span>
-                  <span class="tag-badge ${tagClass}">${d.discountRate}</span>
-                </div>
-                <div class="deal-title">${d.title}</div>
-                <div class="sub-cat-tag"># ${d.sub}</div>
-                <div class="description-text">${d.desc}</div>
-              </div>
-              <div>
-                <div class="price-box">
-                  <span class="original-price">${origKrw}</span>
-                  <span class="discount-price">$${d.discountPrice}</span>
-                  <div class="krw-price">한화 추산: ${krw}</div>
-                </div>
-                <button class="btn-buy" onclick="event.stopPropagation(); window.open('${d.storeUrl}', '_blank')">공식 스토어 딜 바로가기</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    /*
-     * 주식 차트형 연도별/시즌별 가격 추이 SVG 그래프 생성 및 인터랙션 처리
-     */
-    function buildPriceChartSvg(deal, rangeMode = 'all') {
-      const fullHistory = deal.priceHistory || [
-        { date: "2024.11", season: "Black Friday", price: deal.discountPrice },
-        { date: "2025.06", season: "Regular Price", price: deal.original || deal.discountPrice },
-        { date: "2025.11", season: "Black Friday", price: deal.discountPrice },
-        { date: "2026.11", season: "Current Deal", price: deal.discountPrice }
-      ];
-
-      const pointsData = rangeMode === '1y' ? fullHistory.slice(-5) : fullHistory;
-      const svgW = 740;
-      const svgH = 220;
-      const padL = 52;
-      const padR = 26;
-      const padT = 24;
-      const padB = 38;
-      const plotW = svgW - padL - padR;
-      const plotH = svgH - padT - padB;
-
-      const prices = pointsData.map(p => p.price);
-      const maxVal = Math.max(deal.original || 100, ...prices);
-      const minVal = Math.min(0, ...prices);
-      const topBound = maxVal === 0 ? 100 : Math.ceil(maxVal * 1.1);
-      const bottomBound = 0;
-      const valSpan = Math.max(1, topBound - bottomBound);
-
-      const getX = (idx) => {
-        if (pointsData.length <= 1) return padL + plotW / 2;
-        return padL + (idx / (pointsData.length - 1)) * plotW;
-      };
-      const getY = (val) => {
-        return padT + plotH - ((val - bottomBound) / valSpan) * plotH;
-      };
-
-      const gridSteps = 4;
-      let gridLinesHtml = '';
-      for (let i = 0; i <= gridSteps; i++) {
-        const gVal = Math.round(bottomBound + (valSpan * i) / gridSteps);
-        const gy = getY(gVal).toFixed(1);
-        gridLinesHtml += `
-          <line x1="${padL}" y1="${gy}" x2="${svgW - padR}" y2="${gy}" stroke="var(--border-color)" stroke-width="1" stroke-dasharray="${i === 0 ? 'none' : '3 3'}" />
-          <text x="${padL - 10}" y="${Number(gy) + 4}" fill="var(--text-secondary)" font-size="11" font-weight="600" text-anchor="end">$${gVal}</text>
-        `;
-      }
-
-      const origY = getY(deal.original || 0).toFixed(1);
-      const origLineHtml = deal.original > 0 ? `
-        <line x1="${padL}" y1="${origY}" x2="${svgW - padR}" y2="${origY}" stroke="var(--text-secondary)" stroke-width="1" stroke-dasharray="6 4" opacity="0.55" />
-        <text x="${svgW - padR}" y="${Number(origY) - 6}" fill="var(--text-secondary)" font-size="10" font-weight="700" text-anchor="end">MSRP $${deal.original}</text>
-      ` : '';
-
-      const coords = pointsData.map((pt, idx) => ({
-        x: Number(getX(idx).toFixed(1)),
-        y: Number(getY(pt.price).toFixed(1)),
-        ...pt
-      }));
-
-      const polylinePoints = coords.map(c => `${c.x},${c.y}`).join(' ');
-      const areaPath = coords.length > 1
-        ? `M ${coords[0].x} ${padT + plotH} L ` + coords.map(c => `${c.x} ${c.y}`).join(' L ') + ` L ${coords[coords.length - 1].x} ${padT + plotH} Z`
-        : '';
-
-      const minPriceVal = Math.min(...prices);
-
-      const nodesHtml = coords.map((c, idx) => {
-        const isLowest = c.price === minPriceVal;
-        const isCurrent = idx === coords.length - 1;
-        const dotColor = isCurrent ? 'var(--accent-gold)' : (isLowest ? '#8fa874' : 'var(--text-primary)');
-        const offRate = deal.original > 0 ? Math.round(((deal.original - c.price) / deal.original) * 100) : 0;
-        const showLabel = pointsData.length <= 6 || idx % 2 === 0 || idx === coords.length - 1;
-
-        return `
-          <g>
-            ${showLabel ? `<text x="${c.x}" y="${svgH - 10}" fill="var(--text-secondary)" font-size="10.5" font-weight="600" text-anchor="middle">${c.date}</text>` : ''}
-            <circle 
-              class="ph-node-point"
-              cx="${c.x}" 
-              cy="${c.y}" 
-              r="${isCurrent ? 5.5 : 4.5}" 
-              fill="${dotColor}" 
-              stroke="var(--card-bg)" 
-              stroke-width="2"
-              onmouseenter="updatePriceChartTooltip(${deal.id}, '${c.date}', '${c.season}', ${c.price}, ${offRate})"
-              onclick="updatePriceChartTooltip(${deal.id}, '${c.date}', '${c.season}', ${c.price}, ${offRate})"
-            />
-          </g>
-        `;
-      }).join('');
-
-      return `
-        <svg class="ph-svg-chart" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="phAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="var(--accent-gold)" stop-opacity="0.28" />
-              <stop offset="100%" stop-color="var(--accent-gold)" stop-opacity="0.0" />
-            </linearGradient>
-          </defs>
-          ${gridLinesHtml}
-          ${origLineHtml}
-          <path d="${areaPath}" fill="url(#phAreaGrad)" />
-          <polyline fill="none" stroke="var(--accent-gold)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${polylinePoints}" />
-          ${nodesHtml}
-        </svg>
-      `;
-    }
-
-    function switchPriceChartRange(dealId, rangeMode, btnEl) {
-      const deal = dealsData.find(d => d.id === dealId);
-      if (!deal) return;
-
-      document.querySelectorAll('.ph-range-tabs .ph-range-btn').forEach(b => b.classList.remove('active'));
-      if (btnEl) btnEl.classList.add('active');
-
-      const container = document.getElementById('phSvgChartContainer');
-      if (container) {
-        container.innerHTML = buildPriceChartSvg(deal, rangeMode);
-      }
-    }
-
-    function updatePriceChartTooltip(dealId, dateStr, seasonStr, priceVal, offRate) {
-      const box = document.getElementById('phInteractiveTooltip');
-      if (!box) return;
-      const krwStr = priceVal === 0 ? "0원 (무료)" : `약 ${(priceVal * USD_TO_KRW).toLocaleString()}원`;
-      const rateBadge = offRate > 0 ? `(-${offRate}%)` : '(정가)';
-
-      box.innerHTML = `
-        <div>
-          <span class="ph-tooltip-date">[${dateStr}]</span>
-          <span class="ph-tooltip-season">${seasonStr}</span>
-        </div>
-        <div class="ph-tooltip-price">
-          $${priceVal} <span style="color:var(--accent-gold); font-weight:700; margin-left:0.35rem;">${rateBadge} · ${krwStr}</span>
-        </div>
-      `;
-    }
-
-    function openDealDetailModal(id) {
-      const deal = dealsData.find(d => d.id === id);
-      if (!deal) return;
-
-      currentOpenDealId = deal.id;
-      const detailContent = document.getElementById('dealDetailContent');
-      const krw = deal.discountPrice === 0 ? "0원 (무료)" : `약 ${(deal.discountPrice * USD_TO_KRW).toLocaleString()}원`;
-      const searchEncoded = encodeURIComponent(deal.ytQuery || `${deal.brand} ${deal.title} official demo`);
-      const validVideoId = (deal.youtubeId && deal.youtubeId.length === 11) ? deal.youtubeId : "5Sa3wa_doG0";
-
-      const historyArr = deal.priceHistory || [{ date: "2026.11", season: "Current Deal", price: deal.discountPrice }];
-      const allPrices = historyArr.map(h => h.price);
-      const allTimeLow = Math.min(...allPrices);
-      const allTimeLowEntry = historyArr.find(h => h.price === allTimeLow) || historyArr[historyArr.length - 1];
-      const maxDiscountPct = deal.original > 0 ? Math.round(((deal.original - allTimeLow) / deal.original) * 100) : 100;
-
-      let timingEvaluation = "평균 프로모션 가격대";
-      if (deal.discountPrice <= allTimeLow) {
-        timingEvaluation = "역대 최저가 도달 (매수 적합)";
-      } else if (deal.discountPrice <= allTimeLow * 1.1) {
-        timingEvaluation = "최저가 근접 구간 (차이 $" + (deal.discountPrice - allTimeLow) + ")";
-      }
-
-      const latestPoint = historyArr[historyArr.length - 1];
-      const latestOffRate = deal.original > 0 ? Math.round(((deal.original - latestPoint.price) / deal.original) * 100) : 0;
-      const latestKrw = latestPoint.price === 0 ? "0원 (무료)" : `약 ${(latestPoint.price * USD_TO_KRW).toLocaleString()}원`;
-
-      const seasonalityList = deal.seasonality || [
-        { name: "Spring (3~4월)", avgOff: 20, note: "시즌 프로모션" },
-        { name: "Summer (6~7월)", avgOff: deal.discountRateNum, note: "정기 세일" },
-        { name: "Black Friday (11월)", avgOff: deal.discountRateNum, note: "연중 최대 세일" },
-        { name: "Year-End (12월)", avgOff: deal.discountRateNum, note: "연말 세일" }
-      ];
-
-      const seasonalityHtml = seasonalityList.map(s => `
-        <div class="ph-season-item">
-          <div>
-            <div class="ph-season-name">${s.name}</div>
-            <div class="ph-season-rate">${s.avgOff > 0 ? `평균 ${s.avgOff}% OFF` : '할인 없음'}</div>
-            <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:0.15rem;">${s.note}</div>
-          </div>
-          <div class="ph-season-bar-track">
-            <div class="ph-season-bar-fill" style="width: ${Math.min(100, s.avgOff)}%;"></div>
-          </div>
-        </div>
-      `).join('');
-
-      detailContent.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
-          <div>
-            <span style="color:var(--accent-gold); font-weight:800; text-transform:uppercase; font-size:0.85rem;">${deal.brand}</span>
-            <h2 style="font-size:2rem; font-weight:900; margin-top:0.2rem; color:var(--text-primary);">${deal.title}</h2>
-          </div>
-          <span class="tag-badge tag-discount" style="font-size:0.95rem; padding:0.4rem 0.8rem;">${deal.discountRate}</span>
-        </div>
-
-        <div class="plugin-img-wrapper" style="height:280px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
-          <div class="plugin-ui-fallback" style="display:none;">${deal.brand}<br><span>${deal.title}</span></div>
-          <img 
-            data-deal-img-id="${deal.id}"
-            src="${deal.imgUrl}" 
-            alt="${deal.title}" 
-            referrerpolicy="no-referrer" 
-            style="object-fit:contain;" 
-            onload="verifyImageNotDummy(this, ${deal.id})"
-            onerror="handleImgError(this, ${deal.id})">
-        </div>
-
-        <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1.5rem; font-weight:500;">${deal.desc}</p>
-
-        <!-- 연도별 / 시즌별 가격 추이 및 할인 지표 모듈 -->
-        <div class="price-history-section">
-          <div class="ph-header-bar">
-            <div class="ph-title-group">
-              <h4>연도별 · 시즌별 할인 가격 추이 (2023 — 2026)</h4>
-              <p>차트의 각 시즌 변곡점에 마우스를 올리면 당시 할인가와 원화 환산액을 확인할 수 있습니다.</p>
-            </div>
-            <div class="ph-range-tabs">
-              <button type="button" class="ph-range-btn active" onclick="switchPriceChartRange(${deal.id}, 'all', this)">전체 기간 (2023~2026)</button>
-              <button type="button" class="ph-range-btn" onclick="switchPriceChartRange(${deal.id}, '1y', this)">최근 1년</button>
-            </div>
-          </div>
-
-          <div class="ph-metrics-grid">
-            <div class="ph-metric-card">
-              <div class="ph-metric-label">정가 (MSRP)</div>
-              <div class="ph-metric-value">$${deal.original}</div>
-              <div class="ph-metric-sub">약 ${(deal.original * USD_TO_KRW).toLocaleString()}원</div>
-            </div>
-            <div class="ph-metric-card">
-              <div class="ph-metric-label">역대 최저가 (All-Time Low)</div>
-              <div class="ph-metric-value">$${allTimeLow}</div>
-              <div class="ph-metric-sub">최대 ${maxDiscountPct}% 할인 (${allTimeLowEntry.date})</div>
-            </div>
-            <div class="ph-metric-card">
-              <div class="ph-metric-label">현재 딜 판정 지표</div>
-              <div class="ph-metric-value">$${deal.discountPrice}</div>
-              <div class="ph-metric-sub">${timingEvaluation}</div>
-            </div>
-            <div class="ph-metric-card">
-              <div class="ph-metric-label">핵심 세일 시즌</div>
-              <div class="ph-metric-value" style="font-size:0.95rem; line-height:1.35;">${deal.bestSeasonLabel || 'Black Friday (11월)'}</div>
-              <div class="ph-metric-sub">브랜드 정기 프로모션 기준</div>
-            </div>
-          </div>
-
-          <div class="ph-chart-wrapper">
-            <div id="phSvgChartContainer">
-              ${buildPriceChartSvg(deal, 'all')}
-            </div>
-            <div class="ph-tooltip-box" id="phInteractiveTooltip">
-              <div>
-                <span class="ph-tooltip-date">[${latestPoint.date}]</span>
-                <span class="ph-tooltip-season">${latestPoint.season}</span>
-              </div>
-              <div class="ph-tooltip-price">
-                $${latestPoint.price} <span style="color:var(--accent-gold); font-weight:700; margin-left:0.35rem;">(-${latestOffRate}%) · ${latestKrw}</span>
-              </div>
-            </div>
-          </div>
-
-          <div style="font-size:0.8rem; font-weight:800; color:var(--text-secondary); margin-bottom:0.55rem; text-transform:uppercase; letter-spacing:0.04em;">
-            시즌별 평균 할인율 지표 (Seasonality Breakdown)
-          </div>
-          <div class="ph-seasonality-grid">
-            ${seasonalityHtml}
-          </div>
-        </div>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
-          <h4 style="font-weight:800; font-size:1.1rem; color:var(--accent-gold);">공식 데모 & 사운드 리뷰 영상</h4>
-          <a href="https://www.youtube.com/results?search_query=${searchEncoded}" target="_blank" style="font-size:0.82rem; color:var(--accent-gold); text-decoration:none; font-weight:700;">YouTube에서 공식 리뷰 더보기</a>
-        </div>
-        <div class="youtube-video-container">
-          <iframe 
-            id="dealModalYoutubeIframe"
-            src="https://www.youtube.com/embed/${validVideoId}?rel=0&modestbranding=1" 
-            title="${deal.title} Official Demo"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-            allowfullscreen>
-          </iframe>
-        </div>
-
-        <div class="price-box" style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding:1.2rem;">
-          <div>
-            <span class="original-price" style="font-size:1.05rem;">정가 $${deal.original}</span>
-            <span class="discount-price" style="font-size:1.8rem; margin-left:0.5rem;">$${deal.discountPrice}</span>
-          </div>
-          <div class="krw-price" style="font-size:1.1rem;">한화: ${krw}</div>
-        </div>
-
-        <a href="${deal.storeUrl}" target="_blank" class="btn-buy" style="font-size:1.05rem; padding:1rem; text-align:center; margin-top:1.2rem;">공식 스토어 구매 페이지로 이동</a>
-      `;
-
-      openModal('dealDetailModal');
-    }
-
-    function filterCategory(cat) {
-      if (cat === 'affiliate') {
-        alert('제휴 문의: aftrdry@outlook.kr 또는 공식 디스코드 채널로 연락해 주시기 바랍니다.');
-      }
-    }
-
-    let currentCommCat = 'all';
-
-    function setCommunityCategory(cat, el) {
-      document.querySelectorAll('#communityView .main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
-      if (el) el.classList.add('active');
-      currentCommCat = cat;
-      renderCommunityPosts();
-    }
-
-    async function fetchCommunityPosts() {
-      const listEl = document.getElementById('communityList');
-      const deletedIds = getDeletedPostIds();
-
-      if (!supabaseClient) {
-        if (rawCommunityPosts.length === 0) {
-          rawCommunityPosts = [
-            { id: 1, category: "공지사항", author_nickname: "@aftrdry", title: "PlugAzit 공식 아지트 개설 안내", content: "프로듀서들을 위한 큐레이션 및 커뮤니티 공간에 오신 것을 환영합니다.", created_at: new Date().toISOString() },
-            { id: 2, category: "믹싱/마스터링", author_nickname: "@aftrdry", title: "FabFilter Pro-Q 3 Dynamic EQ 보컬 마스킹 잡는 팁", content: "Sidechain 연동 후 250Hz 영역 Dynamic EQ 적용하면 투명하게 정리됩니다.", created_at: new Date().toISOString() }
-          ];
-        }
-        rawCommunityPosts = rawCommunityPosts.filter(p => !deletedIds.includes(String(p.id)));
-        renderCommunityPosts();
-        return;
-      }
-
-      try {
-        const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
-        if (error) {
-          listEl.innerHTML = `<div style="text-align: center; padding: 2.5rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">Supabase 'posts' 테이블 연동 오류: ${error.message}</div>`;
-        } else {
-          rawCommunityPosts = (data || []).filter(p => !deletedIds.includes(String(p.id)));
-          renderCommunityPosts();
-        }
-      } catch (err) { console.error(err); }
-    }
-
-    function renderCommunityPosts() {
-      const listEl = document.getElementById('communityList');
-      const keyword = document.getElementById('commSearchKeyword').value.trim().toLowerCase();
-      const deletedIds = getDeletedPostIds();
-
-      let filtered = rawCommunityPosts.filter(p => !deletedIds.includes(String(p.id)));
-      if (currentCommCat !== 'all') { filtered = filtered.filter(p => p.category === currentCommCat); }
-      if (keyword !== '') {
-        filtered = filtered.filter(p => 
-          (p.title && p.title.toLowerCase().includes(keyword)) ||
-          (p.content && p.content.toLowerCase().includes(keyword)) ||
-          (p.author_nickname && p.author_nickname.toLowerCase().includes(keyword))
-        );
-      }
-
-      if (filtered.length === 0) {
-        listEl.innerHTML = `<div style="text-align: center; padding: 3rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">게시글이 존재하지 않습니다. 첫 번째 글을 작성해 보세요.</div>`;
-        return;
-      }
-
-      listEl.innerHTML = filtered.map(p => {
-        const isNotice = p.category === '공지사항';
-        const cardClass = isNotice ? 'comm-card notice-card' : 'comm-card';
-        const badgeClass = isNotice ? 'comm-category-badge notice' : 'comm-category-badge';
-        const dateStr = new Date(p.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-        const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
-
-        return `
-          <div class="${cardClass}" onclick="openPostDetail(${safeId})">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
-              <div>
-                <span class="${badgeClass}">${p.category || '자유수다'}</span>
-                <span class="comm-author">${p.author_nickname}</span>
-              </div>
-              <span style="font-size:0.78rem; color:var(--text-secondary);">${dateStr}</span>
-            </div>
-            <h4 style="margin:0.5rem 0 0.4rem 0; font-size:1.1rem; color:var(--text-primary); font-weight:700;">${p.title}</h4>
-            <p style="font-size:0.92rem; color:var(--text-secondary); line-height:1.6; white-space: pre-wrap; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${p.content}</p>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function showPostWritePage() {
-      if (!currentUser && supabaseClient) {
-        alert('로그인이 필요한 기능입니다.');
-        openModal('loginModal');
-        return;
-      }
-      document.getElementById('standalonePostForm').reset();
-      document.getElementById('editorGuideOverlay').style.opacity = '0.85';
-      const isAdmin = currentUser && currentUser.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
-      document.getElementById('writeOptNotice').style.display = isAdmin ? 'block' : 'none';
-      showPage('postWrite');
-    }
-
-    function handleEditorTyping() {
-      const content = document.getElementById('writeContent').value;
-      const overlay = document.getElementById('editorGuideOverlay');
-      if (content.length > 0) { overlay.style.opacity = '0'; }
-      else { overlay.style.opacity = '0.85'; }
-    }
-
-    function formatEditorText(command) {
-      const textarea = document.getElementById('writeContent');
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const selectedText = textarea.value.substring(start, end);
-
-      let replacement = selectedText;
-      if (command === 'bold') replacement = `**${selectedText}**`;
-      if (command === 'underline') replacement = `<u>${selectedText}</u>`;
-
-      textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
-      textarea.focus();
-    }
-
-    function insertEditorLink() {
-      const url = prompt('삽입할 웹 링크 URL을 입력하세요:', 'https://');
-      if (!url) return;
-      const textarea = document.getElementById('writeContent');
-      textarea.value += ` [링크](${url}) `;
-    }
-
-    function insertEditorMedia(type) {
-      const label = type === 'image' ? '이미지 URL' : '동영상(유튜브 등) URL';
-      const url = prompt(`첨부할 ${label}을 입력하세요 (용량 15MB 이하 제한):`, 'https://');
-      if (!url) return;
-      const textarea = document.getElementById('writeContent');
-      textarea.value += type === 'image' ? `\n![이미지첨부](${url})\n` : `\n[동영상링크](${url})\n`;
-    }
-
-    async function handleStandalonePostSubmit(e) {
-      e.preventDefault();
-      const category = document.getElementById('writeCategorySelect').value;
-      const title = document.getElementById('writeTitle').value.trim();
-      const content = document.getElementById('writeContent').value.trim();
-
-      if (!supabaseClient) {
-        alert('게시글이 성공적으로 등록되었습니다. (데모 모드)');
-        showPage('community');
-        return;
-      }
-
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (!session) { alert('로그인이 만료되었습니다.'); openModal('loginModal'); return; }
-
-      const user = session.user;
-      const nickname = user.user_metadata?.nickname || '@' + user.email.split('@')[0];
-
-      const { error } = await supabaseClient.from('posts').insert([{
-        user_id: user.id, author_nickname: nickname, category, title, content
-      }]);
-
-      if (error) { alert('게시글 작성 실패: ' + error.message); }
-      else {
-        alert('게시글이 등록되었습니다.');
-        showPage('community');
-        await fetchCommunityPosts();
-      }
-    }
-
-    function openPostDetail(id) {
-      const post = rawCommunityPosts.find(p => String(p.id) === String(id));
-      if (!post) return;
-
-      const container = document.getElementById('postDetailContainer');
-      const actionBtns = document.getElementById('postDetailActionBtns');
-      const dateStr = new Date(post.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-      const emailPrefix = currentUser?.email ? currentUser.email.split('@')[0] : '';
-      const userNick = currentUser?.user_metadata?.nickname || (emailPrefix ? '@' + emailPrefix : '');
-      const isAdmin = currentUser && currentUser.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
-      const isMyPost = currentUser && (
-        (post.user_id && String(currentUser.id) === String(post.user_id)) ||
-        (post.author_nickname && (
-          post.author_nickname === userNick ||
-          post.author_nickname.replace(/^@/, '') === userNick.replace(/^@/, '') ||
-          post.author_nickname.replace(/^@/, '') === emailPrefix
-        )) ||
-        isAdmin
-      );
-
-      const safeId = typeof post.id === 'string' ? `'${post.id}'` : post.id;
-      actionBtns.innerHTML = isMyPost ? `<button class="nav-btn" style="color:#e74c3c; border-color:#e74c3c;" onclick="deletePost(${safeId})">삭제하기</button>` : '';
-
-      container.innerHTML = `
-        <div style="margin-bottom:1.5rem;">
-          <span class="comm-category-badge ${post.category === '공지사항' ? 'notice' : ''}">${post.category}</span>
-          <span class="comm-author" style="font-size:1rem; margin-left:0.5rem;">${post.author_nickname}</span>
-          <span style="font-size:0.82rem; color:var(--text-secondary); float:right;">${dateStr}</span>
-        </div>
-        <h2 style="font-size:1.8rem; font-weight:900; margin-bottom:1.2rem; color:var(--text-primary);">${post.title}</h2>
-        <div style="font-size:1.02rem; color:var(--text-primary); line-height:1.8; white-space: pre-wrap; padding: 1.5rem 0; border-top:1px solid var(--border-color); border-bottom:1px solid var(--border-color);">${post.content}</div>
-      `;
-
-      showPage('postDetail');
-    }
-
-    async function deletePost(id) {
-      if (!confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
-      
-      markPostIdAsDeleted(id);
-      rawCommunityPosts = rawCommunityPosts.filter(p => String(p.id) !== String(id));
-
-      if (!supabaseClient) {
-        alert('게시글이 삭제되었습니다.');
-        showPage('community');
-        renderCommunityPosts();
-        return;
-      }
-
-      try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (session) {
-          const numId = !isNaN(Number(id)) ? Number(id) : id;
-          let { data, error } = await supabaseClient
-            .from('posts')
-            .delete()
-            .eq('id', numId)
-            .select();
-
-          if (!error && (!data || data.length === 0)) {
-            await supabaseClient
-              .from('posts')
-              .delete()
-              .match({ id: numId, user_id: session.user.id });
-          }
-        }
-      } catch (err) {
-        console.error(err);
-      }
-
-      alert('게시글이 성공적으로 삭제되었습니다.');
-      showPage('community');
-      renderCommunityPosts();
-    }
-
-    function switchMyPageTab(tabName, el) {
-      document.querySelectorAll('#myPageView .cat-chip').forEach(c => c.classList.remove('active'));
-      if (el) el.classList.add('active');
-
-      document.getElementById('mpTabProfile').style.display = tabName === 'profile' ? 'block' : 'none';
-      document.getElementById('mpTabSecurity').style.display = tabName === 'security' ? 'block' : 'none';
-      document.getElementById('mpTabActivity').style.display = tabName === 'activity' ? 'block' : 'none';
-
-      if (tabName === 'activity') { fetchMyActivityPosts(); }
-    }
-
-    async function initMyPageData() {
-      if (!supabaseClient) {
-        originalNickname = '@aftrdry';
-        document.getElementById('myPageEmail').value = 'aftrdry@outlook.kr';
-        document.getElementById('myPageNickname').value = originalNickname;
-        document.getElementById('myPageDaw').value = 'Logic Pro';
-        onNicknameInputChanged();
-        return;
-      }
-
-      try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) return;
-        currentUser = session.user;
-        document.getElementById('myPageEmail').value = currentUser.email || '';
-
-        const { data } = await supabaseClient.from('profiles').select('nickname, main_daw').eq('id', currentUser.id).maybeSingle();
-        if (data && data.nickname) {
-          originalNickname = data.nickname;
-          document.getElementById('myPageNickname').value = originalNickname;
-          if (data.main_daw) document.getElementById('myPageDaw').value = data.main_daw;
-        } else {
-          originalNickname = currentUser.user_metadata?.nickname || '@' + currentUser.email.split('@')[0];
-          document.getElementById('myPageNickname').value = originalNickname;
-        }
-        onNicknameInputChanged();
-      } catch (err) { console.error(err); }
-    }
-
-    function onNicknameInputChanged() {
-      const inputVal = document.getElementById('myPageNickname').value.trim();
-      const msgEl = document.getElementById('nicknameCheckMsg');
-      const saveBtn = document.getElementById('btnSaveProfile');
-
-      if (inputVal === originalNickname) {
-        isNicknameVerified = true;
-        msgEl.style.color = 'var(--text-secondary)';
-        msgEl.innerText = '현재 본인의 닉네임입니다.';
-        saveBtn.disabled = false; saveBtn.style.opacity = '1'; saveBtn.style.cursor = 'pointer';
-      } else {
-        isNicknameVerified = false;
-        msgEl.style.color = '#e74c3c';
-        msgEl.innerText = '닉네임 변경 시 [중복 확인] 버튼을 눌러주세요.';
-        saveBtn.disabled = true; saveBtn.style.opacity = '0.5'; saveBtn.style.cursor = 'not-allowed';
-      }
-    }
-
-    async function checkNicknameDuplicate() {
-      const nickname = document.getElementById('myPageNickname').value.trim();
-      const msgEl = document.getElementById('nicknameCheckMsg');
-      const saveBtn = document.getElementById('btnSaveProfile');
-
-      if (!nickname) { alert('닉네임을 입력해 주세요.'); return; }
-      if (nickname === originalNickname) {
-        isNicknameVerified = true;
-        msgEl.style.color = 'var(--text-secondary)';
-        msgEl.innerText = '현재 본인의 닉네임입니다.';
-        saveBtn.disabled = false; saveBtn.style.opacity = '1'; saveBtn.style.cursor = 'pointer';
-        return;
-      }
-
-      if (!supabaseClient) {
-        isNicknameVerified = true;
-        msgEl.style.color = '#8fa874';
-        msgEl.innerText = '사용 가능한 닉네임입니다. (데모 모드)';
-        saveBtn.disabled = false; saveBtn.style.opacity = '1'; saveBtn.style.cursor = 'pointer';
-        return;
-      }
-
-      const { data } = await supabaseClient.from('profiles').select('id').eq('nickname', nickname).maybeSingle();
-      if (data) {
-        isNicknameVerified = false;
-        msgEl.style.color = '#e74c3c';
-        msgEl.innerText = '이미 사용 중인 닉네임입니다.';
-        saveBtn.disabled = true; saveBtn.style.opacity = '0.5'; saveBtn.style.cursor = 'not-allowed';
-      } else {
-        isNicknameVerified = true;
-        msgEl.style.color = '#8fa874';
-        msgEl.innerText = '사용 가능한 닉네임입니다.';
-        saveBtn.disabled = false; saveBtn.style.opacity = '1'; saveBtn.style.cursor = 'pointer';
-      }
-    }
-
-    async function handleProfileUpdateSubmit(e) {
-      e.preventDefault();
-      const nickname = document.getElementById('myPageNickname').value.trim();
-      const main_daw = document.getElementById('myPageDaw').value;
-
-      if (!isNicknameVerified) { alert('닉네임 중복 확인을 완료해 주세요.'); return; }
-      if (!supabaseClient) { alert('프로필이 저장되었습니다.'); return; }
-
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (!session) return;
-
-      const { error } = await supabaseClient.from('profiles').upsert({
-        id: session.user.id, email: session.user.email, nickname, main_daw, updated_at: new Date()
-      });
-
-      if (error) { alert('저장 실패: ' + error.message); }
-      else { alert('프로필 정보가 안전하게 저장되었습니다.'); originalNickname = nickname; }
-    }
-
-    async function handlePasswordChangeSubmit(e) {
-      e.preventDefault();
-      const newPassword = document.getElementById('newPassword').value;
-      const confirmNewPw = document.getElementById('confirmNewPassword').value;
-
-      if (newPassword !== confirmNewPw) { alert('새 비밀번호가 일치하지 않습니다.'); return; }
-      if (newPassword.length < 6) { alert('비밀번호는 6자리 이상이어야 합니다.'); return; }
-
-      if (!supabaseClient) { alert('비밀번호가 변경되었습니다. (데모 모드)'); return; }
-
-      const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
-      if (error) { alert('비밀번호 변경 실패: ' + error.message); }
-      else { alert('비밀번호가 성공적으로 변경되었습니다.'); e.target.reset(); }
-    }
-
-    async function fetchMyActivityPosts() {
-      const listEl = document.getElementById('myActivityList');
-      const deletedIds = getDeletedPostIds();
-
-      if (!supabaseClient) {
-        listEl.innerHTML = `<div class="comm-card"><h4 style="font-weight:700;">[데모] 내가 작성한 글 샘플 제목</h4><p style="font-size:0.88rem; color:var(--text-secondary);">내용 요약...</p></div>`;
-        return;
-      }
-
-      try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) return;
-        const myPosts = rawCommunityPosts.filter(p => String(p.user_id) === String(session.user.id) && !deletedIds.includes(String(p.id)));
-
-        if (myPosts.length === 0) {
-          listEl.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding: 2rem;">작성한 게시글이 없습니다.</p>`;
-          return;
-        }
-
-        listEl.innerHTML = myPosts.map(p => {
-          const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
-          return `
-            <div class="comm-card" onclick="openPostDetail(${safeId})">
-              <span class="comm-category-badge">${p.category}</span>
-              <h4 style="margin:0.4rem 0; font-size:1.05rem; font-weight:700;">${p.title}</h4>
-              <p style="font-size:0.85rem; color:var(--text-secondary);">${new Date(p.created_at).toLocaleDateString('ko-KR')}</p>
-            </div>
-          `;
-        }).join('');
-      } catch (err) { console.error(err); }
-    }
-
-    async function checkUserSession() {
-      if (!supabaseClient) return;
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      currentUser = session?.user || null;
-      updateUIAuthStatus(currentUser);
-    }
-
-    function updateUIAuthStatus(user) {
-      currentUser = user;
-      document.getElementById('authNav').style.display = user ? 'none' : 'flex';
-      document.getElementById('userNav').style.display = user ? 'flex' : 'none';
-      
-      const adminBtn = document.getElementById('navAdminBtn');
-      const isAdmin = user && user.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
-      if (adminBtn) adminBtn.style.display = isAdmin ? 'block' : 'none';
-    }
-
-    async function handleLoginSubmit(e) {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
-
-      if (!supabaseClient) { closeModal('loginModal'); updateUIAuthStatus({ email }); alert('환영합니다.'); return; }
-
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) { alert('로그인 실패: ' + error.message); }
-      else { closeModal('loginModal'); updateUIAuthStatus(data.user); alert('성공적으로 로그인되었습니다.'); }
-    }
-
-    async function handleSignupSubmit(e) {
-      e.preventDefault();
-      const nickname = document.getElementById('signupNickname').value;
-      const email = document.getElementById('signupEmail').value;
-      const password = document.getElementById('signupPassword').value;
-
-      if (!supabaseClient) { closeModal('signupModal'); alert('회원가입 완료.'); return; }
-
-      const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { nickname } } });
-      if (error) { alert('회원가입 실패: ' + error.message); }
-      else { closeModal('signupModal'); alert('가입 완료. 이메일 확인 후 로그인해 주세요.'); }
-    }
-
-    async function handleResetPasswordSubmit(e) {
-      e.preventDefault();
-      const email = document.getElementById('resetEmail').value.trim();
-      if (!supabaseClient) { alert('재설정 메일 발송됨.'); closeModal('resetPwModal'); return; }
-
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: 'https://plugazit.com' });
-      if (error) { alert('요청 실패: ' + error.message); }
-      else { alert('비밀번호 재설정 메일이 발송되었습니다.'); closeModal('resetPwModal'); }
-    }
-
-    async function handleFindEmailSubmit(e) {
-      e.preventDefault();
-      const nickname = document.getElementById('findNickname').value.trim();
-      if (!supabaseClient) { alert(`이메일 힌트: af***@outlook.kr`); closeModal('findEmailModal'); return; }
-
-      const { data } = await supabaseClient.from('profiles').select('email, nickname').eq('nickname', nickname).maybeSingle();
-      if (!data) { alert('해당 닉네임의 회원을 찾을 수 없습니다.'); }
-      else {
-        const parts = data.email.split('@');
-        const masked = parts[0].substring(0, 2) + '*'.repeat(parts[0].length - 2) + '@' + parts[1];
-        alert(`가입 이메일 힌트: [ ${masked} ]`);
-        closeModal('findEmailModal');
-      }
-    }
-
-    async function handleLogout() {
-      if (supabaseClient) { await supabaseClient.auth.signOut(); }
-      alert('로그아웃 되었습니다.');
-      location.reload();
-    }
-
-    function extractYoutubeId(input) {
-      if (!input) return "";
-      const trimmed = input.trim();
-      if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
-      const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
-      return match ? match[1] : "";
-    }
-
-    function handleDealSubmit(e) {
-      e.preventDefault();
-      const brand = document.getElementById('dealBrand').value.trim();
-      const title = document.getElementById('dealTitle').value.trim();
-      const cat = document.getElementById('dealMainCat').value;
-      const orig = parseFloat(document.getElementById('dealOrigPrice').value) || 0;
-      const disc = parseFloat(document.getElementById('dealDiscPrice').value) || 0;
-      const desc = document.getElementById('dealDesc').value.trim();
-      const storeUrl = document.getElementById('dealUrl').value.trim();
-      const customImg = document.getElementById('dealImgUrl')?.value.trim() || "";
-      const ytInput = document.getElementById('dealYoutubeInput')?.value.trim() || "";
-      const ytId = extractYoutubeId(ytInput) || "5Sa3wa_doG0";
-
-      const rateNum = orig > 0 ? Math.round(((orig - disc) / orig) * 100) : (disc === 0 ? 100 : 0);
-      const rateStr = disc === 0 ? "100% FREE" : `${rateNum}% OFF`;
-
-      const newDeal = {
-        id: dealsData.length + 1,
-        brand,
-        title,
-        cat,
-        sub: "전체",
-        desc,
-        original: orig,
-        discountPrice: disc,
-        discountRateNum: rateNum,
-        discountRate: rateStr,
-        code: "NEW-DEAL",
-        perk: desc,
-        storeUrl,
-        daysLeft: 7,
-        imgUrl: customImg || `https://api.microlink.io/?url=${encodeURIComponent(storeUrl)}&screenshot=true&meta=false&embed=screenshot.url`,
-        youtubeId: ytId,
-        ytQuery: `${brand} ${title} official demo`,
-        bestSeasonLabel: "Black Friday (11월)",
-        seasonality: [
-          { name: "Spring (3~4월)", avgOff: Math.round(rateNum * 0.5), note: "시즌 프로모션" },
-          { name: "Summer (6~7월)", avgOff: rateNum, note: "정기 세일" },
-          { name: "Black Friday (11월)", avgOff: rateNum, note: "최대 할인 시즌" },
-          { name: "Year-End (12월)", avgOff: rateNum, note: "연말 세일" }
-        ],
-        priceHistory: [
-          { date: "2024.11", season: "Black Friday", price: disc },
-          { date: "2025.05", season: "Regular Price", price: orig || disc },
-          { date: "2025.11", season: "Black Friday", price: disc },
-          { date: "2026.05", season: "Regular Price", price: orig || disc },
-          { date: "2026.11", season: "Current Deal", price: disc }
-        ]
-      };
-
-      dealsData.unshift(newDeal);
-      resolveLiveYoutubeAndOfficialImage(newDeal);
-      renderDeals();
-      alert('새로운 딜 정보가 관리자 권한으로 등록되었습니다.');
-      e.target.reset();
-      showPage('deals');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      renderSubCategories();
-      renderDeals();
-      checkUserSession();
-      dealsData.forEach(d => resolveLiveYoutubeAndOfficialImage(d));
-    });
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
