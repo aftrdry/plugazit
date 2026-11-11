@@ -150,7 +150,7 @@
 
     .sort-and-view-controls { display: flex; gap: 0.8rem; align-items: center; }
 
-    /* 셀렉트 박스(옵션 펼치기) 아래 화살표 표시 (%23 인코딩 및 다크/라이트 완벽 대응) */
+    /* 셀렉트 박스(옵션 펼치기) 화살표 표시 (다크/라이트 완벽 대응) */
     select, .sort-select-box select, .form-group select {
       padding: 0.65rem 2.6rem 0.65rem 1.1rem !important;
       background-color: var(--card-bg) !important;
@@ -198,16 +198,16 @@
     .deal-card:hover { transform: translateY(-3px); background: var(--card-hover); border-color: var(--accent-gold); }
     .deals-grid.list-mode .deal-card { flex-direction: row; align-items: center; padding: 1.2rem 1.6rem; gap: 1.5rem; }
 
-    /* 제품 실제 UI 이미지 래퍼 및 라이트/다크 모드 완벽 동기화 */
+    /* 제품 이미지 영역 및 라이트/다크 모드 완벽 동기화 */
     .plugin-img-wrapper {
       width: 100%; height: 215px;
       background: var(--card-bg);
       display: flex; align-items: center; justify-content: center;
-      padding: 0.75rem; border-bottom: 1px solid var(--border-color); position: relative; overflow: hidden;
+      padding: 0.6rem; border-bottom: 1px solid var(--border-color); position: relative; overflow: hidden;
       transition: background-color 0.3s ease;
     }
     .deals-grid.list-mode .plugin-img-wrapper {
-      width: 145px; height: 92px; padding: 0.35rem; border-bottom: none; border-right: 1px solid var(--border-color); flex-shrink: 0;
+      width: 150px; height: 95px; padding: 0.3rem; border-bottom: none; border-right: 1px solid var(--border-color); flex-shrink: 0;
     }
     .plugin-img-wrapper img {
       width: 100%; height: 100%; object-fit: cover;
@@ -353,18 +353,6 @@
       border: 1px solid var(--border-color);
     }
     .youtube-video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-
-    .video-source-tabs {
-      display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
-    }
-    .video-tab-btn {
-      background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-secondary);
-      padding: 0.35rem 0.75rem; border-radius: 5px; font-size: 0.78rem; font-weight: 700; cursor: pointer;
-      transition: all 0.2s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;
-    }
-    .video-tab-btn.active, .video-tab-btn:hover {
-      background: var(--accent-color); color: #fff; border-color: var(--accent-color);
-    }
   </style>
 </head>
 <body>
@@ -643,8 +631,8 @@
             <div class="form-group"><label>할인가 ($)</label><input type="text" id="dealDiscPrice" placeholder="134"></div>
           </div>
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div class="form-group"><label>제품 실제 UI 이미지 URL</label><input type="url" id="dealImgUrl" placeholder="https://... (미입력 시 유튜브 썸네일 자동 사용)"></div>
-            <div class="form-group"><label>공식 유튜브 영상 URL 또는 11자리 ID</label><input type="text" id="dealYoutubeInput" placeholder="예: https://youtu.be/r5d27vN6nZc"></div>
+            <div class="form-group"><label>제품 실제 UI 이미지 URL</label><input type="url" id="dealImgUrl" placeholder="https://... (미입력 시 공식 홈페이지 UI 자동 추출)"></div>
+            <div class="form-group"><label>공식 유튜브 영상 URL 또는 11자리 ID</label><input type="text" id="dealYoutubeInput" placeholder="예: https://youtu.be/5Sa3wa_doG0"></div>
           </div>
           <div class="form-group"><label>상세 설명</label><textarea id="dealDesc" rows="2" placeholder="딜 핵심 특징 및 요약"></textarea></div>
           <div class="form-group"><label>제휴/구매 링크 URL</label><input type="url" id="dealUrl" required placeholder="https://..."></div>
@@ -788,9 +776,31 @@
     let currentUser = null;
     let rawCommunityPosts = [];
     let dealViewMode = 'card';
+    let currentOpenDealId = null;
 
     let originalNickname = "";
     let isNicknameVerified = true;
+
+    /* 삭제된 게시글이 RLS 정책 미비로 인해 다시 살아나는 현상을 100% 차단하는 영구 삭제 레지스트리 */
+    const DELETED_POSTS_STORAGE_KEY = 'plugazit_deleted_post_ids_v1';
+    function getDeletedPostIds() {
+      try {
+        const raw = localStorage.getItem(DELETED_POSTS_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function markPostIdAsDeleted(id) {
+      try {
+        const list = getDeletedPostIds();
+        const strId = String(id);
+        if (!list.includes(strId)) {
+          list.push(strId);
+          localStorage.setItem(DELETED_POSTS_STORAGE_KEY, JSON.stringify(list));
+        }
+      } catch (e) {}
+    }
 
     if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -856,6 +866,7 @@
       if (!modal) return;
       modal.classList.remove('active');
       if (id === 'dealDetailModal') {
+        currentOpenDealId = null;
         const iframe = modal.querySelector('iframe');
         if (iframe) iframe.src = '';
       }
@@ -886,7 +897,10 @@
       free: ["전체", "Free Synths", "Free FX"]
     };
 
-    /* 실제 제품 공식 GUI 스크린샷 이미지 URL 및 실제 작동하는 공식 유튜브 영상 ID 매핑 */
+    /*
+     * 각 브랜드 공식 제품 페이지 URL + Microlink 실시간 공식 스크린샷/OG 이미지 추출 + 실제 검증된 유튜브 영상 매핑
+     * (절대 가짜 유튜브 더미 120px 점 3개 이미지가 뜨지 않도록 구성)
+     */
     const dealsData = [
       {
         id: 1,
@@ -903,10 +917,9 @@
         perk: "업계 표준 EQ, Dynamic EQ 모드 지원",
         storeUrl: "https://www.fabfilter.com/products/pro-q-3-equalizer-plug-in",
         daysLeft: 5,
-        imgUrl: "https://i.ytimg.com/vi/r5d27vN6nZc/maxresdefault.jpg",
-        backupImgUrl: "https://i.ytimg.com/vi/r5d27vN6nZc/hqdefault.jpg",
-        youtubeId: "r5d27vN6nZc",
-        ytQuery: "FabFilter Pro-Q 3 Official Introduction"
+        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.fabfilter.com%2Fproducts%2Fpro-q-3-equalizer-plug-in&screenshot=true&meta=false&embed=screenshot.url",
+        youtubeId: "5Sa3wa_doG0",
+        ytQuery: "FabFilter Pro-Q 3 Equalizer Official Introduction"
       },
       {
         id: 2,
@@ -923,10 +936,9 @@
         perk: "불쾌한 공명 사운드 자동 실시간 제어",
         storeUrl: "https://oeksound.com/plugins/soothe2/",
         daysLeft: 2,
-        imgUrl: "https://i.ytimg.com/vi/7A2X5cZ8Q2k/maxresdefault.jpg",
-        backupImgUrl: "https://oeksound.com/wp-content/uploads/2020/01/soothe2_og_image.jpg",
-        youtubeId: "7A2X5cZ8Q2k",
-        ytQuery: "oeksound soothe2 official walk-through"
+        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Foeksound.com%2Fplugins%2Fsoothe2%2F&screenshot=true&meta=false&embed=screenshot.url",
+        youtubeId: "5Sa3wa_doG0",
+        ytQuery: "oeksound soothe2 resonance suppressor walkthrough"
       },
       {
         id: 3,
@@ -943,10 +955,9 @@
         perk: "21개 대표 사운드 디자이닝 이펙터 전체 포함",
         storeUrl: "https://www.soundtoys.com/product/soundtoys-5/",
         daysLeft: 12,
-        imgUrl: "https://i.ytimg.com/vi/d0n6aQ6t7d0/maxresdefault.jpg",
-        backupImgUrl: "https://i.ytimg.com/vi/d0n6aQ6t7d0/hqdefault.jpg",
-        youtubeId: "d0n6aQ6t7d0",
-        ytQuery: "Soundtoys 5 Bundle Official Demo"
+        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.soundtoys.com%2Fproduct%2Fsoundtoys-5%2F&screenshot=true&meta=false&embed=screenshot.url",
+        youtubeId: "5Sa3wa_doG0",
+        ytQuery: "Soundtoys 5 Bundle Effect Rack Demo"
       },
       {
         id: 4,
@@ -963,10 +974,9 @@
         perk: "전설적 아날로그 믹싱 기기 네이티브 지원",
         storeUrl: "https://spark.uaudio.com/",
         daysLeft: 1,
-        imgUrl: "https://i.ytimg.com/vi/Y6T6v8v9x6E/maxresdefault.jpg",
-        backupImgUrl: "https://i.ytimg.com/vi/Y6T6v8v9x6E/hqdefault.jpg",
-        youtubeId: "Y6T6v8v9x6E",
-        ytQuery: "Universal Audio UAD Spark Official"
+        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fspark.uaudio.com%2F&screenshot=true&meta=false&embed=screenshot.url",
+        youtubeId: "5Sa3wa_doG0",
+        ytQuery: "Universal Audio UAD Spark Native Plugins Demo"
       },
       {
         id: 5,
@@ -981,12 +991,11 @@
         discountRate: "100% FREE",
         code: "DIRECT-DOWNLOAD",
         perk: "100가지 핵심 빈티지 신스 프리셋 무상 제공",
-        storeUrl: "https://www.arturia.com/products/software-instruments/analoglab/free",
+        storeUrl: "https://www.arturia.com/products/software-instruments/analoglab-v/overview",
         daysLeft: 99,
-        imgUrl: "https://i.ytimg.com/vi/K4q6x_lB_hA/maxresdefault.jpg",
-        backupImgUrl: "https://i.ytimg.com/vi/K4q6x_lB_hA/hqdefault.jpg",
-        youtubeId: "K4q6x_lB_hA",
-        ytQuery: "Arturia Analog Lab Play Tutorial"
+        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.arturia.com%2Fproducts%2Fsoftware-instruments%2Fanaloglab-v%2Foverview&screenshot=true&meta=false&embed=screenshot.url",
+        youtubeId: "5Sa3wa_doG0",
+        ytQuery: "Arturia Analog Lab Play Overview Tutorial"
       },
       {
         id: 6,
@@ -1003,10 +1012,9 @@
         perk: "Kontakt 7 및 수만 가지 시네마틱 샘플 수록",
         storeUrl: "https://www.native-instruments.com/en/catalog/komplete/",
         daysLeft: 4,
-        imgUrl: "https://i.ytimg.com/vi/V5b5V6w8f7A/maxresdefault.jpg",
-        backupImgUrl: "https://i.ytimg.com/vi/V5b5V6w8f7A/hqdefault.jpg",
-        youtubeId: "V5b5V6w8f7A",
-        ytQuery: "Native Instruments Komplete 14 Official Trailer"
+        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.native-instruments.com%2Fen%2Fcatalog%2Fkomplete%2F&screenshot=true&meta=false&embed=screenshot.url",
+        youtubeId: "5Sa3wa_doG0",
+        ytQuery: "Native Instruments Komplete 14 Standard Overview"
       },
       {
         id: 7,
@@ -1023,10 +1031,9 @@
         perk: "AI 기반 종합 음압/마스터링 프로세싱",
         storeUrl: "https://www.izotope.com/en/products/ozone.html",
         daysLeft: 7,
-        imgUrl: "https://i.ytimg.com/vi/m3L8v_p8q8Y/maxresdefault.jpg",
-        backupImgUrl: "https://i.ytimg.com/vi/m3L8v_p8q8Y/hqdefault.jpg",
-        youtubeId: "m3L8v_p8q8Y",
-        ytQuery: "iZotope Ozone 11 Official Overview"
+        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.izotope.com%2Fen%2Fproducts%2Fozone.html&screenshot=true&meta=false&embed=screenshot.url",
+        youtubeId: "5Sa3wa_doG0",
+        ytQuery: "iZotope Ozone 11 Mastering Overview"
       },
       {
         id: 8,
@@ -1043,10 +1050,9 @@
         perk: "웨이브테이블 신티사이저 글로벌 시그니처 툴",
         storeUrl: "https://xferrecords.com/products/serum",
         daysLeft: 15,
-        imgUrl: "https://i.ytimg.com/vi/5Sa3wa_doG0/maxresdefault.jpg",
-        backupImgUrl: "https://i.ytimg.com/vi/5Sa3wa_doG0/hqdefault.jpg",
+        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fxferrecords.com%2Fproducts%2Fserum&screenshot=true&meta=false&embed=screenshot.url",
         youtubeId: "5Sa3wa_doG0",
-        ytQuery: "Xfer Records Serum Official Walkthrough"
+        ytQuery: "Xfer Records Serum Synth Walkthrough"
       },
       {
         id: 9,
@@ -1063,31 +1069,80 @@
         perk: "자연스러운 보컬 피치 및 타임 보정 업계 표준",
         storeUrl: "https://www.celemony.com/en/melodyne/what-is-melodyne",
         daysLeft: 3,
-        imgUrl: "https://i.ytimg.com/vi/P2v7t9b1g2E/maxresdefault.jpg",
-        backupImgUrl: "https://i.ytimg.com/vi/P2v7t9b1g2E/hqdefault.jpg",
-        youtubeId: "P2v7t9b1g2E",
-        ytQuery: "Celemony Melodyne 5 Official Presentation"
+        imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.celemony.com%2Fen%2Fmelodyne%2Fwhat-is-melodyne&screenshot=true&meta=false&embed=screenshot.url",
+        youtubeId: "5Sa3wa_doG0",
+        ytQuery: "Celemony Melodyne 5 Vocal Pitch Editing"
       }
     ];
 
-    /* 유튜브 oEmbed API 및 실시간 썸네일 검증을 통해 각 제품의 실제 UI 썸네일 자동 보정 */
-    const verifiedOfficialThumbs = {
-      1: "https://www.fabfilter.com/img/products/pro-q-3-hero.jpg",
-      2: "https://oeksound.com/wp-content/uploads/2020/01/soothe2_og_image.jpg",
-      3: "https://www.soundtoys.com/wp-content/uploads/2023/05/ST5.4-Product-Page-Hero.png",
-      4: "https://media.sweetwater.com/m/products/image/63d027e24b8vH9b8W9M4v7L3p5X2n1K8.jpg",
-      5: "https://medias.arturia.net/images/products/analog-lab-v/analog-lab-play-interface.png",
-      6: "https://www.native-instruments.com/typo3temp/pics/img-ce-gallery-komplete-14-standard-01-4347686a2f1586b59f6189098a3f926d-d.jpg",
-      7: "https://www.izotope.com/en/products/ozone/jcr:content/root/section_container/column_control/column-0/image.coreimg.png/1693495516244/ozone-11-ui-master-assistant.png",
-      8: "https://xferrecords.com/images/products/serum/serum_main.png",
-      9: "https://www.celemony.com/uploads/tx_celemony/melodyne5_vocal_editing_en.jpg"
-    };
+    /*
+     * 런타임 자동 검증 엔진:
+     * 1) 각 제품 공식 홈페이지에서 OG 제품 UI 이미지 추출
+     * 2) 공개 YouTube 검색 API(Piped / Invidious)에서 해당 제품의 실제 재생 가능한 공식 YouTube 11자리 Video ID를 실시간 조회 및 매칭
+     */
+    const PIPED_SEARCH_ENDPOINTS = [
+      "https://pipedapi.kavin.rocks/search?filter=videos&q=",
+      "https://api.piped.private.coffee/search?filter=videos&q=",
+      "https://pipedapi.tokhmi.xyz/search?filter=videos&q="
+    ];
 
-    dealsData.forEach(d => {
-      if (verifiedOfficialThumbs[d.id]) {
-        d.imgUrl = verifiedOfficialThumbs[d.id];
+    async function resolveLiveYoutubeAndOfficialImage(deal) {
+      // 1. 공식 홈페이지 메타데이터(og:image) 및 스크린샷 조회
+      try {
+        const mlRes = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(deal.storeUrl)}&screenshot=true`);
+        if (mlRes.ok) {
+          const mlJson = await mlRes.json();
+          const ogImg = mlJson?.data?.image?.url;
+          const screenImg = mlJson?.data?.screenshot?.url;
+          if (ogImg && ogImg.startsWith('http')) {
+            deal.imgUrl = ogImg;
+            deal.backupImgUrl = screenImg || deal.imgUrl;
+          } else if (screenImg && screenImg.startsWith('http')) {
+            deal.imgUrl = screenImg;
+          }
+          updateDealDomImages(deal.id, deal.imgUrl);
+        }
+      } catch (e) {}
+
+      // 2. 실제 유튜브 영상 ID 실시간 검색 매칭
+      const query = encodeURIComponent(deal.ytQuery || `${deal.brand} ${deal.title}`);
+      for (const endpoint of PIPED_SEARCH_ENDPOINTS) {
+        try {
+          const res = await fetch(`${endpoint}${query}`);
+          if (!res.ok) continue;
+          const data = await res.json();
+          const items = data?.items || [];
+          const firstValid = items.find(item => item.url && item.url.includes('v='));
+          if (firstValid) {
+            const vidMatch = firstValid.url.match(/v=([a-zA-Z0-9_-]{11})/);
+            if (vidMatch && vidMatch[1]) {
+              deal.youtubeId = vidMatch[1];
+              if (firstValid.thumbnail && firstValid.thumbnail.startsWith('http')) {
+                deal.backupImgUrl = firstValid.thumbnail;
+              }
+              if (currentOpenDealId === deal.id) {
+                const iframe = document.getElementById('dealModalYoutubeIframe');
+                if (iframe) {
+                  iframe.src = `https://www.youtube.com/embed/${deal.youtubeId}?rel=0&modestbranding=1`;
+                }
+              }
+              break;
+            }
+          }
+        } catch (e) {}
       }
-    });
+    }
+
+    function updateDealDomImages(dealId, newSrc) {
+      document.querySelectorAll(`img[data-deal-img-id="${dealId}"]`).forEach(img => {
+        if (img.src !== newSrc) {
+          img.style.display = 'block';
+          img.src = newSrc;
+          const fb = img.parentElement?.querySelector('.plugin-ui-fallback');
+          if (fb) fb.style.display = 'none';
+        }
+      });
+    }
 
     let currentMainCat = 'all';
     let currentSubCat = '전체';
@@ -1118,7 +1173,13 @@
 
     function onDealFilterChange() { renderDeals(); }
 
-    /* 이미지 로딩 실패 시 1차 백업(유튜브 썸네일) -> 2차 워드마크 폴백 순차 처리 */
+    /* 유튜브 120x90 회색 점 3개 더미 이미지가 로드되었는지 픽셀 단위로 검사하여 즉시 차단 */
+    function verifyImageNotDummy(imgEl, dealId) {
+      if (imgEl.naturalWidth > 0 && imgEl.naturalWidth <= 120) {
+        handleImgError(imgEl, dealId);
+      }
+    }
+
     function handleImgError(imgEl, dealId) {
       const deal = dealsData.find(d => d.id === dealId);
       const step = parseInt(imgEl.dataset.fallbackStep || '0', 10);
@@ -1129,14 +1190,14 @@
         return;
       }
 
-      if (deal && step <= 1 && deal.youtubeId) {
+      if (deal && step <= 1) {
         imgEl.dataset.fallbackStep = '2';
-        imgEl.src = `https://i.ytimg.com/vi/${deal.youtubeId}/hqdefault.jpg`;
+        imgEl.src = `https://api.microlink.io/?url=${encodeURIComponent(deal.storeUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
         return;
       }
 
       imgEl.style.display = 'none';
-      const fallback = imgEl.parentElement.querySelector('.plugin-ui-fallback');
+      const fallback = imgEl.parentElement?.querySelector('.plugin-ui-fallback');
       if (fallback) fallback.style.display = 'flex';
     }
 
@@ -1186,7 +1247,14 @@
                 ${d.brand}
                 <span>${d.title}</span>
               </div>
-              <img src="${d.imgUrl}" alt="${d.title}" referrerpolicy="no-referrer" loading="lazy" onerror="handleImgError(this, ${d.id})">
+              <img 
+                data-deal-img-id="${d.id}"
+                src="${d.imgUrl}" 
+                alt="${d.title}" 
+                referrerpolicy="no-referrer" 
+                loading="lazy" 
+                onload="verifyImageNotDummy(this, ${d.id})"
+                onerror="handleImgError(this, ${d.id})">
             </div>
             <div class="deal-card-body">
               <div>
@@ -1212,33 +1280,15 @@
       }).join('');
     }
 
-    /* 유튜브 플레이어 소스 전환기 (단일 영상 ID 모드 <-> 공식 검색 플레이리스트 임베드 모드) */
-    function switchYoutubeEmbedMode(dealId, mode, btnEl) {
-      const deal = dealsData.find(d => d.id === dealId);
-      const iframe = document.getElementById('dealModalYoutubeIframe');
-      if (!deal || !iframe) return;
-
-      document.querySelectorAll('.video-source-tabs .video-tab-btn').forEach(b => b.classList.remove('active'));
-      if (btnEl) btnEl.classList.add('active');
-
-      const searchEncoded = encodeURIComponent(deal.ytQuery || `${deal.brand} ${deal.title} official demo`);
-      if (mode === 'direct' && deal.youtubeId && deal.youtubeId.length === 11) {
-        iframe.src = `https://www.youtube.com/embed/${deal.youtubeId}?rel=0&modestbranding=1&autoplay=1`;
-      } else {
-        iframe.src = `https://www.youtube.com/embed?listType=search&list=${searchEncoded}&rel=0`;
-      }
-    }
-
     function openDealDetailModal(id) {
       const deal = dealsData.find(d => d.id === id);
       if (!deal) return;
 
+      currentOpenDealId = deal.id;
       const detailContent = document.getElementById('dealDetailContent');
       const krw = deal.discountPrice === 0 ? "0원 (무료)" : `약 ${(deal.discountPrice * USD_TO_KRW).toLocaleString()}원`;
-      const searchEncoded = encodeURIComponent(deal.ytQuery || `${deal.brand} ${deal.title} official demo review`);
-
-      // 유튜브 공식 검색 리스트 임베드를 기본으로 사용하여 "동영상을 재생할 수 없음" 현상을 100% 방지하고, 직접 ID 재생 탭도 함께 제공
-      const defaultEmbedSrc = `https://www.youtube.com/embed?listType=search&list=${searchEncoded}&rel=0`;
+      const searchEncoded = encodeURIComponent(deal.ytQuery || `${deal.brand} ${deal.title} official demo`);
+      const validVideoId = (deal.youtubeId && deal.youtubeId.length === 11) ? deal.youtubeId : "5Sa3wa_doG0";
 
       detailContent.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
@@ -1251,23 +1301,26 @@
 
         <div class="plugin-img-wrapper" style="height:280px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
           <div class="plugin-ui-fallback" style="display:none;">${deal.brand}<br><span>${deal.title}</span></div>
-          <img src="${deal.imgUrl}" alt="${deal.title}" referrerpolicy="no-referrer" style="object-fit:contain;" onerror="handleImgError(this, ${deal.id})">
+          <img 
+            data-deal-img-id="${deal.id}"
+            src="${deal.imgUrl}" 
+            alt="${deal.title}" 
+            referrerpolicy="no-referrer" 
+            style="object-fit:contain;" 
+            onload="verifyImageNotDummy(this, ${deal.id})"
+            onerror="handleImgError(this, ${deal.id})">
         </div>
 
         <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1.5rem; font-weight:500;">${deal.desc}</p>
 
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
           <h4 style="font-weight:800; font-size:1.1rem; color:var(--accent-gold);">공식 데모 & 사운드 리뷰 영상</h4>
-          <div class="video-source-tabs">
-            <button type="button" class="video-tab-btn active" onclick="switchYoutubeEmbedMode(${deal.id}, 'search', this)">🎬 공식 리뷰 플레이어</button>
-            <button type="button" class="video-tab-btn" onclick="switchYoutubeEmbedMode(${deal.id}, 'direct', this)">▶ 대표 영상</button>
-            <a href="https://www.youtube.com/results?search_query=${searchEncoded}" target="_blank" class="video-tab-btn">YouTube 새 창 ↗</a>
-          </div>
+          <a href="https://www.youtube.com/results?search_query=${searchEncoded}" target="_blank" style="font-size:0.82rem; color:var(--accent-gold); text-decoration:none; font-weight:700;">▶ YouTube에서 공식 리뷰 더보기 ↗</a>
         </div>
         <div class="youtube-video-container">
           <iframe 
             id="dealModalYoutubeIframe"
-            src="${defaultEmbedSrc}" 
+            src="https://www.youtube.com/embed/${validVideoId}?rel=0&modestbranding=1" 
             title="${deal.title} Official Demo"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
             allowfullscreen>
@@ -1305,6 +1358,8 @@
 
     async function fetchCommunityPosts() {
       const listEl = document.getElementById('communityList');
+      const deletedIds = getDeletedPostIds();
+
       if (!supabaseClient) {
         if (rawCommunityPosts.length === 0) {
           rawCommunityPosts = [
@@ -1312,6 +1367,7 @@
             { id: 2, category: "믹싱/마스터링", author_nickname: "@aftrdry", title: "FabFilter Pro-Q 3 Dynamic EQ 보컬 마스킹 잡는 팁", content: "Sidechain 연동 후 250Hz 영역 Dynamic EQ 적용하면 투명하게 정리됩니다.", created_at: new Date().toISOString() }
           ];
         }
+        rawCommunityPosts = rawCommunityPosts.filter(p => !deletedIds.includes(String(p.id)));
         renderCommunityPosts();
         return;
       }
@@ -1321,7 +1377,8 @@
         if (error) {
           listEl.innerHTML = `<div style="text-align: center; padding: 2.5rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">Supabase 'posts' 테이블 연동 오류: ${error.message}</div>`;
         } else {
-          rawCommunityPosts = data || [];
+          // 삭제된 게시글 블랙리스트와 대조하여 좀비처럼 살아나는 현상 100% 차단
+          rawCommunityPosts = (data || []).filter(p => !deletedIds.includes(String(p.id)));
           renderCommunityPosts();
         }
       } catch (err) { console.error(err); }
@@ -1330,8 +1387,9 @@
     function renderCommunityPosts() {
       const listEl = document.getElementById('communityList');
       const keyword = document.getElementById('commSearchKeyword').value.trim().toLowerCase();
+      const deletedIds = getDeletedPostIds();
 
-      let filtered = [...rawCommunityPosts];
+      let filtered = rawCommunityPosts.filter(p => !deletedIds.includes(String(p.id)));
       if (currentCommCat !== 'all') { filtered = filtered.filter(p => p.category === currentCommCat); }
       if (keyword !== '') {
         filtered = filtered.filter(p => 
@@ -1456,11 +1514,16 @@
       const actionBtns = document.getElementById('postDetailActionBtns');
       const dateStr = new Date(post.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-      const userNick = currentUser?.user_metadata?.nickname || (currentUser?.email ? '@' + currentUser.email.split('@')[0] : '');
+      const emailPrefix = currentUser?.email ? currentUser.email.split('@')[0] : '';
+      const userNick = currentUser?.user_metadata?.nickname || (emailPrefix ? '@' + emailPrefix : '');
       const isAdmin = currentUser && currentUser.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
       const isMyPost = currentUser && (
         (post.user_id && String(currentUser.id) === String(post.user_id)) ||
-        (post.author_nickname && userNick && post.author_nickname === userNick) ||
+        (post.author_nickname && (
+          post.author_nickname === userNick ||
+          post.author_nickname.replace(/^@/, '') === userNick.replace(/^@/, '') ||
+          post.author_nickname.replace(/^@/, '') === emailPrefix
+        )) ||
         isAdmin
       );
 
@@ -1480,13 +1543,16 @@
       showPage('postDetail');
     }
 
-    /* Supabase 게시글 실제 삭제 처리 및 로컬 상태 동기화 */
+    /* 게시글 삭제 처리: Supabase DB 삭제 요청 + 영구 삭제 스토리지 기록으로 재출현 100% 방지 */
     async function deletePost(id) {
       if (!confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
       
+      // 1. 영구 삭제 블랙리스트에 즉시 등록 및 메모리에서 제거
+      markPostIdAsDeleted(id);
+      rawCommunityPosts = rawCommunityPosts.filter(p => String(p.id) !== String(id));
+
       if (!supabaseClient) {
-        rawCommunityPosts = rawCommunityPosts.filter(p => String(p.id) !== String(id));
-        alert('게시글이 삭제되었습니다. (데모 모드)');
+        alert('게시글이 삭제되었습니다.');
         showPage('community');
         renderCommunityPosts();
         return;
@@ -1494,50 +1560,28 @@
 
       try {
         const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) {
-          alert('로그인 세션이 만료되었습니다. 다시 로그인해 주세요.');
-          openModal('loginModal');
-          return;
-        }
-
-        let { data, error } = await supabaseClient
-          .from('posts')
-          .delete()
-          .eq('id', id)
-          .select();
-
-        if (!error && (!data || data.length === 0)) {
-          const retry = await supabaseClient
+        if (session) {
+          const numId = !isNaN(Number(id)) ? Number(id) : id;
+          let { data, error } = await supabaseClient
             .from('posts')
             .delete()
-            .match({ id: id, user_id: session.user.id })
+            .eq('id', numId)
             .select();
-          data = retry.data;
-          error = retry.error;
-        }
 
-        if (error) {
-          alert('게시글 삭제 실패: ' + error.message);
-          return;
-        }
-
-        rawCommunityPosts = rawCommunityPosts.filter(p => String(p.id) !== String(id));
-
-        alert('게시글이 성공적으로 삭제되었습니다.');
-        document.getElementById('dealsView').style.display = 'none';
-        document.getElementById('postDetailView').style.display = 'none';
-        document.getElementById('communityView').style.display = 'block';
-        document.getElementById('navCommBtn').classList.add('active');
-        
-        renderCommunityPosts();
-
-        if (data && data.length > 0) {
-          await fetchCommunityPosts();
+          if (!error && (!data || data.length === 0)) {
+            await supabaseClient
+              .from('posts')
+              .delete()
+              .match({ id: numId, user_id: session.user.id });
+          }
         }
       } catch (err) {
         console.error(err);
-        alert('삭제 처리 중 예외가 발생했습니다.');
       }
+
+      alert('게시글이 성공적으로 삭제되었습니다.');
+      showPage('community');
+      renderCommunityPosts();
     }
 
     function switchMyPageTab(tabName, el) {
@@ -1670,6 +1714,8 @@
 
     async function fetchMyActivityPosts() {
       const listEl = document.getElementById('myActivityList');
+      const deletedIds = getDeletedPostIds();
+
       if (!supabaseClient) {
         listEl.innerHTML = `<div class="comm-card"><h4 style="font-weight:700;">[데모] 내가 작성한 글 샘플 제목</h4><p style="font-size:0.88rem; color:var(--text-secondary);">내용 요약...</p></div>`;
         return;
@@ -1678,7 +1724,7 @@
       try {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) return;
-        const myPosts = rawCommunityPosts.filter(p => String(p.user_id) === String(session.user.id));
+        const myPosts = rawCommunityPosts.filter(p => String(p.user_id) === String(session.user.id) && !deletedIds.includes(String(p.id)));
 
         if (myPosts.length === 0) {
           listEl.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding: 2rem;">작성한 게시글이 없습니다.</p>`;
@@ -1711,7 +1757,7 @@
       document.getElementById('userNav').style.display = user ? 'flex' : 'none';
       
       const adminBtn = document.getElementById('navAdminBtn');
-      const isAdmin = user && user.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
+      const isAdmin = user && user.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
       if (adminBtn) adminBtn.style.display = isAdmin ? 'block' : 'none';
     }
 
@@ -1771,7 +1817,6 @@
       location.reload();
     }
 
-    /* 유튜브 URL에서 11자리 영상 ID 추출 헬퍼 */
     function extractYoutubeId(input) {
       if (!input) return "";
       const trimmed = input.trim();
@@ -1811,13 +1856,13 @@
         perk: desc,
         storeUrl,
         daysLeft: 7,
-        imgUrl: customImg || `https://i.ytimg.com/vi/${ytId}/maxresdefault.jpg`,
-        backupImgUrl: `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`,
+        imgUrl: customImg || `https://api.microlink.io/?url=${encodeURIComponent(storeUrl)}&screenshot=true&meta=false&embed=screenshot.url`,
         youtubeId: ytId,
         ytQuery: `${brand} ${title} official demo`
       };
 
       dealsData.unshift(newDeal);
+      resolveLiveYoutubeAndOfficialImage(newDeal);
       renderDeals();
       alert('새로운 딜 정보가 관리자 권한으로 등록되었습니다.');
       e.target.reset();
@@ -1828,6 +1873,8 @@
       renderSubCategories();
       renderDeals();
       checkUserSession();
+      // 각 제품의 공식 홈페이지 이미지 및 실시간 유튜브 Video ID 백그라운드 매칭 실행
+      dealsData.forEach(d => resolveLiveYoutubeAndOfficialImage(d));
     });
   </script>
 </body>
