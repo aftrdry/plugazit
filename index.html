@@ -17,6 +17,7 @@
 </head>
 <body>
 
+  <!-- Header -->
   <header role="banner">
     <a href="#" class="logo-container" onclick="resetToHome(); return false;" aria-label="PlugAzit 홈으로 이동">
       <img src="PlugAzit.png" alt="PlugAzit" class="brand-logo-img" />
@@ -46,6 +47,7 @@
   </header>
 
   <main class="container" role="main">
+    <!-- Hero Slogan -->
     <div class="hero-slogan-section">
       <h1 class="hero-title">Right Near, Your Azit.</h1>
       <p class="hero-subtitle">
@@ -63,7 +65,6 @@
           <button type="button" class="cat-chip" onclick="setMainCategory('synth', this)">신디사이저 / 가상악기</button>
           <button type="button" class="cat-chip" onclick="setMainCategory('fx', this)">이펙터 & 유틸리티</button>
           <button type="button" class="cat-chip" onclick="setMainCategory('free', this)">100% FREE</button>
-          <button type="button" class="cat-chip" id="btnMainCatSaved" onclick="setMainCategory('saved', this)">관심 딜 (<span id="savedDealCount">0</span>)</button>
           <button type="button" class="cat-chip affiliate" onclick="filterCategory('affiliate', this)">브랜드 제휴 문의</button>
         </div>
         <div class="sub-cat-bar" id="subCatBar"></div>
@@ -95,16 +96,16 @@
 
     <!-- COMMUNITY VIEW -->
     <section id="communityView" aria-label="프로듀서 커뮤니티">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
         <div>
           <h2 style="font-weight:800; font-size:1.6rem;">Producer Community</h2>
-          <p style="color:var(--text-secondary); font-size:0.9rem;">사운드 믹싱 팁, 플러그인 활용 노하우, 작업곡 피드백을 자유롭게 나누세요.</p>
+          <p style="color:var(--text-secondary); font-size:0.9rem;">사운드 믹싱 팁과 VST 활용 노하우를 자유롭게 나누세요.</p>
         </div>
         <button type="button" class="btn-buy" style="width:auto; padding:0.65rem 1.4rem;" onclick="showPostWritePage()">글 작성하기</button>
       </div>
 
       <div class="main-cat-bar" style="margin-bottom: 1.2rem;">
-        <button type="button" class="cat-chip active" id="btnCommCatAll" onclick="setCommunityCategory('all', this)">전체글</button>
+        <button type="button" class="cat-chip active" onclick="setCommunityCategory('all', this)">전체글</button>
         <button type="button" class="cat-chip notice-chip" onclick="setCommunityCategory('공지사항', this)">공지사항</button>
         <button type="button" class="cat-chip" onclick="setCommunityCategory('믹싱/마스터링', this)">믹싱/마스터링</button>
         <button type="button" class="cat-chip" onclick="setCommunityCategory('VST/신스', this)">VST/신스</button>
@@ -113,18 +114,8 @@
       </div>
 
       <div class="filter-control-bar">
-        <div class="search-input-box" style="max-width: 520px;">
-          <input type="search" id="commSearchKeyword" placeholder="글 제목, 내용, 작성자, DAW, 플러그인 태그 검색..." aria-label="커뮤니티 게시글 검색" oninput="renderCommunityPosts()">
-        </div>
-        <div class="sort-and-view-controls">
-          <div class="sort-select-box">
-            <select id="commSortOption" aria-label="커뮤니티 게시글 정렬" onchange="renderCommunityPosts()">
-              <option value="latest">최신 등록순</option>
-              <option value="popular">추천 인기순</option>
-              <option value="comments">댓글 많은순</option>
-              <option value="views">조회수 높은순</option>
-            </select>
-          </div>
+        <div class="search-input-box" style="max-width: 100%;">
+          <input type="search" id="commSearchKeyword" placeholder="글 제목, 내용, 작성자 닉네임 검색..." aria-label="커뮤니티 게시글 검색" oninput="renderCommunityPosts()">
         </div>
       </div>
       
@@ -133,32 +124,25 @@
       </div>
     </section>
 
-    <!-- POST WRITE / EDIT VIEW -->
+    <!-- 독립형 커뮤니티 글 작성 페이지 -->
     <section id="postWriteView" aria-label="커뮤니티 게시글 작성">
       <div class="standalone-panel-box" style="max-width: 800px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.8rem;">
-          <h2 id="postWriteHeading" style="font-weight:900; font-size:1.6rem; color:var(--accent-gold);">프로듀서 커뮤니티 글 작성</h2>
+          <h2 style="font-weight:900; font-size:1.6rem; color:var(--accent-gold);">프로듀서 커뮤니티 글 작성</h2>
           <button type="button" class="nav-btn" onclick="showPage('community')">목록으로 돌아가기</button>
         </div>
 
         <form id="standalonePostForm" onsubmit="handleStandalonePostSubmit(event)">
-          <div class="admin-grid-2">
-            <div class="form-group">
-              <label for="writeCategorySelect">게시판 카테고리</label>
-              <select id="writeCategorySelect">
-                <option value="믹싱/마스터링">믹싱/마스터링</option>
-                <option value="VST/신스">VST/신스</option>
-                <option value="자유수다" selected>자유수다</option>
-                <option value="곡피드백">곡 피드백</option>
-                <option value="공지사항" id="writeOptNotice" style="display:none; color:var(--accent-gold);">공지사항 (관리자 전용)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="writePluginTag">관련 플러그인 / 장비 태그 (선택)</label>
-              <input type="text" id="writePluginTag" maxlength="50" placeholder="예: Pro-Q 3, Serum, 보컬믹싱">
-            </div>
+          <div class="form-group">
+            <label for="writeCategorySelect">게시판 카테고리</label>
+            <select id="writeCategorySelect">
+              <option value="믹싱/마스터링">믹싱/마스터링</option>
+              <option value="VST/신스">VST/신스</option>
+              <option value="자유수다" selected>자유수다</option>
+              <option value="곡피드백">곡 피드백</option>
+              <option value="공지사항" id="writeOptNotice" style="display:none; color:var(--accent-gold);">공지사항 (관리자 전용)</option>
+            </select>
           </div>
-
           <div class="form-group">
             <label for="writeTitle">제목</label>
             <input type="text" id="writeTitle" required maxlength="150" placeholder="제목을 입력하세요">
@@ -171,54 +155,40 @@
               <button type="button" class="editor-tool-btn" onclick="formatEditorText('underline')"><u>U</u> 밑줄</button>
               <button type="button" class="editor-tool-btn" onclick="insertEditorLink()">링크 삽입</button>
               <button type="button" class="editor-tool-btn" onclick="insertEditorMedia('image')">이미지 첨부</button>
-              <button type="button" class="editor-tool-btn" onclick="insertEditorMedia('video')">유튜브 첨부</button>
-              <button type="button" class="editor-tool-btn" onclick="insertEditorMedia('audio')">오디오/사운드클라우드 첨부</button>
+              <button type="button" class="editor-tool-btn" onclick="insertEditorMedia('video')">동영상 링크</button>
             </div>
             <div class="editor-textarea-wrapper">
               <div class="editor-guide-placeholder" id="editorGuideOverlay">
                 <h5>커뮤니티 이용 규칙 및 클린 프로듀서 가이드</h5>
-                <p>1. 타인에 대한 비방, 불법 크랙 공유, 스팸 게시글은 사전 통보 없이 삭제될 수 있습니다.<br>
-                   2. 곡 피드백 및 사운드 공유 시 상단 툴바의 [오디오/사운드클라우드 첨부] 또는 [유튜브 첨부]를 활용하시면 본문 내 인라인 플레이어가 자동 생성됩니다.<br>
+                <p>1. 타인에 대한 비방, 홍보, 스팸 게시글은 사전 통보 없이 삭제될 수 있습니다.<br>
+                   2. VST 활용 팁과 사운드 공유 시 저작권 규정을 준수해 주세요.<br>
                    <i>* 아래 입력란에 키보드 타이핑을 시작하는 순간 이 안내문은 자동으로 사라집니다.</i></p>
               </div>
               <textarea id="writeContent" class="editor-textarea" rows="8" required maxlength="10000" oninput="handleEditorTyping()"></textarea>
             </div>
-            <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.4rem;">유튜브, SoundCloud 링크 또는 직접 오디오(.mp3, .wav) URL 첨부 시 본문에서 바로 재생됩니다.</p>
+            <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.4rem;">첨부 파일/미디어 용량 제한: 최대 15MB 이하 권장</p>
           </div>
 
           <div style="display:flex; gap:1rem; margin-top:1.5rem;">
             <button type="submit" class="btn-buy" id="btnSubmitPost" style="flex:1;">작성 완료 및 등록</button>
-            <button type="button" class="nav-btn" style="padding: 0.85rem 1.5rem;" onclick="cancelPostWrite()">취소</button>
+            <button type="button" class="nav-btn" style="padding: 0.85rem 1.5rem;" onclick="showPage('community')">취소</button>
           </div>
         </form>
       </div>
     </section>
 
-    <!-- POST DETAIL & COMMENTS VIEW -->
+    <!-- 독립형 커뮤니티 세부 글 읽기 페이지 -->
     <section id="postDetailView" aria-label="게시글 상세 보기">
       <div class="standalone-panel-box" style="max-width: 840px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:1px solid var(--border-color); padding-bottom:1.2rem;">
           <button type="button" class="nav-btn" onclick="showPage('community')">목록으로 돌아가기</button>
-          <div id="postDetailActionBtns" style="display:flex; gap:0.5rem;"></div>
+          <div id="postDetailActionBtns"></div>
         </div>
         <div id="postDetailContainer"></div>
-
-        <div class="comm-comments-section" id="postCommentsSection">
-          <div class="comm-comments-header">
-            <h4>프로듀서 댓글 및 피드백 <span id="postCommentCountBadge" style="color:var(--accent-gold);">0</span></h4>
-          </div>
-          <div id="postCommentsList" class="comm-comments-list"></div>
-          <form id="postCommentForm" class="comm-comment-form" onsubmit="handleCommentSubmit(event)">
-            <textarea id="commentInputText" rows="3" required maxlength="2000" placeholder="믹싱 조언, 플러그인 팁, 또는 곡에 대한 건설적인 피드백을 남겨주세요..."></textarea>
-            <div style="display:flex; justify-content:flex-end; margin-top:0.6rem;">
-              <button type="submit" class="btn-buy" id="btnSubmitComment" style="width:auto; padding:0.6rem 1.4rem;">댓글 등록</button>
-            </div>
-          </form>
-        </div>
       </div>
     </section>
 
-    <!-- MY PAGE VIEW -->
+    <!-- 독립형 마이페이지 뷰 -->
     <section id="myPageView" aria-label="마이페이지">
       <div class="standalone-panel-box" style="max-width: 720px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; border-bottom:1px solid var(--border-color); padding-bottom:1.2rem;">
@@ -232,6 +202,7 @@
           <button type="button" class="cat-chip" onclick="switchMyPageTab('activity', this)">내 활동 (작성글)</button>
         </div>
 
+        <!-- 탭 1: 프로필 설정 -->
         <div id="mpTabProfile" class="mp-tab-content">
           <form onsubmit="handleProfileUpdateSubmit(event)">
             <div class="form-group">
@@ -247,7 +218,7 @@
               <p id="nicknameCheckMsg" style="font-size:0.78rem; margin-top:0.45rem; font-weight:600;"></p>
             </div>
             <div class="form-group">
-              <label for="myPageDaw">주 사용 DAW (커뮤니티 활동 시 프로필 배지로 표시됩니다)</label>
+              <label for="myPageDaw">주 사용 DAW (메인 작업 프로그램)</label>
               <select id="myPageDaw">
                 <option value="Logic Pro">Logic Pro</option>
                 <option value="Cubase">Cubase</option>
@@ -262,6 +233,7 @@
           </form>
         </div>
 
+        <!-- 탭 2: 비밀번호 변경 및 회원 탈퇴 -->
         <div id="mpTabSecurity" class="mp-tab-content" style="display:none;">
           <form onsubmit="handlePasswordChangeSubmit(event)">
             <div class="form-group">
@@ -295,12 +267,14 @@
           </div>
         </div>
 
+        <!-- 탭 3: 내 활동 (작성글 목록) -->
         <div id="mpTabActivity" class="mp-tab-content" style="display:none;">
           <h4 style="font-weight:800; font-size:1.1rem; margin-bottom:1rem; color:var(--text-primary);">내가 작성한 커뮤니티 게시글</h4>
           <div id="myActivityList">
             <p style="color:var(--text-secondary); text-align:center; padding: 2rem;">작성한 게시글을 불러오는 중입니다...</p>
           </div>
         </div>
+
       </div>
     </section>
 
@@ -328,10 +302,10 @@
             <div class="form-group"><label for="dealDiscPrice">할인가 ($)</label><input type="number" step="0.01" min="0" id="dealDiscPrice" required placeholder="134"></div>
           </div>
           <div class="admin-grid-2">
-            <div class="form-group"><label for="dealImgUrl">제품 UI 이미지 URL</label><input type="url" id="dealImgUrl" placeholder="https://..."></div>
+            <div class="form-group"><label for="dealImgUrl">제품 실제 UI 이미지 URL</label><input type="url" id="dealImgUrl" placeholder="https://... (미입력 시 공식 홈페이지 UI 자동 추출)"></div>
             <div class="form-group"><label for="dealYoutubeInput">공식 유튜브 영상 URL 또는 11자리 ID</label><input type="text" id="dealYoutubeInput" placeholder="예: https://youtu.be/5Sa3wa_doG0"></div>
           </div>
-          <div class="form-group"><label for="dealDesc">상세 설명 (공식 홈페이지 핵심 스펙 요약)</label><textarea id="dealDesc" rows="2" required placeholder="공식 홈페이지 기준 핵심 기능 설명"></textarea></div>
+          <div class="form-group"><label for="dealDesc">상세 설명</label><textarea id="dealDesc" rows="2" required placeholder="딜 핵심 특징 및 요약"></textarea></div>
           <div class="form-group"><label for="dealUrl">제휴/구매 링크 URL</label><input type="url" id="dealUrl" required placeholder="https://..."></div>
           <button type="submit" class="btn-buy" id="btnSubmitDeal" style="margin-top:1rem;">새로운 딜 DB 등록 / 업데이트</button>
         </form>
@@ -339,6 +313,7 @@
     </section>
   </main>
 
+  <!-- FOOTER -->
   <footer role="contentinfo">
     <p>© 2026 PlugAzit. All rights reserved.  |  
        Contact: <a href="mailto:aftrdry@outlook.kr">aftrdry@outlook.kr</a>
@@ -351,6 +326,8 @@
   </footer>
 
   <!-- MODALS -->
+
+  <!-- VST 상세 정보 전체 팝업 모달 -->
   <div class="modal-overlay" id="dealDetailModal" role="dialog" aria-modal="true" aria-label="플러그인 상세 정보" onclick="checkModalBackdropClose(event, 'dealDetailModal')">
     <div class="modal-box large-detail-modal" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('dealDetailModal')">×</button>
@@ -358,6 +335,7 @@
     </div>
   </div>
 
+  <!-- 로그인 모달 -->
   <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-label="로그인" onclick="checkModalBackdropClose(event, 'loginModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('loginModal')">×</button>
@@ -383,6 +361,7 @@
     </div>
   </div>
 
+  <!-- 비밀번호 재설정 모달 -->
   <div class="modal-overlay" id="resetPwModal" role="dialog" aria-modal="true" aria-label="비밀번호 재설정" onclick="checkModalBackdropClose(event, 'resetPwModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('resetPwModal')">×</button>
@@ -400,6 +379,7 @@
     </div>
   </div>
 
+  <!-- 아이디 힌트 찾기 모달 -->
   <div class="modal-overlay" id="findEmailModal" role="dialog" aria-modal="true" aria-label="아이디 힌트 찾기" onclick="checkModalBackdropClose(event, 'findEmailModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('findEmailModal')">×</button>
@@ -417,6 +397,7 @@
     </div>
   </div>
 
+  <!-- 회원가입 모달 -->
   <div class="modal-overlay" id="signupModal" role="dialog" aria-modal="true" aria-label="회원가입" onclick="checkModalBackdropClose(event, 'signupModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('signupModal')">×</button>
@@ -448,6 +429,7 @@
     </div>
   </div>
 
+  <!-- 서비스 이용약관 및 개인정보 처리방침 통합 모달 -->
   <div class="modal-overlay" id="termsModal" role="dialog" aria-modal="true" aria-label="약관 및 개인정보 처리방침" onclick="checkModalBackdropClose(event, 'termsModal')">
     <div class="modal-box" style="max-width: 640px;" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('termsModal')">×</button>
@@ -458,11 +440,12 @@
         <button type="button" class="cat-chip" id="tabBtnPrivacy" onclick="switchLegalTab('privacy')">개인정보 처리방침</button>
       </div>
 
+      <!-- 탭 1: 서비스 이용약관 -->
       <div id="legalTermsContent" class="terms-popup-content">
         <h4>제1조 (목적)</h4>
         <p>본 약관은 PlugAzit(이하 "서비스")가 제공하는 VST 플러그인 할인 정보 큐레이션 및 프로듀서 커뮤니티 서비스의 이용 조건 및 절차, 회원과 서비스 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
         <h4>제2조 (할인 정보 및 제휴 링크 고지)</h4>
-        <p>1. 서비스에 게시되는 플러그인 가격, 할인율 및 연도별 가격 추이 데이터는 정보 제공 목적으로 큐레이션되며, 각 브랜드 공식 스토어의 사정에 따라 실시간으로 변동될 수 있습니다.<br>
+        <p>1. 서비스에 게시되는 플러그인 가격, 할인율, 프로모션 코드 및 연도별 가격 추이 데이터는 정보 제공 목적으로 큐레이션되며, 각 브랜드 공식 스토어의 사정에 따라 실시간으로 변동될 수 있습니다.<br>
            2. 일부 외부 스토어 연결 링크는 제휴 마케팅(Affiliate) 링크를 포함할 수 있으며, 이를 통한 구매 시 서비스 운영을 위한 소정의 수수료가 발생할 수 있습니다. 단, 구매자에게 추가 비용은 발생하지 않습니다.</p>
         <h4>제3조 (회원의 의무 및 커뮤니티 운영 정책)</h4>
         <p>회원은 불법 복제 소프트웨어(크랙 등) 공유, 저작권 침해, 타인 비방, 도배 및 영리 목적의 스팸 게시물을 작성해서는 안 되며, 위반 시 사전 통보 없이 게시물 삭제 및 계정 이용이 제한될 수 있습니다.</p>
@@ -470,6 +453,7 @@
         <p>최종 결제 및 라이선스 발급은 각 외부 공식 스토어에서 이루어지므로, 결제 오류·환불·제품 결함에 대한 법적 책임은 해당 스토어 및 제조사에 있습니다.</p>
       </div>
 
+      <!-- 탭 2: 개인정보 처리방침 -->
       <div id="legalPrivacyContent" class="terms-popup-content" style="display:none;">
         <h4>1. 수집하는 개인정보 항목 및 수집 방법</h4>
         <p>PlugAzit는 회원가입, 커뮤니티 활동 및 계정 관리를 위해 최소한의 개인정보만을 수집합니다.<br>
@@ -477,7 +461,7 @@
            - 선택 수집 항목: 주 사용 DAW 정보</p>
         <h4>2. 개인정보의 수집 및 이용 목적</h4>
         <p>- 회원 식별, 로그인 인증 및 부정 이용 방지 (Supabase Auth 기반)<br>
-           - 커뮤니티 게시글·댓글 작성자 표시 및 본인 게시물 수정·삭제 권한 확인<br>
+           - 커뮤니티 게시글 작성자 표시 및 본인 게시글 수정·삭제 권한 확인<br>
            - 비밀번호 재설정 및 계정 관련 고지사항 전달</p>
         <h4>3. 개인정보의 보유 및 이용기간</h4>
         <p>회원의 개인정보는 원칙적으로 <b>회원 탈퇴 시 또는 개인정보 수집·이용 목적이 달성된 시점까지</b> 보유하며, 탈퇴 요청 시 지체 없이 파기합니다. 단, 관계 법령에 따라 보존할 필요가 있는 경우 해당 법령에서 정한 기간 동안 보관합니다.</p>
