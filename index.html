@@ -17,7 +17,6 @@
 </head>
 <body>
 
-  <!-- Header -->
   <header role="banner">
     <a href="#" class="logo-container" onclick="resetToHome(); return false;" aria-label="PlugAzit 홈으로 이동">
       <img src="PlugAzit.png" alt="PlugAzit" class="brand-logo-img" />
@@ -47,7 +46,6 @@
   </header>
 
   <main class="container" role="main">
-    <!-- Hero Slogan -->
     <div class="hero-slogan-section">
       <h1 class="hero-title">Right Near, Your Azit.</h1>
       <p class="hero-subtitle">
@@ -135,7 +133,7 @@
       </div>
     </section>
 
-    <!-- 독립형 커뮤니티 글 작성 / 수정 페이지 -->
+    <!-- POST WRITE / EDIT VIEW -->
     <section id="postWriteView" aria-label="커뮤니티 게시글 작성">
       <div class="standalone-panel-box" style="max-width: 800px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.8rem;">
@@ -196,7 +194,7 @@
       </div>
     </section>
 
-    <!-- 독립형 커뮤니티 세부 글 읽기 및 댓글/피드백 페이지 -->
+    <!-- POST DETAIL & COMMENTS VIEW -->
     <section id="postDetailView" aria-label="게시글 상세 보기">
       <div class="standalone-panel-box" style="max-width: 840px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:1px solid var(--border-color); padding-bottom:1.2rem;">
@@ -205,7 +203,6 @@
         </div>
         <div id="postDetailContainer"></div>
 
-        <!-- 댓글 및 피드백 섹션 -->
         <div class="comm-comments-section" id="postCommentsSection">
           <div class="comm-comments-header">
             <h4>프로듀서 댓글 및 피드백 <span id="postCommentCountBadge" style="color:var(--accent-gold);">0</span></h4>
@@ -221,7 +218,7 @@
       </div>
     </section>
 
-    <!-- 독립형 마이페이지 뷰 -->
+    <!-- MY PAGE VIEW -->
     <section id="myPageView" aria-label="마이페이지">
       <div class="standalone-panel-box" style="max-width: 720px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; border-bottom:1px solid var(--border-color); padding-bottom:1.2rem;">
@@ -235,7 +232,6 @@
           <button type="button" class="cat-chip" onclick="switchMyPageTab('activity', this)">내 활동 (작성글)</button>
         </div>
 
-        <!-- 탭 1: 프로필 설정 -->
         <div id="mpTabProfile" class="mp-tab-content">
           <form onsubmit="handleProfileUpdateSubmit(event)">
             <div class="form-group">
@@ -266,7 +262,6 @@
           </form>
         </div>
 
-        <!-- 탭 2: 비밀번호 변경 및 회원 탈퇴 -->
         <div id="mpTabSecurity" class="mp-tab-content" style="display:none;">
           <form onsubmit="handlePasswordChangeSubmit(event)">
             <div class="form-group">
@@ -300,14 +295,12 @@
           </div>
         </div>
 
-        <!-- 탭 3: 내 활동 (작성글 목록) -->
         <div id="mpTabActivity" class="mp-tab-content" style="display:none;">
           <h4 style="font-weight:800; font-size:1.1rem; margin-bottom:1rem; color:var(--text-primary);">내가 작성한 커뮤니티 게시글</h4>
           <div id="myActivityList">
             <p style="color:var(--text-secondary); text-align:center; padding: 2rem;">작성한 게시글을 불러오는 중입니다...</p>
           </div>
         </div>
-
       </div>
     </section>
 
@@ -350,7 +343,6 @@
     </section>
   </main>
 
-  <!-- FOOTER -->
   <footer role="contentinfo">
     <p>© 2026 PlugAzit. All rights reserved.  |  
        Contact: <a href="mailto:aftrdry@outlook.kr">aftrdry@outlook.kr</a>
@@ -363,8 +355,6 @@
   </footer>
 
   <!-- MODALS -->
-
-  <!-- VST 상세 정보 전체 팝업 모달 -->
   <div class="modal-overlay" id="dealDetailModal" role="dialog" aria-modal="true" aria-label="플러그인 상세 정보" onclick="checkModalBackdropClose(event, 'dealDetailModal')">
     <div class="modal-box large-detail-modal" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('dealDetailModal')">×</button>
@@ -372,7 +362,6 @@
     </div>
   </div>
 
-  <!-- 로그인 모달 -->
   <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-label="로그인" onclick="checkModalBackdropClose(event, 'loginModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('loginModal')">×</button>
@@ -398,7 +387,6 @@
     </div>
   </div>
 
-  <!-- 비밀번호 재설정 모달 -->
   <div class="modal-overlay" id="resetPwModal" role="dialog" aria-modal="true" aria-label="비밀번호 재설정" onclick="checkModalBackdropClose(event, 'resetPwModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('resetPwModal')">×</button>
@@ -416,7 +404,6 @@
     </div>
   </div>
 
-  <!-- 아이디 힌트 찾기 모달 -->
   <div class="modal-overlay" id="findEmailModal" role="dialog" aria-modal="true" aria-label="아이디 힌트 찾기" onclick="checkModalBackdropClose(event, 'findEmailModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('findEmailModal')">×</button>
@@ -434,7 +421,6 @@
     </div>
   </div>
 
-  <!-- 회원가입 모달 -->
   <div class="modal-overlay" id="signupModal" role="dialog" aria-modal="true" aria-label="회원가입" onclick="checkModalBackdropClose(event, 'signupModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('signupModal')">×</button>
@@ -466,7 +452,6 @@
     </div>
   </div>
 
-  <!-- 서비스 이용약관 및 개인정보 처리방침 통합 모달 -->
   <div class="modal-overlay" id="termsModal" role="dialog" aria-modal="true" aria-label="약관 및 개인정보 처리방침" onclick="checkModalBackdropClose(event, 'termsModal')">
     <div class="modal-box" style="max-width: 640px;" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('termsModal')">×</button>
@@ -477,7 +462,6 @@
         <button type="button" class="cat-chip" id="tabBtnPrivacy" onclick="switchLegalTab('privacy')">개인정보 처리방침</button>
       </div>
 
-      <!-- 탭 1: 서비스 이용약관 -->
       <div id="legalTermsContent" class="terms-popup-content">
         <h4>제1조 (목적)</h4>
         <p>본 약관은 PlugAzit(이하 "서비스")가 제공하는 VST 플러그인 할인 정보 큐레이션 및 프로듀서 커뮤니티 서비스의 이용 조건 및 절차, 회원과 서비스 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
@@ -490,7 +474,6 @@
         <p>최종 결제 및 라이선스 발급은 각 외부 공식 스토어에서 이루어지므로, 결제 오류·환불·제품 결함에 대한 법적 책임은 해당 스토어 및 제조사에 있습니다.</p>
       </div>
 
-      <!-- 탭 2: 개인정보 처리방침 -->
       <div id="legalPrivacyContent" class="terms-popup-content" style="display:none;">
         <h4>1. 수집하는 개인정보 항목 및 수집 방법</h4>
         <p>PlugAzit는 회원가입, 커뮤니티 활동 및 계정 관리를 위해 최소한의 개인정보만을 수집합니다.<br>

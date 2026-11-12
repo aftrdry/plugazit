@@ -232,7 +232,6 @@ select:focus { border-color: var(--accent-gold) !important; }
 }
 .plugin-ui-fallback span { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.3rem; font-weight: 500; text-transform: uppercase; }
 
-/* 관심 딜 북마크 버튼 및 마감일 배지 */
 .bookmark-toggle-btn {
   position: absolute; top: 0.9rem; right: 0.9rem; z-index: 5;
   background: rgba(16, 18, 17, 0.78); border: 1px solid var(--border-color);
@@ -300,7 +299,6 @@ select:focus { border-color: var(--accent-gold) !important; }
 #dealsView { display: block; }
 #communityView, #adminView, #myPageView, #postWriteView, #postDetailView { display: none; }
 
-/* 커뮤니티 카드 및 상세 인터랙션 스타일 */
 .comm-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.5rem 1.6rem; border-radius: 10px; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s; }
 .comm-card:hover { border-color: var(--accent-gold); transform: translateY(-2px); }
 .comm-card.notice-card { border-color: var(--accent-gold); background: rgba(194, 168, 120, 0.05); }
@@ -337,7 +335,6 @@ select:focus { border-color: var(--accent-gold) !important; }
   border-color: var(--accent-gold); color: var(--accent-gold); background: var(--card-hover);
 }
 
-/* 댓글 섹션 스타일 */
 .comm-comments-section { margin-top: 2rem; }
 .comm-comments-header { margin-bottom: 1rem; }
 .comm-comments-header h4 { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); }
@@ -359,7 +356,6 @@ select:focus { border-color: var(--accent-gold) !important; }
 }
 .comm-comment-form textarea:focus { border-color: var(--accent-gold); }
 
-/* 본문 내 인라인 오디오 / 미디어 임베드 스타일 */
 .inline-media-box {
   margin: 1rem 0; border-radius: 8px; overflow: hidden;
   border: 1px solid var(--border-color); background: var(--bg-color); padding: 0.8rem;

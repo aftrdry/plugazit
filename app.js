@@ -1,7 +1,6 @@
 const SUPABASE_URL = "https://pxmkzyhayxsvbbftncwy.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_J0LQJ-qjr5ISX1jRKaQ7-A_GwABw8XP";
 let supabaseClient = null;
-
 const ADMIN_EMAILS = ["aftrdry@outlook.kr", "aftrdry@outlook.com", "sharpmson774@gmail.com"];
 let currentUser = null;
 let currentUserDaw = "Logic Pro";
@@ -10,29 +9,23 @@ let dealViewMode = 'card';
 let currentOpenDealId = null;
 let currentOpenPostId = null;
 let editingPostId = null;
-
 let originalNickname = "";
 let isNicknameVerified = true;
-
 if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
-
-/* 1. 보안 유틸리티: 브라우저 내장 DOM 이스케이프 방식 */
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
   const div = document.createElement('div');
   div.textContent = String(str);
   return div.innerHTML;
 }
-
 function sanitizeUrl(url) {
   if (!url) return '#';
   const trimmed = String(url).trim();
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
   return '#';
 }
-
 function extractYoutubeId(input) {
   if (!input) return "";
   const trimmed = input.trim();
@@ -40,16 +33,11 @@ function extractYoutubeId(input) {
   const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
   return match ? match[1] : "";
 }
-
-/* [밑줄] 버그 패치 + 유튜브/사운드클라우드/오디오 파일 인라인 플레이어 변환 렌더러 */
 function renderSafeContent(rawText) {
   let safe = escapeHtml(rawText);
-
   safe = safe.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   safe = safe.replace(/\[밑줄\]([\s\S]+?)\[\/밑줄\]/g, '<u>$1</u>');
-
   safe = safe.replace(/!\[이미지첨부\]\((https?:\/\/[^\s)]+)\)/g, '<img src="$1" alt="첨부 이미지" referrerpolicy="no-referrer" style="max-width:100%; border-radius:8px; margin:0.8rem 0; display:block;">');
-
   safe = safe.replace(/\[(동영상링크|오디오링크|링크)\]\((https?:\/\/[^\s)]+)\)/g, function(match, label, url) {
     const ytId = extractYoutubeId(url);
     if (ytId) {
@@ -64,11 +52,8 @@ function renderSafeContent(rawText) {
     }
     return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-gold); text-decoration:underline; font-weight:700;">[${label} 열기: ${url}]</a>`;
   });
-
   return safe;
 }
-
-/* 2. 중복 제출 방지 헬퍼 */
 const activeLocks = new Set();
 async function withSubmitLock(lockKey, btnEl, asyncFn) {
   if (activeLocks.has(lockKey)) return;
@@ -88,14 +73,11 @@ async function withSubmitLock(lockKey, btnEl, asyncFn) {
     }
   }
 }
-
-/* 3. 로컬 스토리지 상태 관리 (삭제 레지스트리, 관심 딜 북마크, 게시글 추천/조회수/댓글 하이브리드 동기화) */
 const DELETED_POSTS_STORAGE_KEY = 'plugazit_deleted_post_ids_v1';
 const DELETED_DEALS_STORAGE_KEY = 'plugazit_deleted_deal_ids_v1';
 const SAVED_DEALS_STORAGE_KEY = 'plugazit_saved_deal_ids_v1';
 const POST_META_STORAGE_KEY = 'plugazit_post_meta_v1';
 const LOCAL_COMMENTS_STORAGE_KEY = 'plugazit_local_comments_v1';
-
 function getDeletedIds(storageKey) {
   try {
     const raw = localStorage.getItem(storageKey);
@@ -114,7 +96,6 @@ function markIdAsDeleted(storageKey, id) {
     }
   } catch (e) {}
 }
-
 function getSavedDealIds() {
   return getDeletedIds(SAVED_DEALS_STORAGE_KEY);
 }
@@ -141,7 +122,6 @@ function updateSavedDealCountBadge() {
   const validSaved = getSavedDealIds().filter(id => !deletedDealIds.includes(String(id)) && dealsData.some(d => String(d.id) === String(id)));
   el.innerText = validSaved.length;
 }
-
 function getPostMetaMap() {
   try {
     const raw = localStorage.getItem(POST_META_STORAGE_KEY);
@@ -168,7 +148,6 @@ function getPostStats(post) {
   const editedCategory = meta.editedCategory;
   return { views, likes, voted, daw, pluginTag, editedTitle, editedContent, editedCategory };
 }
-
 function getLocalCommentsMap() {
   try {
     const raw = localStorage.getItem(LOCAL_COMMENTS_STORAGE_KEY);
@@ -182,7 +161,6 @@ function saveLocalCommentsMap(map) {
     localStorage.setItem(LOCAL_COMMENTS_STORAGE_KEY, JSON.stringify(map));
   } catch (e) {}
 }
-
 function togglePasswordVisibility(inputId, btnEl) {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -194,14 +172,12 @@ function togglePasswordVisibility(inputId, btnEl) {
     btnEl.innerText = '보기';
   }
 }
-
 function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme');
   const next = current === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   try { localStorage.setItem('plugazit_theme', next); } catch (e) {}
 }
-
 function resetToHome() {
   currentMainCat = 'all';
   currentSubCat = '전체';
@@ -210,7 +186,7 @@ function resetToHome() {
   
   const allBtn = document.getElementById('btnMainCatAll');
   if (allBtn) {
-    document.querySelectorAll('.main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('#dealsView .main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
     allBtn.classList.add('active');
   }
   
@@ -218,36 +194,30 @@ function resetToHome() {
   renderDeals();
   showPage('deals');
 }
-
 function isUserAdmin(user) {
   return Boolean(user && user.email && ADMIN_EMAILS.includes(user.email.toLowerCase()));
 }
-
 function showPage(page) {
   if (page === 'admin' && !isUserAdmin(currentUser)) {
     alert('관리자 권한이 필요한 페이지입니다.');
     return;
   }
-
   document.getElementById('dealsView').style.display = page === 'deals' ? 'block' : 'none';
   document.getElementById('communityView').style.display = page === 'community' ? 'block' : 'none';
   document.getElementById('adminView').style.display = page === 'admin' ? 'block' : 'none';
   document.getElementById('myPageView').style.display = page === 'mypage' ? 'block' : 'none';
   document.getElementById('postWriteView').style.display = page === 'postWrite' ? 'block' : 'none';
   document.getElementById('postDetailView').style.display = page === 'postDetail' ? 'block' : 'none';
-
   document.getElementById('navDealsBtn').classList.toggle('active', page === 'deals');
   document.getElementById('navCommBtn').classList.toggle('active', page === 'community' || page === 'postWrite' || page === 'postDetail');
   const adminBtn = document.getElementById('navAdminBtn');
   if (adminBtn) adminBtn.classList.toggle('active', page === 'admin');
-
   if (page === 'community') {
     fetchCommunityPosts();
   } else if (page === 'mypage') {
     initMyPageData();
   }
 }
-
 function openModal(id) { document.getElementById(id)?.classList.add('active'); }
 function closeModal(id) {
   const modal = document.getElementById(id);
@@ -259,13 +229,11 @@ function closeModal(id) {
     if (iframe) iframe.src = '';
   }
 }
-
 function checkModalBackdropClose(event, modalId) {
   if (event.target.id === modalId) {
     closeModal(modalId);
   }
 }
-
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     document.querySelectorAll('.modal-overlay.active').forEach(modal => {
@@ -273,12 +241,10 @@ document.addEventListener('keydown', (e) => {
     });
   }
 });
-
 function openLegalModal(tabType) {
   switchLegalTab(tabType || 'terms');
   openModal('termsModal');
 }
-
 function switchLegalTab(tabType) {
   const isTerms = tabType === 'terms';
   document.getElementById('tabBtnTerms')?.classList.toggle('active', isTerms);
@@ -288,7 +254,6 @@ function switchLegalTab(tabType) {
   if (termsEl) termsEl.style.display = isTerms ? 'block' : 'none';
   if (privEl) privEl.style.display = isTerms ? 'none' : 'block';
 }
-
 function setDealViewMode(mode) {
   dealViewMode = mode;
   document.getElementById('btnCardView').classList.toggle('active', mode === 'card');
@@ -298,7 +263,6 @@ function setDealViewMode(mode) {
   else { container.classList.remove('list-mode'); }
   renderDeals();
 }
-
 const USD_TO_KRW = 1380;
 const subCategories = {
   all: ["전체 보기"],
@@ -308,7 +272,6 @@ const subCategories = {
   fx: ["전체", "Pitch/Vocal", "Utility/Analyzer", "Modulation"],
   free: ["전체", "Free Synths", "Free FX"]
 };
-
 const dealsData = [
   {
     id: 1,
@@ -656,7 +619,6 @@ const dealsData = [
     ]
   }
 ];
-
 function buildDefaultSeasonalityAndHistory(orig, disc, rateNum) {
   return {
     bestSeasonLabel: "Black Friday (11월)",
@@ -675,31 +637,25 @@ function buildDefaultSeasonalityAndHistory(orig, disc, rateNum) {
     ]
   };
 }
-
 async function fetchDealsFromSupabase() {
   if (!supabaseClient) return;
   const deletedDealIds = getDeletedIds(DELETED_DEALS_STORAGE_KEY);
-
   try {
     const { data, error } = await supabaseClient
       .from('deals')
       .select('*')
       .order('created_at', { ascending: false });
-
     if (error || !data) return;
-
     data.forEach(row => {
       const dbDealId = `db_${row.id}`;
       if (deletedDealIds.includes(dbDealId)) return;
       if (dealsData.some(d => String(d.id) === dbDealId)) return;
-
       const orig = Number(row.original_price) || 0;
       const disc = Number(row.discount_price) || 0;
       const rateNum = orig > 0 ? Math.round(((orig - disc) / orig) * 100) : (disc === 0 ? 100 : 0);
       const rateStr = disc === 0 ? "100% FREE" : `${rateNum}% OFF`;
       const storeUrl = row.store_url || "https://plugazit.com";
       const defaults = buildDefaultSeasonalityAndHistory(orig, disc, rateNum);
-
       const mappedDeal = {
         id: dbDealId,
         dbRowId: row.id,
@@ -723,24 +679,20 @@ async function fetchDealsFromSupabase() {
         seasonality: row.seasonality || defaults.seasonality,
         priceHistory: row.price_history || defaults.priceHistory
       };
-
       dealsData.unshift(mappedDeal);
       resolveLiveYoutubeAndOfficialImage(mappedDeal);
     });
-
     updateSavedDealCountBadge();
     renderDeals();
   } catch (err) {
     console.error(err);
   }
 }
-
 const PIPED_SEARCH_ENDPOINTS = [
   "https://pipedapi.kavin.rocks/search?filter=videos&q=",
   "https://api.piped.private.coffee/search?filter=videos&q=",
   "https://pipedapi.tokhmi.xyz/search?filter=videos&q="
 ];
-
 async function resolveLiveYoutubeAndOfficialImage(deal) {
   try {
     const mlRes = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(deal.storeUrl)}&screenshot=true`);
@@ -757,7 +709,6 @@ async function resolveLiveYoutubeAndOfficialImage(deal) {
       updateDealDomImages(deal.id, deal.imgUrl);
     }
   } catch (e) {}
-
   const query = encodeURIComponent(deal.ytQuery || `${deal.brand} ${deal.title}`);
   for (const endpoint of PIPED_SEARCH_ENDPOINTS) {
     try {
@@ -785,7 +736,6 @@ async function resolveLiveYoutubeAndOfficialImage(deal) {
     } catch (e) {}
   }
 }
-
 function updateDealDomImages(dealId, newSrc) {
   document.querySelectorAll(`img[data-deal-img-id="${dealId}"]`).forEach(img => {
     if (img.src !== newSrc) {
@@ -796,10 +746,8 @@ function updateDealDomImages(dealId, newSrc) {
     }
   });
 }
-
 let currentMainCat = 'all';
 let currentSubCat = '전체';
-
 function setMainCategory(cat, el) {
   document.querySelectorAll('#dealsView .main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
   if (el) el.classList.add('active');
@@ -808,7 +756,6 @@ function setMainCategory(cat, el) {
   renderSubCategories();
   renderDeals();
 }
-
 function renderSubCategories() {
   const subBar = document.getElementById('subCatBar');
   const subs = subCategories[currentMainCat] || ["전체"];
@@ -816,52 +763,42 @@ function renderSubCategories() {
     <button type="button" class="sub-chip ${s === currentSubCat ? 'active' : ''}" onclick="setSubCategory('${s}', this)">${escapeHtml(s)}</button>
   `).join('');
 }
-
 function setSubCategory(sub, el) {
   document.querySelectorAll('.sub-chip').forEach(c => c.classList.remove('active'));
   if (el) el.classList.add('active');
   currentSubCat = sub;
   renderDeals();
 }
-
 function onDealFilterChange() { renderDeals(); }
-
 function verifyImageNotDummy(imgEl, dealId) {
   if (imgEl.naturalWidth > 0 && imgEl.naturalWidth <= 120) {
     handleImgError(imgEl, dealId);
   }
 }
-
 function handleImgError(imgEl, dealId) {
   const deal = dealsData.find(d => String(d.id) === String(dealId));
   const step = parseInt(imgEl.dataset.fallbackStep || '0', 10);
-
   if (deal && step === 0 && deal.backupImgUrl && imgEl.src !== deal.backupImgUrl) {
     imgEl.dataset.fallbackStep = '1';
     imgEl.src = deal.backupImgUrl;
     return;
   }
-
   if (deal && step <= 1) {
     imgEl.dataset.fallbackStep = '2';
     imgEl.src = `https://api.microlink.io/?url=${encodeURIComponent(deal.storeUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
     return;
   }
-
   imgEl.style.display = 'none';
   const fallback = imgEl.parentElement?.querySelector('.plugin-ui-fallback');
   if (fallback) fallback.style.display = 'flex';
 }
-
 function renderDeals() {
   const container = document.getElementById('dealsContainer');
   const searchKeyword = document.getElementById('dealSearchKeyword').value.trim().toLowerCase();
   const sortOption = document.getElementById('dealSortOption').value;
   const deletedDealIds = getDeletedIds(DELETED_DEALS_STORAGE_KEY);
   const savedDealIds = getSavedDealIds();
-
   let filtered = dealsData.filter(d => !deletedDealIds.includes(String(d.id)));
-
   if (currentMainCat !== 'all') {
     if (currentMainCat === 'free') {
       filtered = filtered.filter(d => d.discountPrice === 0);
@@ -871,11 +808,9 @@ function renderDeals() {
       filtered = filtered.filter(d => d.cat === currentMainCat);
     }
   }
-
   if (currentSubCat !== '전체' && currentSubCat !== '전체 보기') {
     filtered = filtered.filter(d => d.sub === currentSubCat);
   }
-
   if (searchKeyword !== '') {
     filtered = filtered.filter(d => 
       d.brand.toLowerCase().includes(searchKeyword) ||
@@ -883,20 +818,17 @@ function renderDeals() {
       d.desc.toLowerCase().includes(searchKeyword)
     );
   }
-
   if (sortOption === 'priceLow') { filtered.sort((a, b) => a.discountPrice - b.discountPrice); }
   else if (sortOption === 'priceHigh') { filtered.sort((a, b) => b.discountPrice - a.discountPrice); }
   else if (sortOption === 'discountHigh') { filtered.sort((a, b) => b.discountRateNum - a.discountRateNum); }
   else if (sortOption === 'endingSoon') { filtered.sort((a, b) => a.daysLeft - b.daysLeft); }
-
   if (filtered.length === 0) {
     const emptyMsg = currentMainCat === 'saved'
-      ? '관심 딜로 저장한 플러그인이 없습니다. 각 카드 우측 상단의 [관심 등록] 버튼을 눌러 추가해 보세요.'
+      ? '관심 딜로 저장한 플러그인이 없습니다. 각 카드 우측 상단의 [+ 관심 등록] 버튼을 눌러 추가해 보세요.'
       : '검색 조건에 해당되는 VST 딜 정보가 없습니다.';
     container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">${emptyMsg}</div>`;
     return;
   }
-
   container.innerHTML = filtered.map(d => {
     const krw = d.discountPrice === 0 ? "0원 (무료)" : `약 ${(d.discountPrice * USD_TO_KRW).toLocaleString()}원`;
     const origKrw = d.original ? `$${escapeHtml(d.original)}` : '';
@@ -905,7 +837,6 @@ function renderDeals() {
     const safeStoreUrl = sanitizeUrl(d.storeUrl);
     const isSaved = savedDealIds.includes(String(d.id));
     const daysText = d.daysLeft >= 90 ? '상시 진행' : `마감 ${d.daysLeft}일 전`;
-
     return `
       <div class="deal-card" onclick="openDealDetailModal(${safeDealId})">
         <button type="button" class="bookmark-toggle-btn ${isSaved ? 'saved' : ''}" onclick="toggleSaveDeal(${safeDealId}, event)">
@@ -952,7 +883,6 @@ function renderDeals() {
     `;
   }).join('');
 }
-
 function copyPromoCode(codeStr, btnEl) {
   if (!codeStr) return;
   navigator.clipboard?.writeText(codeStr);
@@ -962,8 +892,6 @@ function copyPromoCode(codeStr, btnEl) {
     setTimeout(() => { btnEl.innerText = prev; }, 1500);
   }
 }
-
-/* 상세 모달에서 해당 플러그인 관련 커뮤니티 리뷰/질문 바로 검색 연동 */
 function jumpToCommunitySearch(pluginTitle) {
   closeModal('dealDetailModal');
   showPage('community');
@@ -973,7 +901,6 @@ function jumpToCommunitySearch(pluginTitle) {
     renderCommunityPosts();
   }
 }
-
 function buildPriceChartSvg(deal, rangeMode = 'all') {
   const fullHistory = deal.priceHistory || [
     { date: "2024.11", season: "Black Friday", price: deal.discountPrice },
@@ -981,7 +908,6 @@ function buildPriceChartSvg(deal, rangeMode = 'all') {
     { date: "2025.11", season: "Black Friday", price: deal.discountPrice },
     { date: "2026.11", season: "Current Deal", price: deal.discountPrice }
   ];
-
   const pointsData = rangeMode === '1y' ? fullHistory.slice(-5) : fullHistory;
   const svgW = 740;
   const svgH = 220;
@@ -991,13 +917,11 @@ function buildPriceChartSvg(deal, rangeMode = 'all') {
   const padB = 38;
   const plotW = svgW - padL - padR;
   const plotH = svgH - padT - padB;
-
   const prices = pointsData.map(p => p.price);
   const maxVal = Math.max(deal.original || 100, ...prices);
   const topBound = maxVal === 0 ? 100 : Math.ceil(maxVal * 1.1);
   const bottomBound = 0;
   const valSpan = Math.max(1, topBound - bottomBound);
-
   const getX = (idx) => {
     if (pointsData.length <= 1) return padL + plotW / 2;
     return padL + (idx / (pointsData.length - 1)) * plotW;
@@ -1005,7 +929,6 @@ function buildPriceChartSvg(deal, rangeMode = 'all') {
   const getY = (val) => {
     return padT + plotH - ((val - bottomBound) / valSpan) * plotH;
   };
-
   const gridSteps = 4;
   let gridLinesHtml = '';
   for (let i = 0; i <= gridSteps; i++) {
@@ -1016,34 +939,28 @@ function buildPriceChartSvg(deal, rangeMode = 'all') {
       <text x="${padL - 10}" y="${Number(gy) + 4}" fill="var(--text-secondary)" font-size="11" font-weight="600" text-anchor="end">$${gVal}</text>
     `;
   }
-
   const origY = getY(deal.original || 0).toFixed(1);
   const origLineHtml = deal.original > 0 ? `
     <line x1="${padL}" y1="${origY}" x2="${svgW - padR}" y2="${origY}" stroke="var(--text-secondary)" stroke-width="1" stroke-dasharray="6 4" opacity="0.55" />
     <text x="${svgW - padR}" y="${Number(origY) - 6}" fill="var(--text-secondary)" font-size="10" font-weight="700" text-anchor="end">MSRP $${escapeHtml(deal.original)}</text>
   ` : '';
-
   const coords = pointsData.map((pt, idx) => ({
     x: Number(getX(idx).toFixed(1)),
     y: Number(getY(pt.price).toFixed(1)),
     ...pt
   }));
-
   const polylinePoints = coords.map(c => `${c.x},${c.y}`).join(' ');
   const areaPath = coords.length > 1
     ? `M ${coords[0].x} ${padT + plotH} L ` + coords.map(c => `${c.x} ${c.y}`).join(' L ') + ` L ${coords[coords.length - 1].x} ${padT + plotH} Z`
     : '';
-
   const minPriceVal = Math.min(...prices);
   const safeDealId = typeof deal.id === 'string' ? `'${deal.id}'` : deal.id;
-
   const nodesHtml = coords.map((c, idx) => {
     const isLowest = c.price === minPriceVal;
     const isCurrent = idx === coords.length - 1;
     const dotColor = isCurrent ? 'var(--accent-gold)' : (isLowest ? '#8fa874' : 'var(--text-primary)');
     const offRate = deal.original > 0 ? Math.round(((deal.original - c.price) / deal.original) * 100) : 0;
     const showLabel = pointsData.length <= 6 || idx % 2 === 0 || idx === coords.length - 1;
-
     return `
       <g>
         ${showLabel ? `<text x="${c.x}" y="${svgH - 10}" fill="var(--text-secondary)" font-size="10.5" font-weight="600" text-anchor="middle">${escapeHtml(c.date)}</text>` : ''}
@@ -1061,7 +978,6 @@ function buildPriceChartSvg(deal, rangeMode = 'all') {
       </g>
     `;
   }).join('');
-
   return `
     <svg class="ph-svg-chart" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="none">
       <defs>
@@ -1078,26 +994,21 @@ function buildPriceChartSvg(deal, rangeMode = 'all') {
     </svg>
   `;
 }
-
 function switchPriceChartRange(dealId, rangeMode, btnEl) {
   const deal = dealsData.find(d => String(d.id) === String(dealId));
   if (!deal) return;
-
   document.querySelectorAll('.ph-range-tabs .ph-range-btn').forEach(b => b.classList.remove('active'));
   if (btnEl) btnEl.classList.add('active');
-
   const container = document.getElementById('phSvgChartContainer');
   if (container) {
     container.innerHTML = buildPriceChartSvg(deal, rangeMode);
   }
 }
-
 function updatePriceChartTooltip(dealId, dateStr, seasonStr, priceVal, offRate) {
   const box = document.getElementById('phInteractiveTooltip');
   if (!box) return;
   const krwStr = priceVal === 0 ? "0원 (무료)" : `약 ${(priceVal * USD_TO_KRW).toLocaleString()}원`;
   const rateBadge = offRate > 0 ? `(-${offRate}%)` : '(정가)';
-
   box.innerHTML = `
     <div>
       <span class="ph-tooltip-date">[${escapeHtml(dateStr)}]</span>
@@ -1108,11 +1019,9 @@ function updatePriceChartTooltip(dealId, dateStr, seasonStr, priceVal, offRate) 
     </div>
   `;
 }
-
 function openDealDetailModal(id) {
   const deal = dealsData.find(d => String(d.id) === String(id));
   if (!deal) return;
-
   currentOpenDealId = deal.id;
   const detailContent = document.getElementById('dealDetailContent');
   const krw = deal.discountPrice === 0 ? "0원 (무료)" : `약 ${(deal.discountPrice * USD_TO_KRW).toLocaleString()}원`;
@@ -1121,31 +1030,26 @@ function openDealDetailModal(id) {
   const safeDealId = typeof deal.id === 'string' ? `'${deal.id}'` : deal.id;
   const safeStoreUrl = sanitizeUrl(deal.storeUrl);
   const promoCode = deal.code || "DIRECT-DISCOUNT";
-
   const historyArr = deal.priceHistory || [{ date: "2026.11", season: "Current Deal", price: deal.discountPrice }];
   const allPrices = historyArr.map(h => h.price);
   const allTimeLow = Math.min(...allPrices);
   const allTimeLowEntry = historyArr.find(h => h.price === allTimeLow) || historyArr[historyArr.length - 1];
   const maxDiscountPct = deal.original > 0 ? Math.round(((deal.original - allTimeLow) / deal.original) * 100) : 100;
-
   let timingEvaluation = "평균 프로모션 가격대";
   if (deal.discountPrice <= allTimeLow) {
     timingEvaluation = "역대 최저가 도달 (매수 적합)";
   } else if (deal.discountPrice <= allTimeLow * 1.1) {
     timingEvaluation = "최저가 근접 구간 (차이 $" + (deal.discountPrice - allTimeLow) + ")";
   }
-
   const latestPoint = historyArr[historyArr.length - 1];
   const latestOffRate = deal.original > 0 ? Math.round(((deal.original - latestPoint.price) / deal.original) * 100) : 0;
   const latestKrw = latestPoint.price === 0 ? "0원 (무료)" : `약 ${(latestPoint.price * USD_TO_KRW).toLocaleString()}원`;
-
   const seasonalityList = deal.seasonality || [
     { name: "Spring (3~4월)", avgOff: 20, note: "시즌 프로모션" },
     { name: "Summer (6~7월)", avgOff: deal.discountRateNum, note: "정기 세일" },
     { name: "Black Friday (11월)", avgOff: deal.discountRateNum, note: "연중 최대 세일" },
     { name: "Year-End (12월)", avgOff: deal.discountRateNum, note: "연말 세일" }
   ];
-
   const seasonalityHtml = seasonalityList.map(s => `
     <div class="ph-season-item">
       <div>
@@ -1158,11 +1062,9 @@ function openDealDetailModal(id) {
       </div>
     </div>
   `).join('');
-
   const adminDeleteBtnHtml = isUserAdmin(currentUser)
     ? `<button type="button" class="nav-btn danger-outline-btn" style="margin-right:0.6rem; padding:0.35rem 0.8rem; font-size:0.78rem;" onclick="deleteDealItem(${safeDealId})">관리자 딜 삭제</button>`
     : '';
-
   detailContent.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; padding-right:2rem;">
       <div>
@@ -1174,7 +1076,6 @@ function openDealDetailModal(id) {
         <span class="tag-badge tag-discount" style="font-size:0.95rem; padding:0.4rem 0.8rem;">${escapeHtml(deal.discountRate)}</span>
       </div>
     </div>
-
     <div class="plugin-img-wrapper" style="height:280px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
       <div class="plugin-ui-fallback" style="display:none;">${escapeHtml(deal.brand)}<br><span>${escapeHtml(deal.title)}</span></div>
       <img 
@@ -1186,9 +1087,7 @@ function openDealDetailModal(id) {
         onload="verifyImageNotDummy(this, ${safeDealId})"
         onerror="handleImgError(this, ${safeDealId})">
     </div>
-
     <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1rem; font-weight:500;">${escapeHtml(deal.desc)}</p>
-
     <div class="promo-code-bar">
       <div>
         <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">적용 프로모션 코드 / 핵심 혜택</div>
@@ -1202,7 +1101,6 @@ function openDealDetailModal(id) {
         <button type="button" class="copy-code-btn" onclick="jumpToCommunitySearch('${escapeHtml(deal.brand)}')">커뮤니티 관련 글 보기</button>
       </div>
     </div>
-
     <div class="price-history-section">
       <div class="ph-header-bar">
         <div class="ph-title-group">
@@ -1214,7 +1112,6 @@ function openDealDetailModal(id) {
           <button type="button" class="ph-range-btn" onclick="switchPriceChartRange(${safeDealId}, '1y', this)">최근 1년</button>
         </div>
       </div>
-
       <div class="ph-metrics-grid">
         <div class="ph-metric-card">
           <div class="ph-metric-label">정가 (MSRP)</div>
@@ -1237,7 +1134,6 @@ function openDealDetailModal(id) {
           <div class="ph-metric-sub">브랜드 정기 프로모션 기준</div>
         </div>
       </div>
-
       <div class="ph-chart-wrapper">
         <div id="phSvgChartContainer">
           ${buildPriceChartSvg(deal, 'all')}
@@ -1252,7 +1148,6 @@ function openDealDetailModal(id) {
           </div>
         </div>
       </div>
-
       <div style="font-size:0.8rem; font-weight:800; color:var(--text-secondary); margin-bottom:0.55rem; text-transform:uppercase; letter-spacing:0.04em;">
         시즌별 평균 할인율 지표 (Seasonality Breakdown)
       </div>
@@ -1260,7 +1155,6 @@ function openDealDetailModal(id) {
         ${seasonalityHtml}
       </div>
     </div>
-
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
       <h4 style="font-weight:800; font-size:1.1rem; color:var(--accent-gold);">공식 데모 & 사운드 리뷰 영상</h4>
       <a href="https://www.youtube.com/results?search_query=${searchEncoded}" target="_blank" rel="noopener noreferrer" style="font-size:0.82rem; color:var(--accent-gold); text-decoration:none; font-weight:700;">YouTube에서 공식 리뷰 더보기</a>
@@ -1274,7 +1168,6 @@ function openDealDetailModal(id) {
         allowfullscreen>
       </iframe>
     </div>
-
     <div class="price-box" style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding:1.2rem;">
       <div>
         <span class="original-price" style="font-size:1.05rem;">정가 $${escapeHtml(deal.original)}</span>
@@ -1282,23 +1175,18 @@ function openDealDetailModal(id) {
       </div>
       <div class="krw-price" style="font-size:1.1rem;">한화: ${krw}</div>
     </div>
-
     <a href="${escapeHtml(safeStoreUrl)}" target="_blank" rel="noopener noreferrer" class="btn-buy" style="font-size:1.05rem; padding:1rem; text-align:center; margin-top:1.2rem;">공식 스토어 구매 페이지로 이동</a>
   `;
-
   openModal('dealDetailModal');
 }
-
 async function deleteDealItem(dealId) {
   if (!isUserAdmin(currentUser)) {
     alert('관리자 권한이 없습니다.');
     return;
   }
   if (!confirm('이 딜 상품을 목록에서 삭제하시겠습니까?')) return;
-
   const target = dealsData.find(d => String(d.id) === String(dealId));
   markIdAsDeleted(DELETED_DEALS_STORAGE_KEY, dealId);
-
   if (target && target.dbRowId && supabaseClient) {
     try {
       await supabaseClient.from('deals').delete().eq('id', target.dbRowId);
@@ -1306,30 +1194,24 @@ async function deleteDealItem(dealId) {
       console.error(e);
     }
   }
-
   closeModal('dealDetailModal');
   updateSavedDealCountBadge();
   renderDeals();
   alert('해당 딜이 삭제되었습니다.');
 }
-
 function filterCategory(cat) {
   if (cat === 'affiliate') {
     alert('제휴 문의: aftrdry@outlook.kr 또는 공식 디스코드 채널로 연락해 주시기 바랍니다.');
   }
 }
-
-/* 4. 커뮤니티 모듈 고도화: 카테고리, 검색, 정렬, 추천(Upvote), 조회수, 수정(Edit), 실시간 댓글 */
 let currentCommCat = 'all';
 let postCommentsCache = {};
-
 function setCommunityCategory(cat, el) {
   document.querySelectorAll('#communityView .main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
   if (el) el.classList.add('active');
   currentCommCat = cat;
   renderCommunityPosts();
 }
-
 function getCommentCountForPost(postId) {
   const strId = String(postId);
   const dbComments = postCommentsCache[strId] || [];
@@ -1346,7 +1228,6 @@ function getCommentCountForPost(postId) {
   });
   return count;
 }
-
 async function fetchAllCommentsSummary() {
   if (!supabaseClient) return;
   try {
@@ -1365,13 +1246,10 @@ async function fetchAllCommentsSummary() {
     }
   } catch (e) {}
 }
-
 async function fetchCommunityPosts() {
   const listEl = document.getElementById('communityList');
   const deletedIds = getDeletedIds(DELETED_POSTS_STORAGE_KEY);
-
   await fetchAllCommentsSummary();
-
   if (!supabaseClient) {
     if (rawCommunityPosts.length === 0) {
       rawCommunityPosts = [
@@ -1383,7 +1261,6 @@ async function fetchCommunityPosts() {
     renderCommunityPosts();
     return;
   }
-
   try {
     const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
     if (error) {
@@ -1394,13 +1271,11 @@ async function fetchCommunityPosts() {
     }
   } catch (err) { console.error(err); }
 }
-
 function renderCommunityPosts() {
   const listEl = document.getElementById('communityList');
   const keyword = document.getElementById('commSearchKeyword').value.trim().toLowerCase();
   const sortBy = document.getElementById('commSortOption')?.value || 'latest';
   const deletedIds = getDeletedIds(DELETED_POSTS_STORAGE_KEY);
-
   let enriched = rawCommunityPosts
     .filter(p => !deletedIds.includes(String(p.id)))
     .map(p => {
@@ -1418,11 +1293,9 @@ function renderCommunityPosts() {
         _comments: commentCount
       };
     });
-
   if (currentCommCat !== 'all') {
     enriched = enriched.filter(p => p.category === currentCommCat);
   }
-
   if (keyword !== '') {
     enriched = enriched.filter(p => 
       (p.title && p.title.toLowerCase().includes(keyword)) ||
@@ -1432,23 +1305,19 @@ function renderCommunityPosts() {
       (p._pluginTag && p._pluginTag.toLowerCase().includes(keyword))
     );
   }
-
   enriched.sort((a, b) => {
     const aNotice = a.category === '공지사항' ? 1 : 0;
     const bNotice = b.category === '공지사항' ? 1 : 0;
     if (aNotice !== bNotice) return bNotice - aNotice;
-
     if (sortBy === 'popular') return b._likes - a._likes;
     if (sortBy === 'comments') return b._comments - a._comments;
     if (sortBy === 'views') return b._views - a._views;
     return new Date(b.created_at) - new Date(a.created_at);
   });
-
   if (enriched.length === 0) {
     listEl.innerHTML = `<div style="text-align: center; padding: 3rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">조건에 해당하는 게시글이 없습니다. 첫 번째 글을 작성해 보세요.</div>`;
     return;
   }
-
   listEl.innerHTML = enriched.map(p => {
     const isNotice = p.category === '공지사항';
     const cardClass = isNotice ? 'comm-card notice-card' : 'comm-card';
@@ -1456,7 +1325,6 @@ function renderCommunityPosts() {
     const dateStr = new Date(p.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
     const plainPreview = String(p.content || '').replace(/\[밑줄\]|\[\/밑줄\]|\*\*/g, '');
-
     return `
       <div class="${cardClass}" onclick="openPostDetail(${safeId})">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem; margin-bottom:0.45rem;">
@@ -1482,21 +1350,17 @@ function renderCommunityPosts() {
     `;
   }).join('');
 }
-
 function showPostWritePage(editPostObj = null) {
   if (!currentUser && supabaseClient) {
     alert('로그인이 필요한 기능입니다.');
     openModal('loginModal');
     return;
   }
-
   const form = document.getElementById('standalonePostForm');
   form.reset();
   document.getElementById('writeOptNotice').style.display = isUserAdmin(currentUser) ? 'block' : 'none';
-
   const headingEl = document.getElementById('postWriteHeading');
   const submitBtn = document.getElementById('btnSubmitPost');
-
   if (editPostObj) {
     editingPostId = editPostObj.id;
     const stats = getPostStats(editPostObj);
@@ -1513,37 +1377,30 @@ function showPostWritePage(editPostObj = null) {
     submitBtn.innerText = '작성 완료 및 등록';
     document.getElementById('editorGuideOverlay').style.opacity = '0.85';
   }
-
   showPage('postWrite');
 }
-
 function cancelPostWrite() {
   editingPostId = null;
   showPage('community');
 }
-
 function handleEditorTyping() {
   const content = document.getElementById('writeContent').value;
   const overlay = document.getElementById('editorGuideOverlay');
   if (content.length > 0) { overlay.style.opacity = '0'; }
   else { overlay.style.opacity = '0.85'; }
 }
-
 function formatEditorText(command) {
   const textarea = document.getElementById('writeContent');
   const start = textarea.selectionStart;
   const end = textarea.selectionEnd;
   const selectedText = textarea.value.substring(start, end);
-
   let replacement = selectedText;
   if (command === 'bold') replacement = `**${selectedText}**`;
   if (command === 'underline') replacement = `[밑줄]${selectedText}[/밑줄]`;
-
   textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
   textarea.focus();
   handleEditorTyping();
 }
-
 function insertEditorLink() {
   const url = prompt('삽입할 웹 링크 URL을 입력하세요 (https:// 포함):', 'https://');
   if (!url || !/^https?:\/\//i.test(url.trim())) return;
@@ -1551,12 +1408,10 @@ function insertEditorLink() {
   textarea.value += ` [링크](${url.trim()}) `;
   handleEditorTyping();
 }
-
 function insertEditorMedia(type) {
   let label = '이미지 URL';
   if (type === 'video') label = '유튜브 영상 URL';
   if (type === 'audio') label = 'SoundCloud 링크 또는 오디오(.mp3/.wav) URL';
-
   const url = prompt(`첨부할 ${label}을 입력하세요 (https:// 포함):`, 'https://');
   if (!url || !/^https?:\/\//i.test(url.trim())) return;
   const textarea = document.getElementById('writeContent');
@@ -1569,23 +1424,18 @@ function insertEditorMedia(type) {
   }
   handleEditorTyping();
 }
-
 async function handleStandalonePostSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('btnSubmitPost');
-
   await withSubmitLock('postSubmit', btn, async () => {
     const category = document.getElementById('writeCategorySelect').value;
     const pluginTag = document.getElementById('writePluginTag')?.value.trim() || '';
     const title = document.getElementById('writeTitle').value.trim();
     const content = document.getElementById('writeContent').value.trim();
-
     if (category === '공지사항' && !isUserAdmin(currentUser)) {
       alert('공지사항은 관리자만 작성할 수 있습니다.');
       return;
     }
-
-    // 수정 모드일 경우
     if (editingPostId !== null) {
       const metaMap = getPostMetaMap();
       const key = String(editingPostId);
@@ -1598,29 +1448,24 @@ async function handleStandalonePostSubmit(e) {
         daw: currentUserDaw
       };
       savePostMetaMap(metaMap);
-
       if (supabaseClient) {
         try {
           const numId = !isNaN(Number(editingPostId)) ? Number(editingPostId) : editingPostId;
           await supabaseClient.from('posts').update({ category, title, content }).eq('id', numId);
         } catch (err) {}
       }
-
       const target = rawCommunityPosts.find(p => String(p.id) === String(editingPostId));
       if (target) {
         target.category = category;
         target.title = title;
         target.content = content;
       }
-
       const finishedId = editingPostId;
       editingPostId = null;
       alert('게시글이 수정되었습니다.');
       openPostDetail(finishedId);
       return;
     }
-
-    // 신규 작성 모드일 경우
     if (!supabaseClient) {
       const demoId = Date.now();
       rawCommunityPosts.unshift({
@@ -1639,13 +1484,10 @@ async function handleStandalonePostSubmit(e) {
       showPage('community');
       return;
     }
-
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) { alert('로그인이 만료되었습니다.'); openModal('loginModal'); return; }
-
     const user = session.user;
     const nickname = originalNickname || user.user_metadata?.nickname || '@' + user.email.split('@')[0];
-
     const { data: insertedData, error } = await supabaseClient
       .from('posts')
       .insert([{
@@ -1657,7 +1499,6 @@ async function handleStandalonePostSubmit(e) {
       }])
       .select()
       .maybeSingle();
-
     if (error) {
       alert('게시글 작성 실패: ' + error.message);
     } else {
@@ -1677,7 +1518,6 @@ async function handleStandalonePostSubmit(e) {
     }
   });
 }
-
 function isUserOwnerOfPost(post) {
   if (!currentUser || !post) return false;
   const emailPrefix = currentUser.email ? currentUser.email.split('@')[0] : '';
@@ -1691,14 +1531,10 @@ function isUserOwnerOfPost(post) {
   }
   return false;
 }
-
 function openPostDetail(id) {
   const post = rawCommunityPosts.find(p => String(p.id) === String(id));
   if (!post) return;
-
   currentOpenPostId = post.id;
-
-  // 조회수 1 증가 기록
   const metaMap = getPostMetaMap();
   const strId = String(post.id);
   metaMap[strId] = {
@@ -1706,26 +1542,21 @@ function openPostDetail(id) {
     extraViews: ((metaMap[strId] && metaMap[strId].extraViews) || 0) + 1
   };
   savePostMetaMap(metaMap);
-
   const stats = getPostStats(post);
   const displayCategory = stats.editedCategory || post.category;
   const displayTitle = stats.editedTitle || post.title;
   const displayContent = stats.editedContent || post.content;
-
   const container = document.getElementById('postDetailContainer');
   const actionBtns = document.getElementById('postDetailActionBtns');
   const dateStr = new Date(post.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
   const isMyPost = isUserOwnerOfPost(post);
   const safeId = typeof post.id === 'string' ? `'${post.id}'` : post.id;
-
   actionBtns.innerHTML = isMyPost
     ? `
       <button type="button" class="nav-btn" onclick="triggerEditCurrentPost(${safeId})">수정하기</button>
       <button type="button" class="nav-btn danger-outline-btn" onclick="deletePost(${safeId})">삭제하기</button>
     `
     : '';
-
   container.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.2rem;">
       <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.35rem;">
@@ -1748,49 +1579,39 @@ function openPostDetail(id) {
       <span style="font-size:0.8rem; color:var(--text-secondary);">사운드 팁이나 피드백이 도움이 되었다면 추천을 눌러주세요.</span>
     </div>
   `;
-
   renderPostComments(post.id);
   showPage('postDetail');
 }
-
 function triggerEditCurrentPost(id) {
   const post = rawCommunityPosts.find(p => String(p.id) === String(id));
   if (!post) return;
   showPostWritePage(post);
 }
-
 function togglePostUpvote(postId) {
   const post = rawCommunityPosts.find(p => String(p.id) === String(postId));
   if (!post) return;
-
   const map = getPostMetaMap();
   const key = String(post.id);
   const current = map[key] || {};
   const nextVoted = !current.voted;
   const delta = nextVoted ? 1 : -1;
-
   map[key] = {
     ...current,
     voted: nextVoted,
     extraLikes: Math.max(0, (Number(current.extraLikes) || 0) + delta)
   };
   savePostMetaMap(map);
-
   const stats = getPostStats(post);
   const btn = document.getElementById('btnPostUpvote');
   const countEl = document.getElementById('postUpvoteCountText');
   if (btn) btn.classList.toggle('voted', stats.voted);
   if (countEl) countEl.innerText = stats.likes;
 }
-
-/* 댓글 렌더링, 작성, 삭제 */
 async function renderPostComments(postId) {
   const listEl = document.getElementById('postCommentsList');
   const badgeEl = document.getElementById('postCommentCountBadge');
   if (!listEl) return;
-
   const strPostId = String(postId);
-
   if (supabaseClient) {
     try {
       const numId = !isNaN(Number(postId)) ? Number(postId) : postId;
@@ -1804,11 +1625,9 @@ async function renderPostComments(postId) {
       }
     } catch (e) {}
   }
-
   const dbList = postCommentsCache[strPostId] || [];
   const localMap = getLocalCommentsMap();
   const localList = localMap[strPostId] || [];
-
   const merged = [];
   const seen = new Set();
   dbList.concat(localList).forEach(c => {
@@ -1818,14 +1637,11 @@ async function renderPostComments(postId) {
       merged.push(c);
     }
   });
-
   if (badgeEl) badgeEl.innerText = merged.length;
-
   if (merged.length === 0) {
     listEl.innerHTML = `<div style="padding:1.5rem; text-align:center; color:var(--text-secondary); font-size:0.86rem; background:var(--bg-color); border:1px solid var(--border-color); border-radius:8px;">아직 등록된 댓글이 없습니다. 첫 번째 피드백을 남겨보세요.</div>`;
     return;
   }
-
   listEl.innerHTML = merged.map(c => {
     const cDate = new Date(c.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     const emailPrefix = currentUser?.email ? currentUser.email.split('@')[0] : '';
@@ -1836,7 +1652,6 @@ async function renderPostComments(postId) {
       (c.author_nickname && c.author_nickname.replace(/^@/, '') === userNick.replace(/^@/, ''))
     );
     const safeCommentId = typeof c.id === 'string' ? `'${c.id}'` : c.id;
-
     return `
       <div class="comm-comment-item">
         <div class="comm-comment-top">
@@ -1852,7 +1667,6 @@ async function renderPostComments(postId) {
     `;
   }).join('');
 }
-
 async function handleCommentSubmit(e) {
   e.preventDefault();
   if (!currentUser && supabaseClient) {
@@ -1861,17 +1675,14 @@ async function handleCommentSubmit(e) {
     return;
   }
   if (currentOpenPostId === null) return;
-
   const btn = document.getElementById('btnSubmitComment');
   await withSubmitLock('commentSubmit', btn, async () => {
     const inputEl = document.getElementById('commentInputText');
     const content = inputEl.value.trim();
     if (!content) return;
-
     const strPostId = String(currentOpenPostId);
     const emailPrefix = currentUser?.email ? currentUser.email.split('@')[0] : 'producer';
     const nickname = originalNickname || currentUser?.user_metadata?.nickname || '@' + emailPrefix;
-
     let savedDbComment = null;
     if (supabaseClient && currentUser) {
       try {
@@ -1892,7 +1703,6 @@ async function handleCommentSubmit(e) {
         }
       } catch (err) {}
     }
-
     if (!savedDbComment) {
       const localMap = getLocalCommentsMap();
       if (!localMap[strPostId]) localMap[strPostId] = [];
@@ -1907,49 +1717,40 @@ async function handleCommentSubmit(e) {
       });
       saveLocalCommentsMap(localMap);
     }
-
     inputEl.value = '';
     await renderPostComments(currentOpenPostId);
   });
 }
-
 async function deleteCommentItem(postId, commentId) {
   if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
   const strPostId = String(postId);
-
   const localMap = getLocalCommentsMap();
   if (localMap[strPostId]) {
     localMap[strPostId] = localMap[strPostId].filter(c => String(c.id) !== String(commentId));
     saveLocalCommentsMap(localMap);
   }
-
   if (postCommentsCache[strPostId]) {
     postCommentsCache[strPostId] = postCommentsCache[strPostId].filter(c => String(c.id) !== String(commentId));
   }
-
   if (supabaseClient && !String(commentId).startsWith('local_')) {
     try {
       const numCid = !isNaN(Number(commentId)) ? Number(commentId) : commentId;
       await supabaseClient.from('comments').delete().eq('id', numCid);
     } catch (e) {}
   }
-
   await renderPostComments(postId);
 }
-
 async function deletePost(id) {
   if (!confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
   
   markIdAsDeleted(DELETED_POSTS_STORAGE_KEY, id);
   rawCommunityPosts = rawCommunityPosts.filter(p => String(p.id) !== String(id));
-
   if (!supabaseClient) {
     alert('게시글이 삭제되었습니다.');
     showPage('community');
     renderCommunityPosts();
     return;
   }
-
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
@@ -1959,7 +1760,6 @@ async function deletePost(id) {
         .delete()
         .eq('id', numId)
         .select();
-
       if (!error && (!data || data.length === 0)) {
         await supabaseClient
           .from('posts')
@@ -1970,23 +1770,18 @@ async function deletePost(id) {
   } catch (err) {
     console.error(err);
   }
-
   alert('게시글이 성공적으로 삭제되었습니다.');
   showPage('community');
   renderCommunityPosts();
 }
-
 function switchMyPageTab(tabName, el) {
   document.querySelectorAll('#myPageView .cat-chip').forEach(c => c.classList.remove('active'));
   if (el) el.classList.add('active');
-
   document.getElementById('mpTabProfile').style.display = tabName === 'profile' ? 'block' : 'none';
   document.getElementById('mpTabSecurity').style.display = tabName === 'security' ? 'block' : 'none';
   document.getElementById('mpTabActivity').style.display = tabName === 'activity' ? 'block' : 'none';
-
   if (tabName === 'activity') { fetchMyActivityPosts(); }
 }
-
 async function initMyPageData() {
   if (!supabaseClient) {
     originalNickname = '@aftrdry';
@@ -1996,13 +1791,11 @@ async function initMyPageData() {
     onNicknameInputChanged();
     return;
   }
-
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) return;
     currentUser = session.user;
     document.getElementById('myPageEmail').value = currentUser.email || '';
-
     const { data } = await supabaseClient.from('profiles').select('nickname, main_daw').eq('id', currentUser.id).maybeSingle();
     if (data && data.nickname) {
       originalNickname = data.nickname;
@@ -2018,12 +1811,10 @@ async function initMyPageData() {
     onNicknameInputChanged();
   } catch (err) { console.error(err); }
 }
-
 function onNicknameInputChanged() {
   const inputVal = document.getElementById('myPageNickname').value.trim();
   const msgEl = document.getElementById('nicknameCheckMsg');
   const saveBtn = document.getElementById('btnSaveProfile');
-
   if (inputVal === originalNickname) {
     isNicknameVerified = true;
     msgEl.style.color = 'var(--text-secondary)';
@@ -2036,12 +1827,10 @@ function onNicknameInputChanged() {
     saveBtn.disabled = true; saveBtn.style.opacity = '0.5'; saveBtn.style.cursor = 'not-allowed';
   }
 }
-
 async function checkNicknameDuplicate() {
   const nickname = document.getElementById('myPageNickname').value.trim();
   const msgEl = document.getElementById('nicknameCheckMsg');
   const saveBtn = document.getElementById('btnSaveProfile');
-
   if (!nickname) { alert('닉네임을 입력해 주세요.'); return; }
   if (nickname === originalNickname) {
     isNicknameVerified = true;
@@ -2050,7 +1839,6 @@ async function checkNicknameDuplicate() {
     saveBtn.disabled = false; saveBtn.style.opacity = '1'; saveBtn.style.cursor = 'pointer';
     return;
   }
-
   if (!supabaseClient) {
     isNicknameVerified = true;
     msgEl.style.color = '#8fa874';
@@ -2058,7 +1846,6 @@ async function checkNicknameDuplicate() {
     saveBtn.disabled = false; saveBtn.style.opacity = '1'; saveBtn.style.cursor = 'pointer';
     return;
   }
-
   const { data } = await supabaseClient.from('profiles').select('id').eq('nickname', nickname).maybeSingle();
   if (data) {
     isNicknameVerified = false;
@@ -2072,69 +1859,53 @@ async function checkNicknameDuplicate() {
     saveBtn.disabled = false; saveBtn.style.opacity = '1'; saveBtn.style.cursor = 'pointer';
   }
 }
-
 async function handleProfileUpdateSubmit(e) {
   e.preventDefault();
   const saveBtn = document.getElementById('btnSaveProfile');
-
   await withSubmitLock('profileUpdate', saveBtn, async () => {
     const nickname = document.getElementById('myPageNickname').value.trim();
     const main_daw = document.getElementById('myPageDaw').value;
     currentUserDaw = main_daw;
     try { localStorage.setItem('plugazit_user_daw', main_daw); } catch (err) {}
-
     if (!isNicknameVerified) { alert('닉네임 중복 확인을 완료해 주세요.'); return; }
     if (!supabaseClient) { alert('프로필이 저장되었습니다.'); return; }
-
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) return;
-
     const { error } = await supabaseClient.from('profiles').upsert({
       id: session.user.id, email: session.user.email, nickname, main_daw, updated_at: new Date()
     });
-
     if (error) { alert('저장 실패: ' + error.message); }
     else { alert('프로필 정보가 안전하게 저장되었습니다.'); originalNickname = nickname; }
   });
 }
-
 async function handlePasswordChangeSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('btnChangePw');
-
   await withSubmitLock('pwChange', btn, async () => {
     const newPassword = document.getElementById('newPassword').value;
     const confirmNewPw = document.getElementById('confirmNewPassword').value;
-
     if (newPassword !== confirmNewPw) { alert('새 비밀번호가 일치하지 않습니다.'); return; }
     if (newPassword.length < 6) { alert('비밀번호는 6자리 이상이어야 합니다.'); return; }
-
     if (!supabaseClient) { alert('비밀번호가 변경되었습니다. (데모 모드)'); return; }
-
     const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
     if (error) { alert('비밀번호 변경 실패: ' + error.message); }
     else { alert('비밀번호가 성공적으로 변경되었습니다.'); e.target.reset(); }
   });
 }
-
 async function handleAccountDeleteRequest() {
   const confirmed = confirm('정말 회원 탈퇴를 진행하시겠습니까?\n탈퇴 즉시 작성하신 게시글과 프로필 데이터가 파기되며 복구할 수 없습니다.');
   if (!confirmed) return;
-
   if (!supabaseClient) {
     alert('회원 탈퇴 및 데이터 파기가 완료되었습니다.');
     location.reload();
     return;
   }
-
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) return;
-
     await supabaseClient.from('posts').delete().eq('user_id', session.user.id);
     await supabaseClient.from('profiles').delete().eq('id', session.user.id);
     await supabaseClient.auth.signOut();
-
     alert('회원 탈퇴 및 개인정보 파기 처리가 완료되었습니다. 그동안 이용해 주셔서 감사합니다.');
     location.reload();
   } catch (err) {
@@ -2142,26 +1913,21 @@ async function handleAccountDeleteRequest() {
     alert('탈퇴 처리 중 오류가 발생했습니다. 고객센터(aftrdry@outlook.kr)로 문의해 주세요.');
   }
 }
-
 async function fetchMyActivityPosts() {
   const listEl = document.getElementById('myActivityList');
   const deletedIds = getDeletedIds(DELETED_POSTS_STORAGE_KEY);
-
   if (!supabaseClient) {
     listEl.innerHTML = `<div class="comm-card"><h4 style="font-weight:700;">[데모] 내가 작성한 글 샘플 제목</h4><p style="font-size:0.88rem; color:var(--text-secondary);">내용 요약...</p></div>`;
     return;
   }
-
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) return;
     const myPosts = rawCommunityPosts.filter(p => isUserOwnerOfPost(p) && !deletedIds.includes(String(p.id)));
-
     if (myPosts.length === 0) {
       listEl.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding: 2rem;">작성한 게시글이 없습니다.</p>`;
       return;
     }
-
     listEl.innerHTML = myPosts.map(p => {
       const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
       const stats = getPostStats(p);
@@ -2175,7 +1941,6 @@ async function fetchMyActivityPosts() {
     }).join('');
   } catch (err) { console.error(err); }
 }
-
 async function checkUserSession() {
   if (!supabaseClient) return;
   const { data: { session } } = await supabaseClient.auth.getSession();
@@ -2189,7 +1954,6 @@ async function checkUserSession() {
     } catch (e) {}
   }
 }
-
 function updateUIAuthStatus(user) {
   currentUser = user;
   document.getElementById('authNav').style.display = user ? 'none' : 'flex';
@@ -2198,55 +1962,43 @@ function updateUIAuthStatus(user) {
   const adminBtn = document.getElementById('navAdminBtn');
   if (adminBtn) adminBtn.style.display = isUserAdmin(user) ? 'block' : 'none';
 }
-
 async function handleLoginSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('btnLoginSubmit');
-
   await withSubmitLock('login', btn, async () => {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-
     if (!supabaseClient) { closeModal('loginModal'); updateUIAuthStatus({ email }); alert('환영합니다.'); return; }
-
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) { alert('로그인 실패: 이메일 또는 비밀번호를 확인해 주세요.'); }
     else { closeModal('loginModal'); await checkUserSession(); alert('성공적으로 로그인되었습니다.'); }
   });
 }
-
 async function handleSignupSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('btnSignupSubmit');
-
   await withSubmitLock('signup', btn, async () => {
     const nickname = document.getElementById('signupNickname').value.trim();
     const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
-
     if (!supabaseClient) { closeModal('signupModal'); alert('회원가입 완료.'); return; }
-
     const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { nickname } } });
     if (error) { alert('회원가입 실패: ' + error.message); }
     else { closeModal('signupModal'); alert('가입 완료. 이메일 인증 확인 후 로그인해 주세요.'); }
   });
 }
-
 async function handleResetPasswordSubmit(e) {
   e.preventDefault();
   const email = document.getElementById('resetEmail').value.trim();
   if (!supabaseClient) { alert('재설정 메일 발송됨.'); closeModal('resetPwModal'); return; }
-
   const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: 'https://plugazit.com' });
   if (error) { alert('요청 실패: ' + error.message); }
   else { alert('비밀번호 재설정 메일이 발송되었습니다.'); closeModal('resetPwModal'); }
 }
-
 async function handleFindEmailSubmit(e) {
   e.preventDefault();
   const nickname = document.getElementById('findNickname').value.trim();
   if (!supabaseClient) { alert(`이메일 힌트: af***@outlook.kr`); closeModal('findEmailModal'); return; }
-
   const { data } = await supabaseClient.from('profiles').select('email, nickname').eq('nickname', nickname).maybeSingle();
   if (!data) { alert('해당 닉네임의 회원을 찾을 수 없습니다.'); }
   else {
@@ -2256,20 +2008,17 @@ async function handleFindEmailSubmit(e) {
     closeModal('findEmailModal');
   }
 }
-
 async function handleLogout() {
   if (supabaseClient) { await supabaseClient.auth.signOut(); }
   alert('로그아웃 되었습니다.');
   location.reload();
 }
-
 async function handleDealSubmit(e) {
   e.preventDefault();
   if (!isUserAdmin(currentUser) && supabaseClient) {
     alert('관리자 권한이 없습니다.');
     return;
   }
-
   const btn = document.getElementById('btnSubmitDeal');
   await withSubmitLock('dealSubmit', btn, async () => {
     const brand = document.getElementById('dealBrand').value.trim();
@@ -2285,21 +2034,17 @@ async function handleDealSubmit(e) {
     const customImg = document.getElementById('dealImgUrl')?.value.trim() || "";
     const ytInput = document.getElementById('dealYoutubeInput')?.value.trim() || "";
     const ytId = extractYoutubeId(ytInput) || "5Sa3wa_doG0";
-
     const rateNum = orig > 0 ? Math.round(((orig - disc) / orig) * 100) : (disc === 0 ? 100 : 0);
     const rateStr = disc === 0 ? "100% FREE" : `${rateNum}% OFF`;
     const defaults = buildDefaultSeasonalityAndHistory(orig, disc, rateNum);
     const resolvedImgUrl = customImg || `https://api.microlink.io/?url=${encodeURIComponent(storeUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
-
     let insertedRowId = null;
-
     if (supabaseClient) {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (!session || !isUserAdmin(session.user)) {
         alert('관리자 세션이 유효하지 않습니다. 다시 로그인해 주세요.');
         return;
       }
-
       const { data, error } = await supabaseClient
         .from('deals')
         .insert([{
@@ -2320,7 +2065,6 @@ async function handleDealSubmit(e) {
         }])
         .select()
         .maybeSingle();
-
       if (error) {
         alert('Supabase DB 저장 실패 (SQL 설정 여부를 확인해 주세요): ' + error.message);
         return;
@@ -2329,7 +2073,6 @@ async function handleDealSubmit(e) {
         insertedRowId = data.id;
       }
     }
-
     const newDeal = {
       id: insertedRowId ? `db_${insertedRowId}` : (dealsData.length + 1),
       dbRowId: insertedRowId,
@@ -2353,7 +2096,6 @@ async function handleDealSubmit(e) {
       seasonality: defaults.seasonality,
       priceHistory: defaults.priceHistory
     };
-
     dealsData.unshift(newDeal);
     resolveLiveYoutubeAndOfficialImage(newDeal);
     updateSavedDealCountBadge();
@@ -2363,7 +2105,6 @@ async function handleDealSubmit(e) {
     showPage('deals');
   });
 }
-
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const savedTheme = localStorage.getItem('plugazit_theme');
@@ -2373,7 +2114,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const savedDaw = localStorage.getItem('plugazit_user_daw');
     if (savedDaw) currentUserDaw = savedDaw;
   } catch (e) {}
-
   renderSubCategories();
   updateSavedDealCountBadge();
   renderDeals();
