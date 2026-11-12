@@ -50,7 +50,7 @@ function renderSafeContent(rawText) {
     if (/\.(mp3|wav|ogg|flac|m4a)(\?.*)?$/i.test(url)) {
       return `<div class="inline-media-box"><div style="font-size:0.78rem; color:var(--accent-gold); font-weight:700;">오디오 트랙 미리듣기</div><audio controls preload="metadata" src="${url}"></audio></div>`;
     }
-    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-gold); text-decoration:underline; font-weight:700;">[${label} 열기: ${url}]</a>`;
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-gold); text-decoration:underline; font-weight:700;">[${label} 열기]</a>`;
   });
   return safe;
 }
@@ -98,22 +98,6 @@ function markIdAsDeleted(storageKey, id) {
 }
 function getSavedDealIds() {
   return getDeletedIds(SAVED_DEALS_STORAGE_KEY);
-}
-function toggleSaveDeal(dealId, event) {
-  if (event) event.stopPropagation();
-  try {
-    const list = getSavedDealIds();
-    const strId = String(dealId);
-    const idx = list.indexOf(strId);
-    if (idx >= 0) {
-      list.splice(idx, 1);
-    } else {
-      list.push(strId);
-    }
-    localStorage.setItem(SAVED_DEALS_STORAGE_KEY, JSON.stringify(list));
-    updateSavedDealCountBadge();
-    renderDeals();
-  } catch (e) {}
 }
 function updateSavedDealCountBadge() {
   const el = document.getElementById('savedDealCount');
@@ -186,7 +170,7 @@ function resetToHome() {
   
   const allBtn = document.getElementById('btnMainCatAll');
   if (allBtn) {
-    document.querySelectorAll('#dealsView .main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
     allBtn.classList.add('active');
   }
   
@@ -272,7 +256,7 @@ const subCategories = {
   fx: ["전체", "Pitch/Vocal", "Utility/Analyzer", "Modulation"],
   free: ["전체", "Free Synths", "Free FX"]
 };
-/* 원래의 썸네일 URL 구조 유지 + 각 제조사 공식 홈페이지의 핵심 기능 설명문 반영 */
+/* 원본(index 8)의 imgUrl 구조 100% 복원 + 읽기 편하고 명확한 핵심 제품 요약 */
 const dealsData = [
   {
     id: 1,
@@ -280,14 +264,14 @@ const dealsData = [
     title: "Pro-Q 3 Equalizer",
     cat: "mixing",
     sub: "EQ",
-    desc: "최대 24밴드 다이나믹 EQ, Linear Phase 및 Zero Latency 처리, 외부 사이드체인 스펙트럼 충돌 감지 및 Dolby Atmos(최대 9.1.6) 서라운드를 지원하는 이퀄라이저 플러그인입니다.",
+    desc: "다이나믹 EQ, 리니어 페이즈 및 트랙 간 주파수 마스킹 확인 기능을 갖춘 업계 표준 이퀄라이저입니다.",
     original: 179,
     discountPrice: 134,
     discountRateNum: 25,
     discountRate: "25% OFF",
     storeUrl: "https://www.fabfilter.com/products/pro-q-3-equalizer-plug-in",
     daysLeft: 5,
-    imgUrl: "https://www.fabfilter.com/img/products/pro-q-3-large.png",
+    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.fabfilter.com%2Fproducts%2Fpro-q-3-equalizer-plug-in&screenshot=true&meta=false&embed=screenshot.url",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "FabFilter Pro-Q 3 Equalizer Official Introduction",
     bestSeasonLabel: "Summer (7월) / Black Friday (11월)",
@@ -317,14 +301,14 @@ const dealsData = [
     title: "soothe2 Resonance Suppressor",
     cat: "mixing",
     sub: "De-Esser/Dynamic",
-    desc: "전 주파수 대역(20Hz~20kHz)에서 문제 공명(Resonance)을 실시간으로 자동 감지하고, 필요한 주파수와 시점에만 선별적으로 리덕션을 적용하는 다이나믹 레조넌스 서프레서입니다.",
+    desc: "보컬과 악기 트랙의 거친 공명(Resonance) 및 치찰음을 실시간으로 자동 감지해 부드럽게 억제하는 프로세서입니다.",
     original: 219,
     discountPrice: 149,
     discountRateNum: 32,
     discountRate: "32% OFF",
     storeUrl: "https://oeksound.com/plugins/soothe2/",
     daysLeft: 2,
-    imgUrl: "https://oeksound.com/wp-content/uploads/2019/12/soothe2_gui_main.png",
+    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Foeksound.com%2Fplugins%2Fsoothe2%2F&screenshot=true&meta=false&embed=screenshot.url",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "oeksound soothe2 resonance suppressor walkthrough",
     bestSeasonLabel: "Easter (4월) / Black Friday (11월)",
@@ -354,14 +338,14 @@ const dealsData = [
     title: "Soundtoys 5.4 Bundle",
     cat: "fx",
     sub: "Modulation",
-    desc: "Decapitator, EchoBoy, Little AlterBoy, SuperPlate 등 22종의 개별 크리에이티브 오디오 이펙트 플러그인과 멀티 이펙트 체인 호스트인 Effect Rack이 통합된 컬렉션입니다.",
+    desc: "Decapitator, EchoBoy, Little AlterBoy 등 아날로그 질감의 핵심 이펙터 22종과 Effect Rack을 모두 포함한 통합 번들입니다.",
     original: 499,
     discountPrice: 249,
     discountRateNum: 50,
     discountRate: "50% OFF",
     storeUrl: "https://www.soundtoys.com/product/soundtoys-5/",
     daysLeft: 12,
-    imgUrl: "https://www.soundtoys.com/wp-content/uploads/ST5_4_Hero.png",
+    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.soundtoys.com%2Fproduct%2Fsoundtoys-5%2F&screenshot=true&meta=false&embed=screenshot.url",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "Soundtoys 5 Bundle Effect Rack Demo",
     bestSeasonLabel: "Black Friday (11월) / Holiday (12월)",
@@ -391,14 +375,14 @@ const dealsData = [
     title: "UAD Spark 1 Year Pass",
     cat: "mixing",
     sub: "Compressor/Limiter",
-    desc: "별도의 UA 하드웨어(DSP) 없이 Mac 및 Windows 환경에서 네이티브(UADx)로 구동되는 Teletronix LA-2A, 1176, Neve 1073, Studer 테이프 및 가상악기 구독 서비스입니다.",
+    desc: "별도 DSP 하드웨어 없이 LA-2A, 1176, Neve 1073 등 UA의 대표적인 아날로그 복각 플러그인을 네이티브로 사용하는 연간 패스입니다.",
     original: 199,
     discountPrice: 99,
     discountRateNum: 50,
     discountRate: "50% OFF",
     storeUrl: "https://spark.uaudio.com/",
     daysLeft: 1,
-    imgUrl: "https://www.uaudio.com/media/catalog/product/u/a/uad_spark_hero.jpg",
+    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fspark.uaudio.com%2F&screenshot=true&meta=false&embed=screenshot.url",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "Universal Audio UAD Spark Native Plugins Demo",
     bestSeasonLabel: "Half-Year (6월) / Black Friday (11월)",
@@ -428,14 +412,14 @@ const dealsData = [
     title: "Analog Lab Play",
     cat: "free",
     sub: "Free Synths",
-    desc: "Arturia V Collection 및 Pigments 엔진에서 엄선된 100종의 신디사이저, 키보드, 패드, 베이스 프리셋과 직관적인 매크로 컨트롤을 제공하는 무료 소프트웨어 악기입니다.",
+    desc: "Arturia V Collection과 Pigments에서 엄선된 100가지 빈티지 신스 및 건반 프리셋을 무료로 제공하는 가상악기입니다.",
     original: 99,
     discountPrice: 0,
     discountRateNum: 100,
     discountRate: "100% FREE",
     storeUrl: "https://www.arturia.com/products/software-instruments/analoglab-v/overview",
     daysLeft: 99,
-    imgUrl: "https://cdn-resources.arturia.net/products/analoglab-play/analoglab-play-hero.png",
+    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.arturia.com%2Fproducts%2Fsoftware-instruments%2Fanaloglab-v%2Foverview&screenshot=true&meta=false&embed=screenshot.url",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "Arturia Analog Lab Play Overview Tutorial",
     bestSeasonLabel: "상시 무료 배포 (Perpetual Free)",
@@ -463,14 +447,14 @@ const dealsData = [
     title: "Komplete 14 Standard",
     cat: "synth",
     sub: "Sample Library",
-    desc: "Kontakt 7, Massive X, Reaktor 6를 비롯한 86종의 악기 및 이펙트와 38종의 Expansion 사운드 팩이 수록된 Native Instruments의 표준 프로덕션 번들입니다.",
+    desc: "Kontakt 7, Massive X 등 80여 종의 가상악기·이펙트와 Expansion 사운드 팩이 수록된 올라운드 프로덕션 번들입니다.",
     original: 599,
     discountPrice: 299,
     discountRateNum: 50,
     discountRate: "50% OFF",
     storeUrl: "https://www.native-instruments.com/en/catalog/komplete/",
     daysLeft: 4,
-    imgUrl: "https://www.native-instruments.com/fileadmin/ni_media/products/komplete/komplete_14_standard/k14s_hero.png",
+    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.native-instruments.com%2Fen%2Fcatalog%2Fkomplete%2F&screenshot=true&meta=false&embed=screenshot.url",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "Native Instruments Komplete 14 Standard Overview",
     bestSeasonLabel: "Summer of Sound (6월) / Cyber Season (11월)",
@@ -500,14 +484,14 @@ const dealsData = [
     title: "Ozone 11 Advanced",
     cat: "mixing",
     sub: "Mastering Chain",
-    desc: "Clarity 모듈, Stem Focus, Transient/Sustain 분리 프로세싱, Upward Compress 및 AI 기반 Master Assistant를 포함한 20종의 마스터링 모듈 스위트입니다.",
+    desc: "Clarity 모듈, Stem Focus 및 AI Master Assistant를 통해 음압 확보와 톤 밸런스를 완성하는 통합 마스터링 스위트입니다.",
     original: 399,
     discountPrice: 199,
     discountRateNum: 50,
     discountRate: "50% OFF",
     storeUrl: "https://www.izotope.com/en/products/ozone.html",
     daysLeft: 7,
-    imgUrl: "https://www.izotope.com/content/dam/izotope/products/ozone-11-advanced/ozone_11_hero.png",
+    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.izotope.com%2Fen%2Fproducts%2Fozone.html&screenshot=true&meta=false&embed=screenshot.url",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "iZotope Ozone 11 Mastering Overview",
     bestSeasonLabel: "Summer (6월) / Black Friday (11월)",
@@ -536,14 +520,14 @@ const dealsData = [
     title: "Serum VST Synth",
     cat: "synth",
     sub: "Analog/Synth",
-    desc: "고음질 웨이브테이블 오실레이터, 실시간 파형 임포트 및 커스텀 에디터, 드래그 앤 드롭 모듈레이션 매트릭스와 10종의 내장 이펙트 랙을 갖춘 웨이브테이블 신디사이저입니다.",
+    desc: "직관적인 파형 편집과 드래그 앤 드롭 모듈레이션 워크플로우를 갖춘 대표적인 웨이브테이블 신디사이저입니다.",
     original: 189,
     discountPrice: 149,
     discountRateNum: 21,
     discountRate: "21% OFF",
     storeUrl: "https://xferrecords.com/products/serum",
     daysLeft: 15,
-    imgUrl: "https://xferrecords.com/assets/serum/serum_screenshot.png",
+    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fxferrecords.com%2Fproducts%2Fserum&screenshot=true&meta=false&embed=screenshot.url",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "Xfer Records Serum Synth Walkthrough",
     bestSeasonLabel: "제휴 바우처 / 번들 프로모션 시점",
@@ -570,14 +554,14 @@ const dealsData = [
     title: "Melodyne 5 assistant",
     cat: "fx",
     sub: "Pitch/Vocal",
-    desc: "모노포닉(단선율) 보컬 및 악기 트랙 전용 Melodic 알고리즘, 치찰음(Sibilant) 분리 제어, 포먼트·비브라토·타이밍·레벨 편집 및 ARA 워크플로우를 지원합니다.",
+    desc: "보컬의 음정, 박자, 비브라토 및 치찰음을 음질 저하 없이 자연스럽게 다듬는 업계 표준 피치 보정 툴입니다.",
     original: 249,
     discountPrice: 149,
     discountRateNum: 40,
     discountRate: "40% OFF",
     storeUrl: "https://www.celemony.com/en/melodyne/what-is-melodyne",
     daysLeft: 3,
-    imgUrl: "https://www.celemony.com/cgi-bin/WebObjects/License.woa/wa/VTProductDisplay/Melodyne5Assistant_GUI.png",
+    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.celemony.com%2Fen%2Fmelodyne%2Fwhat-is-melodyne&screenshot=true&meta=false&embed=screenshot.url",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "Celemony Melodyne 5 Vocal Pitch Editing",
     bestSeasonLabel: "Summer (6월) / Black Friday (11월)",
@@ -653,7 +637,7 @@ async function fetchDealsFromSupabase() {
         discountRate: rateStr,
         storeUrl: storeUrl,
         daysLeft: row.days_left || 7,
-        imgUrl: row.img_url || "",
+        imgUrl: row.img_url || `https://api.microlink.io/?url=${encodeURIComponent(storeUrl)}&screenshot=true&meta=false&embed=screenshot.url`,
         youtubeId: row.youtube_id || "5Sa3wa_doG0",
         ytQuery: `${row.brand || ''} ${row.title || ''} official demo`,
         bestSeasonLabel: defaults.bestSeasonLabel,
@@ -661,7 +645,7 @@ async function fetchDealsFromSupabase() {
         priceHistory: row.price_history || defaults.priceHistory
       };
       dealsData.unshift(mappedDeal);
-      resolveLiveYoutubeVideoId(mappedDeal);
+      resolveLiveYoutubeAndOfficialImage(mappedDeal);
     });
     updateSavedDealCountBadge();
     renderDeals();
@@ -674,8 +658,23 @@ const PIPED_SEARCH_ENDPOINTS = [
   "https://api.piped.private.coffee/search?filter=videos&q=",
   "https://pipedapi.tokhmi.xyz/search?filter=videos&q="
 ];
-/* 썸네일은 절대 건드리지 않고 유튜브 영상 ID만 백그라운드 매칭 */
-async function resolveLiveYoutubeVideoId(deal) {
+/* 원본(index 8)의 썸네일 & 유튜브 매칭 함수 100% 그대로 복원 */
+async function resolveLiveYoutubeAndOfficialImage(deal) {
+  try {
+    const mlRes = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(deal.storeUrl)}&screenshot=true`);
+    if (mlRes.ok) {
+      const mlJson = await mlRes.json();
+      const ogImg = mlJson?.data?.image?.url;
+      const screenImg = mlJson?.data?.screenshot?.url;
+      if (ogImg && ogImg.startsWith('http')) {
+        deal.imgUrl = ogImg;
+        deal.backupImgUrl = screenImg || deal.imgUrl;
+      } else if (screenImg && screenImg.startsWith('http')) {
+        deal.imgUrl = screenImg;
+      }
+      updateDealDomImages(deal.id, deal.imgUrl);
+    }
+  } catch (e) {}
   const query = encodeURIComponent(deal.ytQuery || `${deal.brand} ${deal.title}`);
   for (const endpoint of PIPED_SEARCH_ENDPOINTS) {
     try {
@@ -688,6 +687,9 @@ async function resolveLiveYoutubeVideoId(deal) {
         const vidMatch = firstValid.url.match(/v=([a-zA-Z0-9_-]{11})/);
         if (vidMatch && vidMatch[1]) {
           deal.youtubeId = vidMatch[1];
+          if (firstValid.thumbnail && firstValid.thumbnail.startsWith('http')) {
+            deal.backupImgUrl = firstValid.thumbnail;
+          }
           if (String(currentOpenDealId) === String(deal.id)) {
             const iframe = document.getElementById('dealModalYoutubeIframe');
             if (iframe) {
@@ -700,10 +702,20 @@ async function resolveLiveYoutubeVideoId(deal) {
     } catch (e) {}
   }
 }
+function updateDealDomImages(dealId, newSrc) {
+  document.querySelectorAll(`img[data-deal-img-id="${dealId}"]`).forEach(img => {
+    if (img.src !== newSrc) {
+      img.style.display = 'block';
+      img.src = newSrc;
+      const fb = img.parentElement?.querySelector('.plugin-ui-fallback');
+      if (fb) fb.style.display = 'none';
+    }
+  });
+}
 let currentMainCat = 'all';
 let currentSubCat = '전체';
 function setMainCategory(cat, el) {
-  document.querySelectorAll('#dealsView .main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
   if (el) el.classList.add('active');
   currentMainCat = cat;
   currentSubCat = '전체';
@@ -724,12 +736,29 @@ function setSubCategory(sub, el) {
   renderDeals();
 }
 function onDealFilterChange() { renderDeals(); }
-/* 원래의 깔끔한 이미지 에러 폴백 로직 그대로 복원 */
-function handleImgError(imgEl) {
+function verifyImageNotDummy(imgEl, dealId) {
+  if (imgEl.naturalWidth > 0 && imgEl.naturalWidth <= 120) {
+    handleImgError(imgEl, dealId);
+  }
+}
+function handleImgError(imgEl, dealId) {
+  const deal = dealsData.find(d => String(d.id) === String(dealId));
+  const step = parseInt(imgEl.dataset.fallbackStep || '0', 10);
+  if (deal && step === 0 && deal.backupImgUrl && imgEl.src !== deal.backupImgUrl) {
+    imgEl.dataset.fallbackStep = '1';
+    imgEl.src = deal.backupImgUrl;
+    return;
+  }
+  if (deal && step <= 1) {
+    imgEl.dataset.fallbackStep = '2';
+    imgEl.src = `https://api.microlink.io/?url=${encodeURIComponent(deal.storeUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
+    return;
+  }
   imgEl.style.display = 'none';
   const fallback = imgEl.parentElement?.querySelector('.plugin-ui-fallback');
   if (fallback) fallback.style.display = 'flex';
 }
+/* 원본(index 8)의 깔끔한 카드 렌더링 구조 100% 그대로 복원 */
 function renderDeals() {
   const container = document.getElementById('dealsContainer');
   const searchKeyword = document.getElementById('dealSearchKeyword').value.trim().toLowerCase();
@@ -761,10 +790,7 @@ function renderDeals() {
   else if (sortOption === 'discountHigh') { filtered.sort((a, b) => b.discountRateNum - a.discountRateNum); }
   else if (sortOption === 'endingSoon') { filtered.sort((a, b) => a.daysLeft - b.daysLeft); }
   if (filtered.length === 0) {
-    const emptyMsg = currentMainCat === 'saved'
-      ? '관심 딜로 저장한 플러그인이 없습니다. 각 카드 우측 상단의 [+ 관심 등록] 버튼을 눌러 추가해 보세요.'
-      : '검색 조건에 해당되는 VST 딜 정보가 없습니다.';
-    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">${emptyMsg}</div>`;
+    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">검색 조건에 해당되는 VST 딜 정보가 없습니다.</div>`;
     return;
   }
   container.innerHTML = filtered.map(d => {
@@ -773,18 +799,21 @@ function renderDeals() {
     const tagClass = d.discountPrice === 0 ? 'tag-free' : 'tag-discount';
     const safeDealId = typeof d.id === 'string' ? `'${d.id}'` : d.id;
     const safeStoreUrl = sanitizeUrl(d.storeUrl);
-    const isSaved = savedDealIds.includes(String(d.id));
     return `
       <div class="deal-card" onclick="openDealDetailModal(${safeDealId})">
-        <button type="button" class="bookmark-toggle-btn ${isSaved ? 'saved' : ''}" onclick="toggleSaveDeal(${safeDealId}, event)">
-          ${isSaved ? '관심 저장됨' : '+ 관심 등록'}
-        </button>
         <div class="plugin-img-wrapper">
           <div class="plugin-ui-fallback" style="display:none;">
             ${escapeHtml(d.brand)}
             <span>${escapeHtml(d.title)}</span>
           </div>
-          <img src="${escapeHtml(d.imgUrl)}" alt="${escapeHtml(d.title)}" onerror="handleImgError(this)">
+          <img 
+            data-deal-img-id="${escapeHtml(d.id)}"
+            src="${escapeHtml(d.imgUrl)}" 
+            alt="${escapeHtml(d.title)}" 
+            referrerpolicy="no-referrer" 
+            loading="lazy" 
+            onload="verifyImageNotDummy(this, ${safeDealId})"
+            onerror="handleImgError(this, ${safeDealId})">
         </div>
         <div class="deal-card-body">
           <div>
@@ -983,9 +1012,16 @@ function openDealDetailModal(id) {
         <span class="tag-badge tag-discount" style="font-size:0.95rem; padding:0.4rem 0.8rem;">${escapeHtml(deal.discountRate)}</span>
       </div>
     </div>
-    <div class="plugin-img-wrapper" style="height:260px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
+    <div class="plugin-img-wrapper" style="height:280px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
       <div class="plugin-ui-fallback" style="display:none;">${escapeHtml(deal.brand)}<br><span>${escapeHtml(deal.title)}</span></div>
-      <img src="${escapeHtml(deal.imgUrl)}" alt="${escapeHtml(deal.title)}" onerror="handleImgError(this)">
+      <img 
+        data-deal-img-id="${escapeHtml(deal.id)}"
+        src="${escapeHtml(deal.imgUrl)}" 
+        alt="${escapeHtml(deal.title)}" 
+        referrerpolicy="no-referrer" 
+        style="object-fit:contain;" 
+        onload="verifyImageNotDummy(this, ${safeDealId})"
+        onerror="handleImgError(this, ${safeDealId})">
     </div>
     <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1.5rem; font-weight:500;">${escapeHtml(deal.desc)}</p>
     <div class="price-history-section">
@@ -1251,17 +1287,17 @@ function showPostWritePage(editPostObj = null) {
   if (editPostObj) {
     editingPostId = editPostObj.id;
     const stats = getPostStats(editPostObj);
-    headingEl.innerText = '커뮤니티 게시글 수정';
-    submitBtn.innerText = '수정 내용 저장';
+    if (headingEl) headingEl.innerText = '커뮤니티 게시글 수정';
+    if (submitBtn) submitBtn.innerText = '수정 내용 저장';
     document.getElementById('writeCategorySelect').value = stats.editedCategory || editPostObj.category || '자유수다';
-    document.getElementById('writePluginTag').value = stats.pluginTag || '';
+    if (document.getElementById('writePluginTag')) document.getElementById('writePluginTag').value = stats.pluginTag || '';
     document.getElementById('writeTitle').value = stats.editedTitle || editPostObj.title || '';
     document.getElementById('writeContent').value = stats.editedContent || editPostObj.content || '';
     document.getElementById('editorGuideOverlay').style.opacity = '0';
   } else {
     editingPostId = null;
-    headingEl.innerText = '프로듀서 커뮤니티 글 작성';
-    submitBtn.innerText = '작성 완료 및 등록';
+    if (headingEl) headingEl.innerText = '프로듀서 커뮤니티 글 작성';
+    if (submitBtn) submitBtn.innerText = '작성 완료 및 등록';
     document.getElementById('editorGuideOverlay').style.opacity = '0.85';
   }
   showPage('postWrite');
@@ -1922,6 +1958,7 @@ async function handleDealSubmit(e) {
     const rateNum = orig > 0 ? Math.round(((orig - disc) / orig) * 100) : (disc === 0 ? 100 : 0);
     const rateStr = disc === 0 ? "100% FREE" : `${rateNum}% OFF`;
     const defaults = buildDefaultSeasonalityAndHistory(orig, disc, rateNum);
+    const resolvedImgUrl = customImg || `https://api.microlink.io/?url=${encodeURIComponent(storeUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
     let insertedRowId = null;
     if (supabaseClient) {
       const { data: { session } } = await supabaseClient.auth.getSession();
@@ -1971,7 +2008,7 @@ async function handleDealSubmit(e) {
       discountRate: rateStr,
       storeUrl,
       daysLeft: 7,
-      imgUrl: customImg,
+      imgUrl: resolvedImgUrl,
       youtubeId: ytId,
       ytQuery: `${brand} ${title} official demo`,
       bestSeasonLabel: defaults.bestSeasonLabel,
@@ -1979,7 +2016,7 @@ async function handleDealSubmit(e) {
       priceHistory: defaults.priceHistory
     };
     dealsData.unshift(newDeal);
-    resolveLiveYoutubeVideoId(newDeal);
+    resolveLiveYoutubeAndOfficialImage(newDeal);
     updateSavedDealCountBadge();
     renderDeals();
     alert('새로운 딜 정보가 데이터베이스에 영구 등록되었습니다.');
@@ -2001,5 +2038,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderDeals();
   await checkUserSession();
   await fetchDealsFromSupabase();
-  dealsData.forEach(d => resolveLiveYoutubeVideoId(d));
+  dealsData.forEach(d => resolveLiveYoutubeAndOfficialImage(d));
 });
