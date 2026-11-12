@@ -328,14 +328,10 @@
             <div class="form-group"><label for="dealDiscPrice">할인가 ($)</label><input type="number" step="0.01" min="0" id="dealDiscPrice" required placeholder="134"></div>
           </div>
           <div class="admin-grid-2">
-            <div class="form-group"><label for="dealImgUrl">제품 실제 UI 이미지 URL</label><input type="url" id="dealImgUrl" placeholder="https://... (미입력 시 공식 홈페이지 UI 자동 추출)"></div>
+            <div class="form-group"><label for="dealImgUrl">제품 UI 이미지 URL</label><input type="url" id="dealImgUrl" placeholder="https://..."></div>
             <div class="form-group"><label for="dealYoutubeInput">공식 유튜브 영상 URL 또는 11자리 ID</label><input type="text" id="dealYoutubeInput" placeholder="예: https://youtu.be/5Sa3wa_doG0"></div>
           </div>
-          <div class="admin-grid-2">
-            <div class="form-group"><label for="dealPromoCode">할인 프로모션 코드 (선택)</label><input type="text" id="dealPromoCode" placeholder="예: FAB-PROMO-2026 (없으면 DIRECT-DISCOUNT)"></div>
-            <div class="form-group"><label for="dealPerk">핵심 혜택 한 줄 요약 (선택)</label><input type="text" id="dealPerk" placeholder="예: 다이나믹 EQ 모드 지원, 기간 한정 특가"></div>
-          </div>
-          <div class="form-group"><label for="dealDesc">상세 설명</label><textarea id="dealDesc" rows="2" required placeholder="딜 핵심 특징 및 요약"></textarea></div>
+          <div class="form-group"><label for="dealDesc">상세 설명 (공식 홈페이지 핵심 스펙 요약)</label><textarea id="dealDesc" rows="2" required placeholder="공식 홈페이지 기준 핵심 기능 설명"></textarea></div>
           <div class="form-group"><label for="dealUrl">제휴/구매 링크 URL</label><input type="url" id="dealUrl" required placeholder="https://..."></div>
           <button type="submit" class="btn-buy" id="btnSubmitDeal" style="margin-top:1rem;">새로운 딜 DB 등록 / 업데이트</button>
         </form>
@@ -466,7 +462,7 @@
         <h4>제1조 (목적)</h4>
         <p>본 약관은 PlugAzit(이하 "서비스")가 제공하는 VST 플러그인 할인 정보 큐레이션 및 프로듀서 커뮤니티 서비스의 이용 조건 및 절차, 회원과 서비스 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
         <h4>제2조 (할인 정보 및 제휴 링크 고지)</h4>
-        <p>1. 서비스에 게시되는 플러그인 가격, 할인율, 프로모션 코드 및 연도별 가격 추이 데이터는 정보 제공 목적으로 큐레이션되며, 각 브랜드 공식 스토어의 사정에 따라 실시간으로 변동될 수 있습니다.<br>
+        <p>1. 서비스에 게시되는 플러그인 가격, 할인율 및 연도별 가격 추이 데이터는 정보 제공 목적으로 큐레이션되며, 각 브랜드 공식 스토어의 사정에 따라 실시간으로 변동될 수 있습니다.<br>
            2. 일부 외부 스토어 연결 링크는 제휴 마케팅(Affiliate) 링크를 포함할 수 있으며, 이를 통한 구매 시 서비스 운영을 위한 소정의 수수료가 발생할 수 있습니다. 단, 구매자에게 추가 비용은 발생하지 않습니다.</p>
         <h4>제3조 (회원의 의무 및 커뮤니티 운영 정책)</h4>
         <p>회원은 불법 복제 소프트웨어(크랙 등) 공유, 저작권 침해, 타인 비방, 도배 및 영리 목적의 스팸 게시물을 작성해서는 안 되며, 위반 시 사전 통보 없이 게시물 삭제 및 계정 이용이 제한될 수 있습니다.</p>

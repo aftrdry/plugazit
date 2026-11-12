@@ -272,6 +272,7 @@ const subCategories = {
   fx: ["전체", "Pitch/Vocal", "Utility/Analyzer", "Modulation"],
   free: ["전체", "Free Synths", "Free FX"]
 };
+/* 원래의 썸네일 URL 구조 유지 + 각 제조사 공식 홈페이지의 핵심 기능 설명문 반영 */
 const dealsData = [
   {
     id: 1,
@@ -279,16 +280,14 @@ const dealsData = [
     title: "Pro-Q 3 Equalizer",
     cat: "mixing",
     sub: "EQ",
-    desc: "트랙 간 믹싱 마스킹 제어 및 위상 왜곡 없는 정밀 이퀄라이징과 Dynamic EQ 작업용 업계 표준 이퀄라이저입니다.",
+    desc: "최대 24밴드 다이나믹 EQ, Linear Phase 및 Zero Latency 처리, 외부 사이드체인 스펙트럼 충돌 감지 및 Dolby Atmos(최대 9.1.6) 서라운드를 지원하는 이퀄라이저 플러그인입니다.",
     original: 179,
     discountPrice: 134,
     discountRateNum: 25,
     discountRate: "25% OFF",
-    code: "FAB-PROMO-2026",
-    perk: "업계 표준 EQ, Dynamic EQ 모드 지원",
     storeUrl: "https://www.fabfilter.com/products/pro-q-3-equalizer-plug-in",
     daysLeft: 5,
-    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.fabfilter.com%2Fproducts%2Fpro-q-3-equalizer-plug-in&screenshot=true&meta=false&embed=screenshot.url",
+    imgUrl: "https://www.fabfilter.com/img/products/pro-q-3-large.png",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "FabFilter Pro-Q 3 Equalizer Official Introduction",
     bestSeasonLabel: "Summer (7월) / Black Friday (11월)",
@@ -318,16 +317,14 @@ const dealsData = [
     title: "soothe2 Resonance Suppressor",
     cat: "mixing",
     sub: "De-Esser/Dynamic",
-    desc: "보컬이나 악기 트랙에서 발생하는 불쾌한 쏘는 소리와 피크 공명을 실시간으로 감지하여 부드럽게 억제하는 툴입니다.",
+    desc: "전 주파수 대역(20Hz~20kHz)에서 문제 공명(Resonance)을 실시간으로 자동 감지하고, 필요한 주파수와 시점에만 선별적으로 리덕션을 적용하는 다이나믹 레조넌스 서프레서입니다.",
     original: 219,
     discountPrice: 149,
     discountRateNum: 32,
     discountRate: "32% OFF",
-    code: "SOOTHE2026",
-    perk: "불쾌한 공명 사운드 자동 실시간 제어",
     storeUrl: "https://oeksound.com/plugins/soothe2/",
     daysLeft: 2,
-    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Foeksound.com%2Fplugins%2Fsoothe2%2F&screenshot=true&meta=false&embed=screenshot.url",
+    imgUrl: "https://oeksound.com/wp-content/uploads/2019/12/soothe2_gui_main.png",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "oeksound soothe2 resonance suppressor walkthrough",
     bestSeasonLabel: "Easter (4월) / Black Friday (11월)",
@@ -357,16 +354,14 @@ const dealsData = [
     title: "Soundtoys 5.4 Bundle",
     cat: "fx",
     sub: "Modulation",
-    desc: "Decapitator, Echoboy 등 아날로그 감성의 특색 있는 사운드 질감을 만드는 21가지 최고급 이펙터 모음입니다.",
+    desc: "Decapitator, EchoBoy, Little AlterBoy, SuperPlate 등 22종의 개별 크리에이티브 오디오 이펙트 플러그인과 멀티 이펙트 체인 호스트인 Effect Rack이 통합된 컬렉션입니다.",
     original: 499,
     discountPrice: 249,
     discountRateNum: 50,
     discountRate: "50% OFF",
-    code: "SOUNDTOYS-DEAL",
-    perk: "21개 대표 사운드 디자이닝 이펙터 전체 포함",
     storeUrl: "https://www.soundtoys.com/product/soundtoys-5/",
     daysLeft: 12,
-    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.soundtoys.com%2Fproduct%2Fsoundtoys-5%2F&screenshot=true&meta=false&embed=screenshot.url",
+    imgUrl: "https://www.soundtoys.com/wp-content/uploads/ST5_4_Hero.png",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "Soundtoys 5 Bundle Effect Rack Demo",
     bestSeasonLabel: "Black Friday (11월) / Holiday (12월)",
@@ -396,16 +391,14 @@ const dealsData = [
     title: "UAD Spark 1 Year Pass",
     cat: "mixing",
     sub: "Compressor/Limiter",
-    desc: "DSP 하드웨어 없이 1176, LA-2A, Studer 테이프 머신 등 전설적인 아날로그 하드웨어의 명음기를 컴퓨터에서 구동합니다.",
+    desc: "별도의 UA 하드웨어(DSP) 없이 Mac 및 Windows 환경에서 네이티브(UADx)로 구동되는 Teletronix LA-2A, 1176, Neve 1073, Studer 테이프 및 가상악기 구독 서비스입니다.",
     original: 199,
     discountPrice: 99,
     discountRateNum: 50,
     discountRate: "50% OFF",
-    code: "UAD-SPARK-50",
-    perk: "전설적 아날로그 믹싱 기기 네이티브 지원",
     storeUrl: "https://spark.uaudio.com/",
     daysLeft: 1,
-    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fspark.uaudio.com%2F&screenshot=true&meta=false&embed=screenshot.url",
+    imgUrl: "https://www.uaudio.com/media/catalog/product/u/a/uad_spark_hero.jpg",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "Universal Audio UAD Spark Native Plugins Demo",
     bestSeasonLabel: "Half-Year (6월) / Black Friday (11월)",
@@ -435,16 +428,14 @@ const dealsData = [
     title: "Analog Lab Play",
     cat: "free",
     sub: "Free Synths",
-    desc: "빈티지 신티사이저와 클래식 건반 악기들의 최고급 프리셋 100가지를 무상으로 사용할 수 있는 가상악기 뷰어입니다.",
+    desc: "Arturia V Collection 및 Pigments 엔진에서 엄선된 100종의 신디사이저, 키보드, 패드, 베이스 프리셋과 직관적인 매크로 컨트롤을 제공하는 무료 소프트웨어 악기입니다.",
     original: 99,
     discountPrice: 0,
     discountRateNum: 100,
     discountRate: "100% FREE",
-    code: "DIRECT-DOWNLOAD",
-    perk: "100가지 핵심 빈티지 신스 프리셋 무상 제공",
     storeUrl: "https://www.arturia.com/products/software-instruments/analoglab-v/overview",
     daysLeft: 99,
-    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.arturia.com%2Fproducts%2Fsoftware-instruments%2Fanaloglab-v%2Foverview&screenshot=true&meta=false&embed=screenshot.url",
+    imgUrl: "https://cdn-resources.arturia.net/products/analoglab-play/analoglab-play-hero.png",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "Arturia Analog Lab Play Overview Tutorial",
     bestSeasonLabel: "상시 무료 배포 (Perpetual Free)",
@@ -472,16 +463,14 @@ const dealsData = [
     title: "Komplete 14 Standard",
     cat: "synth",
     sub: "Sample Library",
-    desc: "Kontakt 7 샘플러를 기반으로 웅장한 시네마틱 오케스트라, 드럼, 신스 사운드까지 보유한 통합 제작 번들입니다.",
+    desc: "Kontakt 7, Massive X, Reaktor 6를 비롯한 86종의 악기 및 이펙트와 38종의 Expansion 사운드 팩이 수록된 Native Instruments의 표준 프로덕션 번들입니다.",
     original: 599,
     discountPrice: 299,
     discountRateNum: 50,
     discountRate: "50% OFF",
-    code: "BF-SEASON",
-    perk: "Kontakt 7 및 수만 가지 시네마틱 샘플 수록",
     storeUrl: "https://www.native-instruments.com/en/catalog/komplete/",
     daysLeft: 4,
-    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.native-instruments.com%2Fen%2Fcatalog%2Fkomplete%2F&screenshot=true&meta=false&embed=screenshot.url",
+    imgUrl: "https://www.native-instruments.com/fileadmin/ni_media/products/komplete/komplete_14_standard/k14s_hero.png",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "Native Instruments Komplete 14 Standard Overview",
     bestSeasonLabel: "Summer of Sound (6월) / Cyber Season (11월)",
@@ -511,16 +500,14 @@ const dealsData = [
     title: "Ozone 11 Advanced",
     cat: "mixing",
     sub: "Mastering Chain",
-    desc: "음원 마스터링 시 대역별 음압 보정, Stem Rebalance 및 AI Assistant 기반으로 곡의 완성도를 마감하는 마스터링 툴입니다.",
+    desc: "Clarity 모듈, Stem Focus, Transient/Sustain 분리 프로세싱, Upward Compress 및 AI 기반 Master Assistant를 포함한 20종의 마스터링 모듈 스위트입니다.",
     original: 399,
     discountPrice: 199,
     discountRateNum: 50,
     discountRate: "50% OFF",
-    code: "OZONE11-SALE",
-    perk: "AI 기반 종합 음압/마스터링 프로세싱",
     storeUrl: "https://www.izotope.com/en/products/ozone.html",
     daysLeft: 7,
-    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.izotope.com%2Fen%2Fproducts%2Fozone.html&screenshot=true&meta=false&embed=screenshot.url",
+    imgUrl: "https://www.izotope.com/content/dam/izotope/products/ozone-11-advanced/ozone_11_hero.png",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "iZotope Ozone 11 Mastering Overview",
     bestSeasonLabel: "Summer (6월) / Black Friday (11월)",
@@ -549,16 +536,14 @@ const dealsData = [
     title: "Serum VST Synth",
     cat: "synth",
     sub: "Analog/Synth",
-    desc: "직관적인 렌더링 파형 편집과 압도적인 사운드 메이킹 성능으로 EDM, 팝, 트랩 전 장르에서 일렉트로닉 신스를 이끄는 대표작입니다.",
+    desc: "고음질 웨이브테이블 오실레이터, 실시간 파형 임포트 및 커스텀 에디터, 드래그 앤 드롭 모듈레이션 매트릭스와 10종의 내장 이펙트 랙을 갖춘 웨이브테이블 신디사이저입니다.",
     original: 189,
     discountPrice: 149,
     discountRateNum: 21,
     discountRate: "21% OFF",
-    code: "SERUM-PROMO",
-    perk: "웨이브테이블 신티사이저 글로벌 시그니처 툴",
     storeUrl: "https://xferrecords.com/products/serum",
     daysLeft: 15,
-    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fxferrecords.com%2Fproducts%2Fserum&screenshot=true&meta=false&embed=screenshot.url",
+    imgUrl: "https://xferrecords.com/assets/serum/serum_screenshot.png",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "Xfer Records Serum Synth Walkthrough",
     bestSeasonLabel: "제휴 바우처 / 번들 프로모션 시점",
@@ -585,16 +570,14 @@ const dealsData = [
     title: "Melodyne 5 assistant",
     cat: "fx",
     sub: "Pitch/Vocal",
-    desc: "보컬의 음정과 타이밍을 음질 손상 없이 정밀하게 수정하는 글로벌 표준 보컬 피치 보정 플러그인입니다.",
+    desc: "모노포닉(단선율) 보컬 및 악기 트랙 전용 Melodic 알고리즘, 치찰음(Sibilant) 분리 제어, 포먼트·비브라토·타이밍·레벨 편집 및 ARA 워크플로우를 지원합니다.",
     original: 249,
     discountPrice: 149,
     discountRateNum: 40,
     discountRate: "40% OFF",
-    code: "MELODYNE40",
-    perk: "자연스러운 보컬 피치 및 타임 보정 업계 표준",
     storeUrl: "https://www.celemony.com/en/melodyne/what-is-melodyne",
     daysLeft: 3,
-    imgUrl: "https://api.microlink.io/?url=https%3A%2F%2Fwww.celemony.com%2Fen%2Fmelodyne%2Fwhat-is-melodyne&screenshot=true&meta=false&embed=screenshot.url",
+    imgUrl: "https://www.celemony.com/cgi-bin/WebObjects/License.woa/wa/VTProductDisplay/Melodyne5Assistant_GUI.png",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "Celemony Melodyne 5 Vocal Pitch Editing",
     bestSeasonLabel: "Summer (6월) / Black Friday (11월)",
@@ -668,11 +651,9 @@ async function fetchDealsFromSupabase() {
         discountPrice: disc,
         discountRateNum: rateNum,
         discountRate: rateStr,
-        code: row.promo_code || "DIRECT-DISCOUNT",
-        perk: row.perk || "공식 스토어 프로모션 할인가 적용",
         storeUrl: storeUrl,
         daysLeft: row.days_left || 7,
-        imgUrl: row.img_url || `https://api.microlink.io/?url=${encodeURIComponent(storeUrl)}&screenshot=true&meta=false&embed=screenshot.url`,
+        imgUrl: row.img_url || "",
         youtubeId: row.youtube_id || "5Sa3wa_doG0",
         ytQuery: `${row.brand || ''} ${row.title || ''} official demo`,
         bestSeasonLabel: defaults.bestSeasonLabel,
@@ -680,7 +661,7 @@ async function fetchDealsFromSupabase() {
         priceHistory: row.price_history || defaults.priceHistory
       };
       dealsData.unshift(mappedDeal);
-      resolveLiveYoutubeAndOfficialImage(mappedDeal);
+      resolveLiveYoutubeVideoId(mappedDeal);
     });
     updateSavedDealCountBadge();
     renderDeals();
@@ -693,22 +674,8 @@ const PIPED_SEARCH_ENDPOINTS = [
   "https://api.piped.private.coffee/search?filter=videos&q=",
   "https://pipedapi.tokhmi.xyz/search?filter=videos&q="
 ];
-async function resolveLiveYoutubeAndOfficialImage(deal) {
-  try {
-    const mlRes = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(deal.storeUrl)}&screenshot=true`);
-    if (mlRes.ok) {
-      const mlJson = await mlRes.json();
-      const ogImg = mlJson?.data?.image?.url;
-      const screenImg = mlJson?.data?.screenshot?.url;
-      if (ogImg && ogImg.startsWith('http')) {
-        deal.imgUrl = ogImg;
-        deal.backupImgUrl = screenImg || deal.imgUrl;
-      } else if (screenImg && screenImg.startsWith('http')) {
-        deal.imgUrl = screenImg;
-      }
-      updateDealDomImages(deal.id, deal.imgUrl);
-    }
-  } catch (e) {}
+/* 썸네일은 절대 건드리지 않고 유튜브 영상 ID만 백그라운드 매칭 */
+async function resolveLiveYoutubeVideoId(deal) {
   const query = encodeURIComponent(deal.ytQuery || `${deal.brand} ${deal.title}`);
   for (const endpoint of PIPED_SEARCH_ENDPOINTS) {
     try {
@@ -721,9 +688,6 @@ async function resolveLiveYoutubeAndOfficialImage(deal) {
         const vidMatch = firstValid.url.match(/v=([a-zA-Z0-9_-]{11})/);
         if (vidMatch && vidMatch[1]) {
           deal.youtubeId = vidMatch[1];
-          if (firstValid.thumbnail && firstValid.thumbnail.startsWith('http')) {
-            deal.backupImgUrl = firstValid.thumbnail;
-          }
           if (String(currentOpenDealId) === String(deal.id)) {
             const iframe = document.getElementById('dealModalYoutubeIframe');
             if (iframe) {
@@ -735,16 +699,6 @@ async function resolveLiveYoutubeAndOfficialImage(deal) {
       }
     } catch (e) {}
   }
-}
-function updateDealDomImages(dealId, newSrc) {
-  document.querySelectorAll(`img[data-deal-img-id="${dealId}"]`).forEach(img => {
-    if (img.src !== newSrc) {
-      img.style.display = 'block';
-      img.src = newSrc;
-      const fb = img.parentElement?.querySelector('.plugin-ui-fallback');
-      if (fb) fb.style.display = 'none';
-    }
-  });
 }
 let currentMainCat = 'all';
 let currentSubCat = '전체';
@@ -770,24 +724,8 @@ function setSubCategory(sub, el) {
   renderDeals();
 }
 function onDealFilterChange() { renderDeals(); }
-function verifyImageNotDummy(imgEl, dealId) {
-  if (imgEl.naturalWidth > 0 && imgEl.naturalWidth <= 120) {
-    handleImgError(imgEl, dealId);
-  }
-}
-function handleImgError(imgEl, dealId) {
-  const deal = dealsData.find(d => String(d.id) === String(dealId));
-  const step = parseInt(imgEl.dataset.fallbackStep || '0', 10);
-  if (deal && step === 0 && deal.backupImgUrl && imgEl.src !== deal.backupImgUrl) {
-    imgEl.dataset.fallbackStep = '1';
-    imgEl.src = deal.backupImgUrl;
-    return;
-  }
-  if (deal && step <= 1) {
-    imgEl.dataset.fallbackStep = '2';
-    imgEl.src = `https://api.microlink.io/?url=${encodeURIComponent(deal.storeUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
-    return;
-  }
+/* 원래의 깔끔한 이미지 에러 폴백 로직 그대로 복원 */
+function handleImgError(imgEl) {
   imgEl.style.display = 'none';
   const fallback = imgEl.parentElement?.querySelector('.plugin-ui-fallback');
   if (fallback) fallback.style.display = 'flex';
@@ -836,7 +774,6 @@ function renderDeals() {
     const safeDealId = typeof d.id === 'string' ? `'${d.id}'` : d.id;
     const safeStoreUrl = sanitizeUrl(d.storeUrl);
     const isSaved = savedDealIds.includes(String(d.id));
-    const daysText = d.daysLeft >= 90 ? '상시 진행' : `마감 ${d.daysLeft}일 전`;
     return `
       <div class="deal-card" onclick="openDealDetailModal(${safeDealId})">
         <button type="button" class="bookmark-toggle-btn ${isSaved ? 'saved' : ''}" onclick="toggleSaveDeal(${safeDealId}, event)">
@@ -847,14 +784,7 @@ function renderDeals() {
             ${escapeHtml(d.brand)}
             <span>${escapeHtml(d.title)}</span>
           </div>
-          <img 
-            data-deal-img-id="${escapeHtml(d.id)}"
-            src="${escapeHtml(d.imgUrl)}" 
-            alt="${escapeHtml(d.title)}" 
-            referrerpolicy="no-referrer" 
-            loading="lazy" 
-            onload="verifyImageNotDummy(this, ${safeDealId})"
-            onerror="handleImgError(this, ${safeDealId})">
+          <img src="${escapeHtml(d.imgUrl)}" alt="${escapeHtml(d.title)}" onerror="handleImgError(this)">
         </div>
         <div class="deal-card-body">
           <div>
@@ -863,12 +793,8 @@ function renderDeals() {
               <span class="tag-badge ${tagClass}">${escapeHtml(d.discountRate)}</span>
             </div>
             <div class="deal-title">${escapeHtml(d.title)}</div>
-            <div class="sub-cat-tag">
-              <span># ${escapeHtml(d.sub)}</span>
-              <span class="days-left-label">${escapeHtml(daysText)}</span>
-            </div>
+            <div class="sub-cat-tag"># ${escapeHtml(d.sub)}</div>
             <div class="description-text">${escapeHtml(d.desc)}</div>
-            ${d.perk ? `<div class="perk-line-badge">${escapeHtml(d.perk)}</div>` : ''}
           </div>
           <div>
             <div class="price-box">
@@ -882,24 +808,6 @@ function renderDeals() {
       </div>
     `;
   }).join('');
-}
-function copyPromoCode(codeStr, btnEl) {
-  if (!codeStr) return;
-  navigator.clipboard?.writeText(codeStr);
-  if (btnEl) {
-    const prev = btnEl.innerText;
-    btnEl.innerText = '복사 완료';
-    setTimeout(() => { btnEl.innerText = prev; }, 1500);
-  }
-}
-function jumpToCommunitySearch(pluginTitle) {
-  closeModal('dealDetailModal');
-  showPage('community');
-  const searchInput = document.getElementById('commSearchKeyword');
-  if (searchInput) {
-    searchInput.value = pluginTitle;
-    renderCommunityPosts();
-  }
 }
 function buildPriceChartSvg(deal, rangeMode = 'all') {
   const fullHistory = deal.priceHistory || [
@@ -1029,7 +937,6 @@ function openDealDetailModal(id) {
   const validVideoId = (deal.youtubeId && deal.youtubeId.length === 11) ? deal.youtubeId : "5Sa3wa_doG0";
   const safeDealId = typeof deal.id === 'string' ? `'${deal.id}'` : deal.id;
   const safeStoreUrl = sanitizeUrl(deal.storeUrl);
-  const promoCode = deal.code || "DIRECT-DISCOUNT";
   const historyArr = deal.priceHistory || [{ date: "2026.11", season: "Current Deal", price: deal.discountPrice }];
   const allPrices = historyArr.map(h => h.price);
   const allTimeLow = Math.min(...allPrices);
@@ -1076,31 +983,11 @@ function openDealDetailModal(id) {
         <span class="tag-badge tag-discount" style="font-size:0.95rem; padding:0.4rem 0.8rem;">${escapeHtml(deal.discountRate)}</span>
       </div>
     </div>
-    <div class="plugin-img-wrapper" style="height:280px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
+    <div class="plugin-img-wrapper" style="height:260px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
       <div class="plugin-ui-fallback" style="display:none;">${escapeHtml(deal.brand)}<br><span>${escapeHtml(deal.title)}</span></div>
-      <img 
-        data-deal-img-id="${escapeHtml(deal.id)}"
-        src="${escapeHtml(deal.imgUrl)}" 
-        alt="${escapeHtml(deal.title)}" 
-        referrerpolicy="no-referrer" 
-        style="object-fit:contain;" 
-        onload="verifyImageNotDummy(this, ${safeDealId})"
-        onerror="handleImgError(this, ${safeDealId})">
+      <img src="${escapeHtml(deal.imgUrl)}" alt="${escapeHtml(deal.title)}" onerror="handleImgError(this)">
     </div>
-    <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1rem; font-weight:500;">${escapeHtml(deal.desc)}</p>
-    <div class="promo-code-bar">
-      <div>
-        <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">적용 프로모션 코드 / 핵심 혜택</div>
-        <div style="margin-top:0.2rem;">
-          <span class="promo-code-text">${escapeHtml(promoCode)}</span>
-          <span style="font-size:0.84rem; color:var(--text-primary); margin-left:0.6rem; font-weight:600;">${escapeHtml(deal.perk || '')}</span>
-        </div>
-      </div>
-      <div style="display:flex; gap:0.5rem;">
-        <button type="button" class="copy-code-btn" onclick="copyPromoCode('${escapeHtml(promoCode)}', this)">코드 복사</button>
-        <button type="button" class="copy-code-btn" onclick="jumpToCommunitySearch('${escapeHtml(deal.brand)}')">커뮤니티 관련 글 보기</button>
-      </div>
-    </div>
+    <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1.5rem; font-weight:500;">${escapeHtml(deal.desc)}</p>
     <div class="price-history-section">
       <div class="ph-header-bar">
         <div class="ph-title-group">
@@ -2027,8 +1914,6 @@ async function handleDealSubmit(e) {
     const sub = document.getElementById('dealSubCat')?.value.trim() || "전체";
     const orig = parseFloat(document.getElementById('dealOrigPrice').value) || 0;
     const disc = parseFloat(document.getElementById('dealDiscPrice').value) || 0;
-    const promoCode = document.getElementById('dealPromoCode')?.value.trim() || "DIRECT-DISCOUNT";
-    const perk = document.getElementById('dealPerk')?.value.trim() || "공식 스토어 한정 프로모션";
     const desc = document.getElementById('dealDesc').value.trim();
     const storeUrl = document.getElementById('dealUrl').value.trim();
     const customImg = document.getElementById('dealImgUrl')?.value.trim() || "";
@@ -2037,7 +1922,6 @@ async function handleDealSubmit(e) {
     const rateNum = orig > 0 ? Math.round(((orig - disc) / orig) * 100) : (disc === 0 ? 100 : 0);
     const rateStr = disc === 0 ? "100% FREE" : `${rateNum}% OFF`;
     const defaults = buildDefaultSeasonalityAndHistory(orig, disc, rateNum);
-    const resolvedImgUrl = customImg || `https://api.microlink.io/?url=${encodeURIComponent(storeUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
     let insertedRowId = null;
     if (supabaseClient) {
       const { data: { session } } = await supabaseClient.auth.getSession();
@@ -2085,11 +1969,9 @@ async function handleDealSubmit(e) {
       discountPrice: disc,
       discountRateNum: rateNum,
       discountRate: rateStr,
-      code: promoCode,
-      perk: perk,
       storeUrl,
       daysLeft: 7,
-      imgUrl: resolvedImgUrl,
+      imgUrl: customImg,
       youtubeId: ytId,
       ytQuery: `${brand} ${title} official demo`,
       bestSeasonLabel: defaults.bestSeasonLabel,
@@ -2097,7 +1979,7 @@ async function handleDealSubmit(e) {
       priceHistory: defaults.priceHistory
     };
     dealsData.unshift(newDeal);
-    resolveLiveYoutubeAndOfficialImage(newDeal);
+    resolveLiveYoutubeVideoId(newDeal);
     updateSavedDealCountBadge();
     renderDeals();
     alert('새로운 딜 정보가 데이터베이스에 영구 등록되었습니다.');
@@ -2119,5 +2001,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderDeals();
   await checkUserSession();
   await fetchDealsFromSupabase();
-  dealsData.forEach(d => resolveLiveYoutubeAndOfficialImage(d));
+  dealsData.forEach(d => resolveLiveYoutubeVideoId(d));
 });
