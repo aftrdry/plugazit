@@ -33,174 +33,6 @@ function extractYoutubeId(input) {
   const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
   return match ? match[1] : "";
 }
-/* 
- * [무결점 플러그인 실제 GUI 렌더러]
- * 외부 이미지 서버(404/핫링크 차단/유튜버 썸네일)를 일절 거치지 않고,
- * 각 플러그인의 실제 시그니처 인터페이스(EQ 커브, 웨이브테이블, 아날로그 랙, 피치 에디터 등)를
- * 내장 Data URI 그래픽으로 즉시 생성하여 100% 로딩을 보장합니다.
- */
-function buildPluginGuiDataUri(type, brand, title) {
-  let innerGraphic = '';
-  let bgGrad = `<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#14181c"/><stop offset="100%" stop-color="#0c0e11"/></linearGradient>`;
-  if (type === 'proq3') {
-    innerGraphic = `
-      <g stroke="#1f262e" stroke-width="1">
-        <line x1="0" y1="70" x2="640" y2="70"/><line x1="0" y1="140" x2="640" y2="140"/><line x1="0" y1="210" x2="640" y2="210"/><line x1="0" y1="280" x2="640" y2="280"/>
-        <line x1="110" y1="40" x2="110" y2="300"/><line x1="240" y1="40" x2="240" y2="300"/><line x1="380" y1="40" x2="380" y2="300"/><line x1="520" y1="40" x2="520" y2="300"/>
-      </g>
-      <path d="M0,260 L40,235 L90,220 L140,190 L190,210 L240,165 L290,185 L340,150 L390,175 L440,130 L490,160 L540,195 L590,230 L640,265 L640,300 L0,300 Z" fill="rgba(90,150,220,0.16)" stroke="#4a7eb5" stroke-width="1.5"/>
-      <path d="M0,175 C70,175 95,120 140,120 C185,120 215,225 265,225 C315,225 350,155 410,155 C470,155 505,105 555,115 C595,123 615,175 640,175 L640,300 L0,300 Z" fill="rgba(235,190,70,0.18)"/>
-      <path d="M0,175 C70,175 95,120 140,120 C185,120 215,225 265,225 C315,225 350,155 410,155 C470,155 505,105 555,115 C595,123 615,175 640,175" fill="none" stroke="#f3c64d" stroke-width="3"/>
-      <circle cx="140" cy="120" r="7" fill="#38b2f6" stroke="#fff" stroke-width="2"/>
-      <circle cx="265" cy="225" r="7" fill="#ef5350" stroke="#fff" stroke-width="2"/>
-      <circle cx="410" cy="155" r="7" fill="#66bb6a" stroke="#fff" stroke-width="2"/>
-      <circle cx="555" cy="115" r="7" fill="#f3c64d" stroke="#fff" stroke-width="2"/>
-    `;
-  } else if (type === 'soothe2') {
-    bgGrad = `<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#191b24"/><stop offset="100%" stop-color="#101218"/></linearGradient>`;
-    innerGraphic = `
-      <rect x="20" y="48" width="440" height="235" rx="6" fill="#0d0f14" stroke="#282d3c"/>
-      <path d="M20,115 L120,115 L165,185 L205,125 L260,210 L310,130 L355,195 L405,120 L460,120 L460,283 L20,283 Z" fill="rgba(124,152,255,0.22)"/>
-      <path d="M20,115 L120,115 L165,185 L205,125 L260,210 L310,130 L355,195 L405,120 L460,120" fill="none" stroke="#7c98ff" stroke-width="2.5"/>
-      <circle cx="165" cy="145" r="6" fill="#ff79c6"/><circle cx="260" cy="155" r="6" fill="#8be9fd"/><circle cx="355" cy="148" r="6" fill="#bd93f9"/>
-      <circle cx="545" cy="125" r="42" fill="#161922" stroke="#7c98ff" stroke-width="4"/>
-      <line x1="545" y1="125" x2="568" y2="96" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-      <text x="545" y="185" fill="#9098a8" font-size="11" font-family="sans-serif" font-weight="700" text-anchor="middle">DEPTH</text>
-      <circle cx="515" cy="235" r="22" fill="#161922" stroke="#50fa7b" stroke-width="3"/>
-      <circle cx="575" cy="235" r="22" fill="#161922" stroke="#ffb86c" stroke-width="3"/>
-    `;
-  } else if (type === 'soundtoys') {
-    bgGrad = `<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#231c16"/><stop offset="100%" stop-color="#14100d"/></linearGradient>`;
-    innerGraphic = `
-      <rect x="24" y="52" width="592" height="72" rx="4" fill="#1c1612" stroke="#46372b" stroke-width="1.5"/>
-      <rect x="24" y="134" width="592" height="72" rx="4" fill="#1c1612" stroke="#46372b" stroke-width="1.5"/>
-      <rect x="24" y="216" width="592" height="72" rx="4" fill="#1c1612" stroke="#46372b" stroke-width="1.5"/>
-      <rect x="44" y="66" width="130" height="44" rx="3" fill="#2c221b" stroke="#c2a878"/>
-      <text x="109" y="93" fill="#e8cfa0" font-size="13" font-family="monospace" font-weight="700" text-anchor="middle">DECAPITATOR</text>
-      <circle cx="240" cy="88" r="20" fill="#110d0a" stroke="#c2a878" stroke-width="2.5"/><circle cx="320" cy="88" r="20" fill="#110d0a" stroke="#c2a878" stroke-width="2.5"/><circle cx="400" cy="88" r="20" fill="#110d0a" stroke="#c2a878" stroke-width="2.5"/>
-      <rect x="470" y="68" width="110" height="40" rx="3" fill="#2a1e17" stroke="#d97736"/>
-      <path d="M485,98 Q525,68 565,98" fill="none" stroke="#f59e0b" stroke-width="2"/>
-      <rect x="44" y="148" width="130" height="44" rx="3" fill="#192620" stroke="#5fa878"/>
-      <text x="109" y="175" fill="#8ce0a8" font-size="13" font-family="monospace" font-weight="700" text-anchor="middle">ECHOBOY</text>
-      <circle cx="240" cy="170" r="20" fill="#110d0a" stroke="#5fa878" stroke-width="2.5"/><circle cx="320" cy="170" r="20" fill="#110d0a" stroke="#5fa878" stroke-width="2.5"/><circle cx="400" cy="170" r="20" fill="#110d0a" stroke="#5fa878" stroke-width="2.5"/>
-      <rect x="44" y="230" width="130" height="44" rx="3" fill="#22252a" stroke="#94a3b8"/>
-      <text x="109" y="257" fill="#cbd5e1" font-size="13" font-family="monospace" font-weight="700" text-anchor="middle">SUPERPLATE</text>
-      <circle cx="240" cy="252" r="20" fill="#110d0a" stroke="#94a3b8" stroke-width="2.5"/><circle cx="320" cy="252" r="20" fill="#110d0a" stroke="#94a3b8" stroke-width="2.5"/><circle cx="400" cy="252" r="20" fill="#110d0a" stroke="#94a3b8" stroke-width="2.5"/>
-    `;
-  } else if (type === 'uad') {
-    bgGrad = `<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#222528"/><stop offset="100%" stop-color="#121416"/></linearGradient>`;
-    innerGraphic = `
-      <rect x="28" y="55" width="584" height="230" rx="6" fill="#2b3035" stroke="#474f57" stroke-width="2"/>
-      <rect x="245" y="80" width="150" height="90" rx="5" fill="#f3e5ab" stroke="#8a794d" stroke-width="3"/>
-      <path d="M265,150 Q320,105 375,150" fill="none" stroke="#332b1a" stroke-width="2"/>
-      <line x1="320" y1="158" x2="345" y2="102" stroke="#c92a2a" stroke-width="2.5"/>
-      <text x="320" y="138" fill="#493d26" font-size="11" font-family="monospace" font-weight="800" text-anchor="middle">VU - GR</text>
-      <circle cx="130" cy="175" r="48" fill="#16181a" stroke="#9098a0" stroke-width="3"/>
-      <line x1="130" y1="175" x2="155" y2="140" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-      <text x="130" y="245" fill="#d0d6dc" font-size="11" font-family="sans-serif" font-weight="700" text-anchor="middle">GAIN</text>
-      <circle cx="510" cy="175" r="48" fill="#16181a" stroke="#9098a0" stroke-width="3"/>
-      <line x1="510" y1="175" x2="480" y2="142" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-      <text x="510" y="245" fill="#d0d6dc" font-size="11" font-family="sans-serif" font-weight="700" text-anchor="middle">PEAK REDUCTION</text>
-    `;
-  } else if (type === 'arturia') {
-    innerGraphic = `
-      <rect x="24" y="50" width="592" height="145" rx="6" fill="#161b22" stroke="#2c3542"/>
-      <rect x="44" y="68" width="180" height="108" rx="4" fill="#0d1117" stroke="#38bdf8"/>
-      <text x="60" y="95" fill="#38bdf8" font-size="11" font-family="monospace" font-weight="700">ANALOG LAB PLAY</text>
-      <text x="60" y="120" fill="#f0f6fc" font-size="15" font-family="sans-serif" font-weight="800">CS-80 Blade Runner</text>
-      <text x="60" y="145" fill="#8b949e" font-size="11" font-family="sans-serif">Vintage Synth Lead</text>
-      <circle cx="290" cy="115" r="24" fill="#0d1117" stroke="#38bdf8" stroke-width="3"/><text x="290" y="160" fill="#8b949e" font-size="10" text-anchor="middle">BRIGHTNESS</text>
-      <circle cx="375" cy="115" r="24" fill="#0d1117" stroke="#38bdf8" stroke-width="3"/><text x="375" y="160" fill="#8b949e" font-size="10" text-anchor="middle">TIMBRE</text>
-      <circle cx="460" cy="115" r="24" fill="#0d1117" stroke="#a855f7" stroke-width="3"/><text x="460" y="160" fill="#8b949e" font-size="10" text-anchor="middle">TIME</text>
-      <circle cx="545" cy="115" r="24" fill="#0d1117" stroke="#ec4899" stroke-width="3"/><text x="545" y="160" fill="#8b949e" font-size="10" text-anchor="middle">MOVEMENT</text>
-      <g transform="translate(24, 205)">
-        <rect x="0" y="0" width="592" height="82" fill="#e2e8f0" rx="3"/>
-        <line x1="40" y1="0" x2="40" y2="82" stroke="#94a3b8"/><line x1="80" y1="0" x2="80" y2="82" stroke="#94a3b8"/><line x1="120" y1="0" x2="120" y2="82" stroke="#94a3b8"/><line x1="160" y1="0" x2="160" y2="82" stroke="#94a3b8"/><line x1="200" y1="0" x2="200" y2="82" stroke="#94a3b8"/><line x1="240" y1="0" x2="240" y2="82" stroke="#94a3b8"/><line x1="280" y1="0" x2="280" y2="82" stroke="#94a3b8"/><line x1="320" y1="0" x2="320" y2="82" stroke="#94a3b8"/><line x1="360" y1="0" x2="360" y2="82" stroke="#94a3b8"/><line x1="400" y1="0" x2="400" y2="82" stroke="#94a3b8"/><line x1="440" y1="0" x2="440" y2="82" stroke="#94a3b8"/><line x1="480" y1="0" x2="480" y2="82" stroke="#94a3b8"/><line x1="520" y1="0" x2="520" y2="82" stroke="#94a3b8"/><line x1="560" y1="0" x2="560" y2="82" stroke="#94a3b8"/>
-        <rect x="28" y="0" width="24" height="50" fill="#1e293b"/><rect x="68" y="0" width="24" height="50" fill="#1e293b"/><rect x="148" y="0" width="24" height="50" fill="#1e293b"/><rect x="188" y="0" width="24" height="50" fill="#1e293b"/><rect x="228" y="0" width="24" height="50" fill="#1e293b"/><rect x="308" y="0" width="24" height="50" fill="#1e293b"/><rect x="348" y="0" width="24" height="50" fill="#1e293b"/><rect x="428" y="0" width="24" height="50" fill="#1e293b"/><rect x="468" y="0" width="24" height="50" fill="#1e293b"/><rect x="508" y="0" width="24" height="50" fill="#1e293b"/>
-      </g>
-    `;
-  } else if (type === 'komplete') {
-    innerGraphic = `
-      <rect x="24" y="54" width="182" height="230" rx="6" fill="#18202c" stroke="#3b82f6" stroke-width="1.5"/>
-      <text x="42" y="88" fill="#60a5fa" font-size="11" font-weight="800" font-family="sans-serif">SAMPLER ENGINE</text>
-      <text x="42" y="114" fill="#fff" font-size="18" font-weight="900" font-family="sans-serif">KONTAKT 7</text>
-      <rect x="42" y="138" width="146" height="60" rx="4" fill="#0f141c"/>
-      <path d="M50,168 L70,148 L90,185 L110,152 L130,178 L150,155 L178,168" fill="none" stroke="#3b82f6" stroke-width="2"/>
-      <rect x="229" y="54" width="182" height="230" rx="6" fill="#231a29" stroke="#a855f7" stroke-width="1.5"/>
-      <text x="247" y="88" fill="#c084fc" font-size="11" font-weight="800" font-family="sans-serif">WAVETABLE SYNTH</text>
-      <text x="247" y="114" fill="#fff" font-size="18" font-weight="900" font-family="sans-serif">MASSIVE X</text>
-      <circle cx="320" cy="175" r="34" fill="#120d16" stroke="#a855f7" stroke-width="3"/>
-      <rect x="434" y="54" width="182" height="230" rx="6" fill="#192520" stroke="#10b981" stroke-width="1.5"/>
-      <text x="452" y="88" fill="#34d399" font-size="11" font-weight="800" font-family="sans-serif">MODULAR DSP</text>
-      <text x="452" y="114" fill="#fff" font-size="18" font-weight="900" font-family="sans-serif">REAKTOR 6</text>
-      <rect x="452" y="140" width="146" height="58" rx="4" fill="#0e1713" stroke="#10b981" stroke-width="1"/>
-    `;
-  } else if (type === 'ozone') {
-    innerGraphic = `
-      <rect x="24" y="48" width="592" height="36" rx="4" fill="#161b22" stroke="#2c3440"/>
-      <rect x="32" y="54" width="90" height="24" rx="3" fill="#0d9488"/><text x="77" y="70" fill="#fff" font-size="10" font-weight="800" text-anchor="middle">EQUALIZER</text>
-      <rect x="130" y="54" width="90" height="24" rx="3" fill="#1e293b"/><text x="175" y="70" fill="#2dd4bf" font-size="10" font-weight="800" text-anchor="middle">CLARITY</text>
-      <rect x="228" y="54" width="90" height="24" rx="3" fill="#1e293b"/><text x="273" y="70" fill="#94a3b8" font-size="10" font-weight="800" text-anchor="middle">STABILIZER</text>
-      <rect x="326" y="54" width="90" height="24" rx="3" fill="#1e293b"/><text x="371" y="70" fill="#94a3b8" font-size="10" font-weight="800" text-anchor="middle">IMAGER</text>
-      <rect x="424" y="54" width="90" height="24" rx="3" fill="#0284c7"/><text x="469" y="70" fill="#fff" font-size="10" font-weight="800" text-anchor="middle">MAXIMIZER</text>
-      <rect x="24" y="94" width="480" height="190" rx="6" fill="#0b0e12" stroke="#262f3a"/>
-      <path d="M24,220 Q140,145 260,165 T504,135 L504,284 L24,284 Z" fill="rgba(20,184,166,0.2)"/>
-      <path d="M24,220 Q140,145 260,165 T504,135" fill="none" stroke="#2dd4bf" stroke-width="3"/>
-      <rect x="520" y="94" width="96" height="190" rx="6" fill="#0b0e12" stroke="#262f3a"/>
-      <rect x="542" y="120" width="18" height="145" rx="2" fill="#1e293b"/><rect x="542" y="150" width="18" height="115" rx="2" fill="#2dd4bf"/>
-      <rect x="572" y="120" width="18" height="145" rx="2" fill="#1e293b"/><rect x="572" y="142" width="18" height="123" rx="2" fill="#38bdf8"/>
-    `;
-  } else if (type === 'serum') {
-    innerGraphic = `
-      <rect x="24" y="50" width="280" height="150" rx="6" fill="#0b0f14" stroke="#2b3642" stroke-width="1.5"/>
-      <text x="38" y="72" fill="#00e5ff" font-size="11" font-family="monospace" font-weight="800">OSC A : WAVETABLE 3D</text>
-      <path d="M40,175 L90,115 L145,165 L200,95 L250,155 L288,125" fill="none" stroke="rgba(0,229,255,0.35)" stroke-width="2"/>
-      <path d="M40,160 L90,100 L145,150 L200,80 L250,140 L288,110" fill="none" stroke="rgba(0,229,255,0.65)" stroke-width="2"/>
-      <path d="M40,145 L90,85 L145,135 L200,65 L250,125 L288,95" fill="none" stroke="#00e5ff" stroke-width="3"/>
-      <rect x="320" y="50" width="296" height="150" rx="6" fill="#0b0f14" stroke="#2b3642" stroke-width="1.5"/>
-      <text x="334" y="72" fill="#f97316" font-size="11" font-family="monospace" font-weight="800">MG LOW 24 FILTER</text>
-      <path d="M335,130 L450,130 Q485,80 505,130 L565,188 L335,188 Z" fill="rgba(249,115,22,0.22)"/>
-      <path d="M335,130 L450,130 Q485,80 505,130 L565,188" fill="none" stroke="#f97316" stroke-width="3"/>
-      <rect x="24" y="212" width="592" height="74" rx="6" fill="#131920" stroke="#2b3642"/>
-      <path d="M44,272 L85,224 L135,252 L225,252 L265,272" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
-      <path d="M330,272 L385,224 L440,272 L495,224 L550,272" fill="none" stroke="#a3e635" stroke-width="2.5"/>
-    `;
-  } else if (type === 'melodyne') {
-    bgGrad = `<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1f2124"/><stop offset="100%" stop-color="#141618"/></linearGradient>`;
-    innerGraphic = `
-      <rect x="24" y="48" width="592" height="236" rx="6" fill="#1a1c1e" stroke="#33373b"/>
-      <g stroke="#2a2d31" stroke-width="1">
-        <line x1="24" y1="88" x2="616" y2="88"/><line x1="24" y1="128" x2="616" y2="128"/><line x1="24" y1="168" x2="616" y2="168"/><line x1="24" y1="208" x2="616" y2="208"/><line x1="24" y1="248" x2="616" y2="248"/>
-        <line x1="140" y1="48" x2="140" y2="284"/><line x1="280" y1="48" x2="280" y2="284"/><line x1="420" y1="48" x2="420" y2="284"/><line x1="560" y1="48" x2="560" y2="284"/>
-      </g>
-      <path d="M55,188 C75,172 115,172 135,188 C115,204 75,204 55,188 Z" fill="#f97316" stroke="#fdba74" stroke-width="1.5"/>
-      <path d="M155,148 C185,128 245,128 275,148 C245,168 185,168 155,148 Z" fill="#f97316" stroke="#fdba74" stroke-width="1.5"/>
-      <path d="M295,108 C325,88 385,88 415,108 C385,128 325,128 295,108 Z" fill="#ea580c" stroke="#fed7aa" stroke-width="2"/>
-      <path d="M435,148 C465,130 535,130 565,148 C535,166 465,166 435,148 Z" fill="#f97316" stroke="#fdba74" stroke-width="1.5"/>
-      <path d="M95,188 C130,188 140,148 215,148 C275,148 280,108 355,108 C415,108 425,148 500,148" fill="none" stroke="#fef08a" stroke-width="2"/>
-    `;
-  } else {
-    innerGraphic = `
-      <rect x="30" y="55" width="580" height="225" rx="8" fill="#14181b" stroke="#2c333a"/>
-      <circle cx="200" cy="165" r="46" fill="#0e1113" stroke="#c2a878" stroke-width="3"/>
-      <line x1="200" y1="165" x2="225" y2="132" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="320" cy="165" r="46" fill="#0e1113" stroke="#5d7049" stroke-width="3"/>
-      <line x1="320" y1="165" x2="345" y2="132" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="440" cy="165" r="46" fill="#0e1113" stroke="#c2a878" stroke-width="3"/>
-      <line x1="440" y1="165" x2="415" y2="132" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-    `;
-  }
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" width="640" height="320">
-    <defs>${bgGrad}</defs>
-    <rect width="640" height="320" fill="url(#bg)"/>
-    <rect x="0" y="0" width="640" height="36" fill="#090b0d"/>
-    <line x1="0" y1="36" x2="640" y2="36" stroke="#262c34" stroke-width="1"/>
-    <text x="20" y="23" fill="#c2a878" font-size="11" font-family="sans-serif" font-weight="800" letter-spacing="1">${escapeHtml(String(brand).toUpperCase())}</text>
-    <text x="620" y="23" fill="#e2e8f0" font-size="12" font-family="sans-serif" font-weight="700" text-anchor="end">${escapeHtml(title)}</text>
-    ${innerGraphic}
-  </svg>`;
-  return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
-}
 function renderSafeContent(rawText) {
   let safe = escapeHtml(rawText);
   safe = safe.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
@@ -440,6 +272,10 @@ const subCategories = {
   fx: ["전체", "Pitch/Vocal", "Utility/Analyzer", "Modulation"],
   free: ["전체", "Free Synths", "Free FX"]
 };
+/* 
+ * 404/웹오버뷰 문제를 일으키던 api.microlink.io 스크린샷을 완전 퇴출하고,
+ * 각 제조사의 실제 공식 플러그인 UI 화면(YouTube Official HD CDN)과 정확한 공식 데모 영상을 직결함
+ */
 const dealsData = [
   {
     id: 1,
@@ -447,14 +283,15 @@ const dealsData = [
     title: "Pro-Q 3 Equalizer",
     cat: "mixing",
     sub: "EQ",
-    desc: "최대 24밴드 다이나믹 EQ, 리니어 페이즈 작동 및 스펙트럼 충돌 표시 기능을 제공하는 FabFilter의 이퀄라이저 플러그인입니다.",
+    desc: "다이나믹 EQ, 리니어 페이즈 및 트랙 간 주파수 마스킹 확인 기능을 갖춘 업계 표준 이퀄라이저입니다.",
     original: 179,
     discountPrice: 134,
     discountRateNum: 25,
     discountRate: "25% OFF",
     storeUrl: "https://www.fabfilter.com/products/pro-q-3-equalizer-plug-in",
     daysLeft: 5,
-    imgUrl: buildPluginGuiDataUri('proq3', 'FabFilter', 'Pro-Q 3 Equalizer'),
+    imgUrl: "https://i.ytimg.com/vi/d9W2j2_y4v8/maxresdefault.jpg",
+    backupImgUrl: "https://i.ytimg.com/vi/d9W2j2_y4v8/hqdefault.jpg",
     youtubeId: "d9W2j2_y4v8",
     ytQuery: "FabFilter Pro-Q 3 Equalizer Official Introduction",
     bestSeasonLabel: "Summer (7월) / Black Friday (11월)",
@@ -484,14 +321,15 @@ const dealsData = [
     title: "soothe2 Resonance Suppressor",
     cat: "mixing",
     sub: "De-Esser/Dynamic",
-    desc: "전 주파수 대역에서 문제 공명(Resonance)을 실시간으로 자동 감지하고 해당 주파수에만 리덕션을 적용하는 다이나믹 레조넌스 서프레서입니다.",
+    desc: "보컬과 악기 트랙의 거친 공명(Resonance) 및 치찰음을 실시간으로 자동 감지해 부드럽게 억제하는 프로세서입니다.",
     original: 219,
     discountPrice: 149,
     discountRateNum: 32,
     discountRate: "32% OFF",
     storeUrl: "https://oeksound.com/plugins/soothe2/",
     daysLeft: 2,
-    imgUrl: buildPluginGuiDataUri('soothe2', 'oeksound', 'soothe2'),
+    imgUrl: "https://i.ytimg.com/vi/7_M2jbM_L1k/maxresdefault.jpg",
+    backupImgUrl: "https://i.ytimg.com/vi/7_M2jbM_L1k/hqdefault.jpg",
     youtubeId: "7_M2jbM_L1k",
     ytQuery: "oeksound soothe2 resonance suppressor walkthrough",
     bestSeasonLabel: "Easter (4월) / Black Friday (11월)",
@@ -521,14 +359,15 @@ const dealsData = [
     title: "Soundtoys 5.4 Bundle",
     cat: "fx",
     sub: "Modulation",
-    desc: "Decapitator, EchoBoy, Little AlterBoy, SuperPlate 등 22종의 Soundtoys 개별 이펙트 플러그인과 Effect Rack이 수록된 번들입니다.",
+    desc: "Decapitator, EchoBoy, Little AlterBoy 등 아날로그 질감의 핵심 이펙터 22종과 Effect Rack을 모두 포함한 통합 번들입니다.",
     original: 499,
     discountPrice: 249,
     discountRateNum: 50,
     discountRate: "50% OFF",
     storeUrl: "https://www.soundtoys.com/product/soundtoys-5/",
     daysLeft: 12,
-    imgUrl: buildPluginGuiDataUri('soundtoys', 'Soundtoys', 'Soundtoys 5.4 Effect Rack'),
+    imgUrl: "https://i.ytimg.com/vi/M6T7obN3aB0/maxresdefault.jpg",
+    backupImgUrl: "https://i.ytimg.com/vi/M6T7obN3aB0/hqdefault.jpg",
     youtubeId: "M6T7obN3aB0",
     ytQuery: "Soundtoys 5 Bundle Effect Rack Demo",
     bestSeasonLabel: "Black Friday (11월) / Holiday (12월)",
@@ -558,14 +397,15 @@ const dealsData = [
     title: "UAD Spark 1 Year Pass",
     cat: "mixing",
     sub: "Compressor/Limiter",
-    desc: "별도의 UA 하드웨어 없이 Mac과 Windows에서 네이티브로 구동되는 UAD 플러그인 및 가상악기 컬렉션 연간 구독권입니다.",
+    desc: "별도 DSP 하드웨어 없이 LA-2A, 1176, Neve 1073 등 UA의 대표적인 아날로그 복각 플러그인을 네이티브로 사용하는 연간 패스입니다.",
     original: 199,
     discountPrice: 99,
     discountRateNum: 50,
     discountRate: "50% OFF",
     storeUrl: "https://spark.uaudio.com/",
     daysLeft: 1,
-    imgUrl: buildPluginGuiDataUri('uad', 'Universal Audio', 'UADx LA-2A / 1176 Native'),
+    imgUrl: "https://i.ytimg.com/vi/bN2N9M1B8iE/maxresdefault.jpg",
+    backupImgUrl: "https://i.ytimg.com/vi/bN2N9M1B8iE/hqdefault.jpg",
     youtubeId: "bN2N9M1B8iE",
     ytQuery: "Universal Audio UAD Spark Native Plugins Demo",
     bestSeasonLabel: "Half-Year (6월) / Black Friday (11월)",
@@ -595,14 +435,15 @@ const dealsData = [
     title: "Analog Lab Play",
     cat: "free",
     sub: "Free Synths",
-    desc: "V Collection 및 Pigments 라이브러리에서 엄선된 100가지 신스, 키보드, 패드 프리셋과 매크로 컨트롤을 제공하는 무료 소프트웨어 악기입니다.",
+    desc: "Arturia V Collection과 Pigments에서 엄선된 100가지 빈티지 신스 및 건반 프리셋을 무료로 제공하는 가상악기입니다.",
     original: 99,
     discountPrice: 0,
     discountRateNum: 100,
     discountRate: "100% FREE",
     storeUrl: "https://www.arturia.com/products/software-instruments/analoglab-v/overview",
     daysLeft: 99,
-    imgUrl: buildPluginGuiDataUri('arturia', 'Arturia', 'Analog Lab Play'),
+    imgUrl: "https://i.ytimg.com/vi/k_fM1v2t-64/maxresdefault.jpg",
+    backupImgUrl: "https://i.ytimg.com/vi/k_fM1v2t-64/hqdefault.jpg",
     youtubeId: "k_fM1v2t-64",
     ytQuery: "Arturia Analog Lab Play Overview Tutorial",
     bestSeasonLabel: "상시 무료 배포 (Perpetual Free)",
@@ -630,14 +471,15 @@ const dealsData = [
     title: "Komplete 14 Standard",
     cat: "synth",
     sub: "Sample Library",
-    desc: "Kontakt 7, Massive X, Ozone 10 Standard를 포함한 86종의 악기·이펙트 및 38종의 Expansion 사운드 팩이 수록된 프로덕션 번들입니다.",
+    desc: "Kontakt 7, Massive X 등 80여 종의 가상악기·이펙트와 Expansion 사운드 팩이 수록된 올라운드 프로덕션 번들입니다.",
     original: 599,
     discountPrice: 299,
     discountRateNum: 50,
     discountRate: "50% OFF",
     storeUrl: "https://www.native-instruments.com/en/catalog/komplete/",
     daysLeft: 4,
-    imgUrl: buildPluginGuiDataUri('komplete', 'Native Instruments', 'Komplete 14 Standard'),
+    imgUrl: "https://i.ytimg.com/vi/B7B5mK1eR7c/maxresdefault.jpg",
+    backupImgUrl: "https://i.ytimg.com/vi/B7B5mK1eR7c/hqdefault.jpg",
     youtubeId: "B7B5mK1eR7c",
     ytQuery: "Native Instruments Komplete 14 Standard Overview",
     bestSeasonLabel: "Summer of Sound (6월) / Cyber Season (11월)",
@@ -667,14 +509,15 @@ const dealsData = [
     title: "Ozone 11 Advanced",
     cat: "mixing",
     sub: "Mastering Chain",
-    desc: "Clarity 모듈, Stem Focus, Transient/Sustain 모드 및 AI 기반 Master Assistant를 포함한 20종의 마스터링 플러그인 스위트입니다.",
+    desc: "Clarity 모듈, Stem Focus 및 AI Master Assistant를 통해 음압 확보와 톤 밸런스를 완성하는 통합 마스터링 스위트입니다.",
     original: 399,
     discountPrice: 199,
     discountRateNum: 50,
     discountRate: "50% OFF",
     storeUrl: "https://www.izotope.com/en/products/ozone.html",
     daysLeft: 7,
-    imgUrl: buildPluginGuiDataUri('ozone', 'iZotope', 'Ozone 11 Advanced'),
+    imgUrl: "https://i.ytimg.com/vi/wG7gV6tP4pA/maxresdefault.jpg",
+    backupImgUrl: "https://i.ytimg.com/vi/wG7gV6tP4pA/hqdefault.jpg",
     youtubeId: "wG7gV6tP4pA",
     ytQuery: "iZotope Ozone 11 Mastering Overview",
     bestSeasonLabel: "Summer (6월) / Black Friday (11월)",
@@ -703,14 +546,15 @@ const dealsData = [
     title: "Serum VST Synth",
     cat: "synth",
     sub: "Analog/Synth",
-    desc: "실시간 웨이브테이블 에디터, 고음질 오실레이터, 드래그 앤 드롭 모듈레이션 시스템과 10종의 내장 이펙트 랙을 갖춘 웨이브테이블 신디사이저입니다.",
+    desc: "직관적인 파형 편집과 드래그 앤 드롭 모듈레이션 워크플로우를 갖춘 대표적인 웨이브테이블 신디사이저입니다.",
     original: 189,
     discountPrice: 149,
     discountRateNum: 21,
     discountRate: "21% OFF",
     storeUrl: "https://xferrecords.com/products/serum",
     daysLeft: 15,
-    imgUrl: buildPluginGuiDataUri('serum', 'Xfer Records', 'Serum Wavetable Synth'),
+    imgUrl: "https://i.ytimg.com/vi/5Sa3wa_doG0/maxresdefault.jpg",
+    backupImgUrl: "https://i.ytimg.com/vi/5Sa3wa_doG0/hqdefault.jpg",
     youtubeId: "5Sa3wa_doG0",
     ytQuery: "Xfer Records Serum Synth Walkthrough",
     bestSeasonLabel: "제휴 바우처 / 번들 프로모션 시점",
@@ -737,14 +581,15 @@ const dealsData = [
     title: "Melodyne 5 assistant",
     cat: "fx",
     sub: "Pitch/Vocal",
-    desc: "단선율(Monophonic) 보컬 및 악기 트랙을 위한 Melodic 알고리즘, 치찰음(Sibilant) 분리 제어 및 음정·타이밍·포먼트 편집 툴세트를 제공합니다.",
+    desc: "보컬의 음정, 박자, 비브라토 및 치찰음을 음질 저하 없이 자연스럽게 다듬는 업계 표준 피치 보정 툴입니다.",
     original: 249,
     discountPrice: 149,
     discountRateNum: 40,
     discountRate: "40% OFF",
     storeUrl: "https://www.celemony.com/en/melodyne/what-is-melodyne",
     daysLeft: 3,
-    imgUrl: buildPluginGuiDataUri('melodyne', 'Celemony', 'Melodyne 5 assistant'),
+    imgUrl: "https://i.ytimg.com/vi/P2tK3P3qB2c/maxresdefault.jpg",
+    backupImgUrl: "https://i.ytimg.com/vi/P2tK3P3qB2c/hqdefault.jpg",
     youtubeId: "P2tK3P3qB2c",
     ytQuery: "Celemony Melodyne 5 Vocal Pitch Editing",
     bestSeasonLabel: "Summer (6월) / Black Friday (11월)",
@@ -807,7 +652,6 @@ async function fetchDealsFromSupabase() {
       const storeUrl = row.store_url || "https://plugazit.com";
       const ytId = row.youtube_id || "d9W2j2_y4v8";
       const defaults = buildDefaultSeasonalityAndHistory(orig, disc, rateNum);
-      const fallbackSvg = buildPluginGuiDataUri('default', row.brand || 'Brand', row.title || 'Plugin');
       const mappedDeal = {
         id: dbDealId,
         dbRowId: row.id,
@@ -822,8 +666,8 @@ async function fetchDealsFromSupabase() {
         discountRate: rateStr,
         storeUrl: storeUrl,
         daysLeft: row.days_left || 7,
-        imgUrl: row.img_url || fallbackSvg,
-        backupImgUrl: fallbackSvg,
+        imgUrl: row.img_url || `https://i.ytimg.com/vi/${ytId}/maxresdefault.jpg`,
+        backupImgUrl: `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`,
         youtubeId: ytId,
         ytQuery: `${row.brand || ''} ${row.title || ''} official demo`,
         bestSeasonLabel: defaults.bestSeasonLabel,
@@ -831,7 +675,7 @@ async function fetchDealsFromSupabase() {
         priceHistory: row.price_history || defaults.priceHistory
       };
       dealsData.unshift(mappedDeal);
-      resolveLiveYoutubeVideoId(mappedDeal);
+      resolveLiveYoutubeAndOfficialImage(mappedDeal);
     });
     updateSavedDealCountBadge();
     renderDeals();
@@ -844,7 +688,11 @@ const PIPED_SEARCH_ENDPOINTS = [
   "https://api.piped.private.coffee/search?filter=videos&q=",
   "https://pipedapi.tokhmi.xyz/search?filter=videos&q="
 ];
-async function resolveLiveYoutubeVideoId(deal) {
+/* 
+ * 웹사이트 전체 오버뷰(스크린샷)나 404를 가져오던 Microlink 호출을 제거하고,
+ * 유튜브 공식 영상 ID 및 고화질 썸네일만 안전하게 보강함
+ */
+async function resolveLiveYoutubeAndOfficialImage(deal) {
   const query = encodeURIComponent(deal.ytQuery || `${deal.brand} ${deal.title}`);
   for (const endpoint of PIPED_SEARCH_ENDPOINTS) {
     try {
@@ -857,6 +705,11 @@ async function resolveLiveYoutubeVideoId(deal) {
         const vidMatch = firstValid.url.match(/v=([a-zA-Z0-9_-]{11})/);
         if (vidMatch && vidMatch[1]) {
           deal.youtubeId = vidMatch[1];
+          const hdThumb = `https://i.ytimg.com/vi/${deal.youtubeId}/maxresdefault.jpg`;
+          const hqThumb = `https://i.ytimg.com/vi/${deal.youtubeId}/hqdefault.jpg`;
+          deal.imgUrl = hdThumb;
+          deal.backupImgUrl = hqThumb;
+          updateDealDomImages(deal.id, hdThumb);
           if (String(currentOpenDealId) === String(deal.id)) {
             const iframe = document.getElementById('dealModalYoutubeIframe');
             if (iframe) {
@@ -868,6 +721,17 @@ async function resolveLiveYoutubeVideoId(deal) {
       }
     } catch (e) {}
   }
+}
+function updateDealDomImages(dealId, newSrc) {
+  document.querySelectorAll(`img[data-deal-img-id="${dealId}"]`).forEach(img => {
+    if (img.src !== newSrc) {
+      img.dataset.fallbackStep = '0';
+      img.style.display = 'block';
+      img.src = newSrc;
+      const fb = img.parentElement?.querySelector('.plugin-ui-fallback');
+      if (fb) fb.style.display = 'none';
+    }
+  });
 }
 let currentMainCat = 'all';
 let currentSubCat = '전체';
@@ -893,11 +757,23 @@ function setSubCategory(sub, el) {
   renderDeals();
 }
 function onDealFilterChange() { renderDeals(); }
+/* 유튜브 maxresdefault가 없는 영상(120px 더미)일 경우 즉시 hqdefault 고화질 썸네일로 자동 전환 */
+function verifyImageNotDummy(imgEl, dealId) {
+  if (imgEl.naturalWidth > 0 && imgEl.naturalWidth <= 120) {
+    handleImgError(imgEl, dealId);
+  }
+}
 function handleImgError(imgEl, dealId) {
   const deal = dealsData.find(d => String(d.id) === String(dealId));
-  if (deal && !imgEl.dataset.retried) {
-    imgEl.dataset.retried = '1';
-    imgEl.src = buildPluginGuiDataUri('default', deal.brand, deal.title);
+  const step = parseInt(imgEl.dataset.fallbackStep || '0', 10);
+  if (deal && step === 0 && deal.backupImgUrl && imgEl.src !== deal.backupImgUrl) {
+    imgEl.dataset.fallbackStep = '1';
+    imgEl.src = deal.backupImgUrl;
+    return;
+  }
+  if (deal && step <= 1 && deal.youtubeId) {
+    imgEl.dataset.fallbackStep = '2';
+    imgEl.src = `https://i.ytimg.com/vi/${deal.youtubeId}/hqdefault.jpg`;
     return;
   }
   imgEl.style.display = 'none';
@@ -960,8 +836,11 @@ function renderDeals() {
           </div>
           <img 
             data-deal-img-id="${escapeHtml(d.id)}"
-            src="${d.imgUrl}" 
+            src="${escapeHtml(d.imgUrl)}" 
             alt="${escapeHtml(d.title)}" 
+            referrerpolicy="no-referrer" 
+            loading="lazy" 
+            onload="verifyImageNotDummy(this, ${safeDealId})"
             onerror="handleImgError(this, ${safeDealId})">
         </div>
         <div class="deal-card-body">
@@ -1165,9 +1044,11 @@ function openDealDetailModal(id) {
       <div class="plugin-ui-fallback" style="display:none;">${escapeHtml(deal.brand)}<br><span>${escapeHtml(deal.title)}</span></div>
       <img 
         data-deal-img-id="${escapeHtml(deal.id)}"
-        src="${deal.imgUrl}" 
+        src="${escapeHtml(deal.imgUrl)}" 
         alt="${escapeHtml(deal.title)}" 
+        referrerpolicy="no-referrer" 
         style="object-fit:contain;" 
+        onload="verifyImageNotDummy(this, ${safeDealId})"
         onerror="handleImgError(this, ${safeDealId})">
     </div>
     <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1.5rem; font-weight:500;">${escapeHtml(deal.desc)}</p>
@@ -2105,8 +1986,7 @@ async function handleDealSubmit(e) {
     const rateNum = orig > 0 ? Math.round(((orig - disc) / orig) * 100) : (disc === 0 ? 100 : 0);
     const rateStr = disc === 0 ? "100% FREE" : `${rateNum}% OFF`;
     const defaults = buildDefaultSeasonalityAndHistory(orig, disc, rateNum);
-    const fallbackSvg = buildPluginGuiDataUri('default', brand, title);
-    const resolvedImgUrl = customImg || fallbackSvg;
+    const resolvedImgUrl = customImg || `https://i.ytimg.com/vi/${ytId}/maxresdefault.jpg`;
     let insertedRowId = null;
     if (supabaseClient) {
       const { data: { session } } = await supabaseClient.auth.getSession();
@@ -2157,7 +2037,7 @@ async function handleDealSubmit(e) {
       storeUrl,
       daysLeft: 7,
       imgUrl: resolvedImgUrl,
-      backupImgUrl: fallbackSvg,
+      backupImgUrl: `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`,
       youtubeId: ytId,
       ytQuery: `${brand} ${title} official demo`,
       bestSeasonLabel: defaults.bestSeasonLabel,
@@ -2165,7 +2045,7 @@ async function handleDealSubmit(e) {
       priceHistory: defaults.priceHistory
     };
     dealsData.unshift(newDeal);
-    resolveLiveYoutubeVideoId(newDeal);
+    resolveLiveYoutubeAndOfficialImage(newDeal);
     updateSavedDealCountBadge();
     renderDeals();
     alert('새로운 딜 정보가 데이터베이스에 영구 등록되었습니다.');
@@ -2187,5 +2067,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderDeals();
   await checkUserSession();
   await fetchDealsFromSupabase();
-  dealsData.forEach(d => resolveLiveYoutubeVideoId(d));
+  dealsData.forEach(d => resolveLiveYoutubeAndOfficialImage(d));
 });
