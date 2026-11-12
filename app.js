@@ -4,9 +4,12 @@ let supabaseClient = null;
 
 const ADMIN_EMAILS = ["aftrdry@outlook.kr", "aftrdry@outlook.com", "sharpmson774@gmail.com"];
 let currentUser = null;
+let currentUserDaw = "Logic Pro";
 let rawCommunityPosts = [];
 let dealViewMode = 'card';
 let currentOpenDealId = null;
+let currentOpenPostId = null;
+let editingPostId = null;
 
 let originalNickname = "";
 let isNicknameVerified = true;
@@ -15,7 +18,7 @@ if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
-/* 1. 보안 유틸리티: 채팅창 복사 시 따옴표/엔티티가 절대 깨지지 않는 브라우저 내장 DOM 이스케이프 방식 */
+/* 1. 보안 유틸리티: 브라우저 내장 DOM 이스케이프 방식 */
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
   const div = document.createElement('div');
@@ -30,11 +33,38 @@ function sanitizeUrl(url) {
   return '#';
 }
 
+function extractYoutubeId(input) {
+  if (!input) return "";
+  const trimmed = input.trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+  const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : "";
+}
+
+/* [밑줄] 버그 패치 + 유튜브/사운드클라우드/오디오 파일 인라인 플레이어 변환 렌더러 */
 function renderSafeContent(rawText) {
   let safe = escapeHtml(rawText);
+
   safe = safe.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  safe = safe.replace(/\[밑줄\]([\s\S]+?)\[\/밑줄\]/g, '<u>$1</u>');
+
   safe = safe.replace(/!\[이미지첨부\]\((https?:\/\/[^\s)]+)\)/g, '<img src="$1" alt="첨부 이미지" referrerpolicy="no-referrer" style="max-width:100%; border-radius:8px; margin:0.8rem 0; display:block;">');
-  safe = safe.replace(/\[(링크|동영상링크)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:var(--accent-gold); text-decoration:underline; font-weight:700;">[$1 열기]</a>');
+
+  safe = safe.replace(/\[(동영상링크|오디오링크|링크)\]\((https?:\/\/[^\s)]+)\)/g, function(match, label, url) {
+    const ytId = extractYoutubeId(url);
+    if (ytId) {
+      return `<div class="youtube-video-container" style="margin:1rem 0;"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+    }
+    if (/soundcloud\.com\//i.test(url)) {
+      const scUrl = encodeURIComponent(url);
+      return `<div class="inline-media-box"><iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=${scUrl}&color=%23c2a878&auto_play=false&show_comments=true"></iframe></div>`;
+    }
+    if (/\.(mp3|wav|ogg|flac|m4a)(\?.*)?$/i.test(url)) {
+      return `<div class="inline-media-box"><div style="font-size:0.78rem; color:var(--accent-gold); font-weight:700;">오디오 트랙 미리듣기</div><audio controls preload="metadata" src="${url}"></audio></div>`;
+    }
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-gold); text-decoration:underline; font-weight:700;">[${label} 열기: ${url}]</a>`;
+  });
+
   return safe;
 }
 
@@ -59,9 +89,12 @@ async function withSubmitLock(lockKey, btnEl, asyncFn) {
   }
 }
 
-/* 3. 로컬 영구 삭제 레지스트리 */
+/* 3. 로컬 스토리지 상태 관리 (삭제 레지스트리, 관심 딜 북마크, 게시글 추천/조회수/댓글 하이브리드 동기화) */
 const DELETED_POSTS_STORAGE_KEY = 'plugazit_deleted_post_ids_v1';
 const DELETED_DEALS_STORAGE_KEY = 'plugazit_deleted_deal_ids_v1';
+const SAVED_DEALS_STORAGE_KEY = 'plugazit_saved_deal_ids_v1';
+const POST_META_STORAGE_KEY = 'plugazit_post_meta_v1';
+const LOCAL_COMMENTS_STORAGE_KEY = 'plugazit_local_comments_v1';
 
 function getDeletedIds(storageKey) {
   try {
@@ -79,6 +112,74 @@ function markIdAsDeleted(storageKey, id) {
       list.push(strId);
       localStorage.setItem(storageKey, JSON.stringify(list));
     }
+  } catch (e) {}
+}
+
+function getSavedDealIds() {
+  return getDeletedIds(SAVED_DEALS_STORAGE_KEY);
+}
+function toggleSaveDeal(dealId, event) {
+  if (event) event.stopPropagation();
+  try {
+    const list = getSavedDealIds();
+    const strId = String(dealId);
+    const idx = list.indexOf(strId);
+    if (idx >= 0) {
+      list.splice(idx, 1);
+    } else {
+      list.push(strId);
+    }
+    localStorage.setItem(SAVED_DEALS_STORAGE_KEY, JSON.stringify(list));
+    updateSavedDealCountBadge();
+    renderDeals();
+  } catch (e) {}
+}
+function updateSavedDealCountBadge() {
+  const el = document.getElementById('savedDealCount');
+  if (!el) return;
+  const deletedDealIds = getDeletedIds(DELETED_DEALS_STORAGE_KEY);
+  const validSaved = getSavedDealIds().filter(id => !deletedDealIds.includes(String(id)) && dealsData.some(d => String(d.id) === String(id)));
+  el.innerText = validSaved.length;
+}
+
+function getPostMetaMap() {
+  try {
+    const raw = localStorage.getItem(POST_META_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+function savePostMetaMap(map) {
+  try {
+    localStorage.setItem(POST_META_STORAGE_KEY, JSON.stringify(map));
+  } catch (e) {}
+}
+function getPostStats(post) {
+  const map = getPostMetaMap();
+  const meta = map[String(post.id)] || {};
+  const views = (Number(post.views) || 0) + (Number(meta.extraViews) || 0);
+  const likes = (Number(post.likes_count) || 0) + (Number(meta.extraLikes) || 0);
+  const voted = Boolean(meta.voted);
+  const daw = post.author_daw || meta.daw || '';
+  const pluginTag = post.plugin_tag || meta.pluginTag || '';
+  const editedTitle = meta.editedTitle;
+  const editedContent = meta.editedContent;
+  const editedCategory = meta.editedCategory;
+  return { views, likes, voted, daw, pluginTag, editedTitle, editedContent, editedCategory };
+}
+
+function getLocalCommentsMap() {
+  try {
+    const raw = localStorage.getItem(LOCAL_COMMENTS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+function saveLocalCommentsMap(map) {
+  try {
+    localStorage.setItem(LOCAL_COMMENTS_STORAGE_KEY, JSON.stringify(map));
   } catch (e) {}
 }
 
@@ -136,7 +237,7 @@ function showPage(page) {
   document.getElementById('postDetailView').style.display = page === 'postDetail' ? 'block' : 'none';
 
   document.getElementById('navDealsBtn').classList.toggle('active', page === 'deals');
-  document.getElementById('navCommBtn').classList.toggle('active', page === 'community');
+  document.getElementById('navCommBtn').classList.toggle('active', page === 'community' || page === 'postWrite' || page === 'postDetail');
   const adminBtn = document.getElementById('navAdminBtn');
   if (adminBtn) adminBtn.classList.toggle('active', page === 'admin');
 
@@ -201,6 +302,7 @@ function setDealViewMode(mode) {
 const USD_TO_KRW = 1380;
 const subCategories = {
   all: ["전체 보기"],
+  saved: ["전체 보기"],
   mixing: ["전체", "EQ", "Compressor/Limiter", "Reverb/Delay", "De-Esser/Dynamic", "Saturation/Tape", "Mastering Chain"],
   synth: ["전체", "Analog/Synth", "Sample Library", "Cinematic/Orchestral", "Drum/Percussion"],
   fx: ["전체", "Pitch/Vocal", "Utility/Analyzer", "Modulation"],
@@ -610,6 +712,8 @@ async function fetchDealsFromSupabase() {
         discountPrice: disc,
         discountRateNum: rateNum,
         discountRate: rateStr,
+        code: row.promo_code || "DIRECT-DISCOUNT",
+        perk: row.perk || "공식 스토어 프로모션 할인가 적용",
         storeUrl: storeUrl,
         daysLeft: row.days_left || 7,
         imgUrl: row.img_url || `https://api.microlink.io/?url=${encodeURIComponent(storeUrl)}&screenshot=true&meta=false&embed=screenshot.url`,
@@ -624,6 +728,7 @@ async function fetchDealsFromSupabase() {
       resolveLiveYoutubeAndOfficialImage(mappedDeal);
     });
 
+    updateSavedDealCountBadge();
     renderDeals();
   } catch (err) {
     console.error(err);
@@ -696,7 +801,7 @@ let currentMainCat = 'all';
 let currentSubCat = '전체';
 
 function setMainCategory(cat, el) {
-  document.querySelectorAll('.main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#dealsView .main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
   if (el) el.classList.add('active');
   currentMainCat = cat;
   currentSubCat = '전체';
@@ -753,12 +858,18 @@ function renderDeals() {
   const searchKeyword = document.getElementById('dealSearchKeyword').value.trim().toLowerCase();
   const sortOption = document.getElementById('dealSortOption').value;
   const deletedDealIds = getDeletedIds(DELETED_DEALS_STORAGE_KEY);
+  const savedDealIds = getSavedDealIds();
 
   let filtered = dealsData.filter(d => !deletedDealIds.includes(String(d.id)));
 
   if (currentMainCat !== 'all') {
-    if (currentMainCat === 'free') { filtered = filtered.filter(d => d.discountPrice === 0); }
-    else { filtered = filtered.filter(d => d.cat === currentMainCat); }
+    if (currentMainCat === 'free') {
+      filtered = filtered.filter(d => d.discountPrice === 0);
+    } else if (currentMainCat === 'saved') {
+      filtered = filtered.filter(d => savedDealIds.includes(String(d.id)));
+    } else {
+      filtered = filtered.filter(d => d.cat === currentMainCat);
+    }
   }
 
   if (currentSubCat !== '전체' && currentSubCat !== '전체 보기') {
@@ -779,7 +890,10 @@ function renderDeals() {
   else if (sortOption === 'endingSoon') { filtered.sort((a, b) => a.daysLeft - b.daysLeft); }
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">검색 조건에 해당되는 VST 딜 정보가 없습니다.</div>`;
+    const emptyMsg = currentMainCat === 'saved'
+      ? '관심 딜로 저장한 플러그인이 없습니다. 각 카드 우측 상단의 [관심 등록] 버튼을 눌러 추가해 보세요.'
+      : '검색 조건에 해당되는 VST 딜 정보가 없습니다.';
+    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">${emptyMsg}</div>`;
     return;
   }
 
@@ -789,9 +903,14 @@ function renderDeals() {
     const tagClass = d.discountPrice === 0 ? 'tag-free' : 'tag-discount';
     const safeDealId = typeof d.id === 'string' ? `'${d.id}'` : d.id;
     const safeStoreUrl = sanitizeUrl(d.storeUrl);
+    const isSaved = savedDealIds.includes(String(d.id));
+    const daysText = d.daysLeft >= 90 ? '상시 진행' : `마감 ${d.daysLeft}일 전`;
 
     return `
       <div class="deal-card" onclick="openDealDetailModal(${safeDealId})">
+        <button type="button" class="bookmark-toggle-btn ${isSaved ? 'saved' : ''}" onclick="toggleSaveDeal(${safeDealId}, event)">
+          ${isSaved ? '관심 저장됨' : '+ 관심 등록'}
+        </button>
         <div class="plugin-img-wrapper">
           <div class="plugin-ui-fallback" style="display:none;">
             ${escapeHtml(d.brand)}
@@ -813,8 +932,12 @@ function renderDeals() {
               <span class="tag-badge ${tagClass}">${escapeHtml(d.discountRate)}</span>
             </div>
             <div class="deal-title">${escapeHtml(d.title)}</div>
-            <div class="sub-cat-tag"># ${escapeHtml(d.sub)}</div>
+            <div class="sub-cat-tag">
+              <span># ${escapeHtml(d.sub)}</span>
+              <span class="days-left-label">${escapeHtml(daysText)}</span>
+            </div>
             <div class="description-text">${escapeHtml(d.desc)}</div>
+            ${d.perk ? `<div class="perk-line-badge">${escapeHtml(d.perk)}</div>` : ''}
           </div>
           <div>
             <div class="price-box">
@@ -828,6 +951,27 @@ function renderDeals() {
       </div>
     `;
   }).join('');
+}
+
+function copyPromoCode(codeStr, btnEl) {
+  if (!codeStr) return;
+  navigator.clipboard?.writeText(codeStr);
+  if (btnEl) {
+    const prev = btnEl.innerText;
+    btnEl.innerText = '복사 완료';
+    setTimeout(() => { btnEl.innerText = prev; }, 1500);
+  }
+}
+
+/* 상세 모달에서 해당 플러그인 관련 커뮤니티 리뷰/질문 바로 검색 연동 */
+function jumpToCommunitySearch(pluginTitle) {
+  closeModal('dealDetailModal');
+  showPage('community');
+  const searchInput = document.getElementById('commSearchKeyword');
+  if (searchInput) {
+    searchInput.value = pluginTitle;
+    renderCommunityPosts();
+  }
 }
 
 function buildPriceChartSvg(deal, rangeMode = 'all') {
@@ -976,6 +1120,7 @@ function openDealDetailModal(id) {
   const validVideoId = (deal.youtubeId && deal.youtubeId.length === 11) ? deal.youtubeId : "5Sa3wa_doG0";
   const safeDealId = typeof deal.id === 'string' ? `'${deal.id}'` : deal.id;
   const safeStoreUrl = sanitizeUrl(deal.storeUrl);
+  const promoCode = deal.code || "DIRECT-DISCOUNT";
 
   const historyArr = deal.priceHistory || [{ date: "2026.11", season: "Current Deal", price: deal.discountPrice }];
   const allPrices = historyArr.map(h => h.price);
@@ -1042,7 +1187,21 @@ function openDealDetailModal(id) {
         onerror="handleImgError(this, ${safeDealId})">
     </div>
 
-    <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1.5rem; font-weight:500;">${escapeHtml(deal.desc)}</p>
+    <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1rem; font-weight:500;">${escapeHtml(deal.desc)}</p>
+
+    <div class="promo-code-bar">
+      <div>
+        <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">적용 프로모션 코드 / 핵심 혜택</div>
+        <div style="margin-top:0.2rem;">
+          <span class="promo-code-text">${escapeHtml(promoCode)}</span>
+          <span style="font-size:0.84rem; color:var(--text-primary); margin-left:0.6rem; font-weight:600;">${escapeHtml(deal.perk || '')}</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:0.5rem;">
+        <button type="button" class="copy-code-btn" onclick="copyPromoCode('${escapeHtml(promoCode)}', this)">코드 복사</button>
+        <button type="button" class="copy-code-btn" onclick="jumpToCommunitySearch('${escapeHtml(deal.brand)}')">커뮤니티 관련 글 보기</button>
+      </div>
+    </div>
 
     <div class="price-history-section">
       <div class="ph-header-bar">
@@ -1149,6 +1308,7 @@ async function deleteDealItem(dealId) {
   }
 
   closeModal('dealDetailModal');
+  updateSavedDealCountBadge();
   renderDeals();
   alert('해당 딜이 삭제되었습니다.');
 }
@@ -1159,7 +1319,9 @@ function filterCategory(cat) {
   }
 }
 
+/* 4. 커뮤니티 모듈 고도화: 카테고리, 검색, 정렬, 추천(Upvote), 조회수, 수정(Edit), 실시간 댓글 */
 let currentCommCat = 'all';
+let postCommentsCache = {};
 
 function setCommunityCategory(cat, el) {
   document.querySelectorAll('#communityView .main-cat-bar .cat-chip').forEach(c => c.classList.remove('active'));
@@ -1168,15 +1330,53 @@ function setCommunityCategory(cat, el) {
   renderCommunityPosts();
 }
 
+function getCommentCountForPost(postId) {
+  const strId = String(postId);
+  const dbComments = postCommentsCache[strId] || [];
+  const localMap = getLocalCommentsMap();
+  const localComments = localMap[strId] || [];
+  const combinedIds = new Set();
+  let count = 0;
+  dbComments.concat(localComments).forEach(c => {
+    const key = String(c.id || c.created_at);
+    if (!combinedIds.has(key)) {
+      combinedIds.add(key);
+      count++;
+    }
+  });
+  return count;
+}
+
+async function fetchAllCommentsSummary() {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient
+      .from('comments')
+      .select('*')
+      .order('created_at', { ascending: true });
+    if (!error && data) {
+      const grouped = {};
+      data.forEach(c => {
+        const pid = String(c.post_id);
+        if (!grouped[pid]) grouped[pid] = [];
+        grouped[pid].push(c);
+      });
+      postCommentsCache = grouped;
+    }
+  } catch (e) {}
+}
+
 async function fetchCommunityPosts() {
   const listEl = document.getElementById('communityList');
   const deletedIds = getDeletedIds(DELETED_POSTS_STORAGE_KEY);
 
+  await fetchAllCommentsSummary();
+
   if (!supabaseClient) {
     if (rawCommunityPosts.length === 0) {
       rawCommunityPosts = [
-        { id: 1, category: "공지사항", author_nickname: "@aftrdry", title: "PlugAzit 공식 아지트 개설 안내", content: "프로듀서들을 위한 큐레이션 및 커뮤니티 공간에 오신 것을 환영합니다.", created_at: new Date().toISOString() },
-        { id: 2, category: "믹싱/마스터링", author_nickname: "@aftrdry", title: "FabFilter Pro-Q 3 Dynamic EQ 보컬 마스킹 잡는 팁", content: "Sidechain 연동 후 250Hz 영역 Dynamic EQ 적용하면 투명하게 정리됩니다.", created_at: new Date().toISOString() }
+        { id: 1, category: "공지사항", author_nickname: "@aftrdry", author_daw: "Logic Pro", plugin_tag: "PlugAzit", title: "PlugAzit 공식 아지트 개설 및 커뮤니티 이용 안내", content: "프로듀서들을 위한 VST 딜 큐레이션 및 사운드 커뮤니티 공간에 오신 것을 환영합니다.", views: 42, likes_count: 12, created_at: new Date().toISOString() },
+        { id: 2, category: "믹싱/마스터링", author_nickname: "@aftrdry", author_daw: "Ableton Live", plugin_tag: "Pro-Q 3", title: "FabFilter Pro-Q 3 Dynamic EQ로 보컬-악기 마스킹 잡는 실전 팁", content: "보컬 핵심 대역인 2.5kHz와 중저역 250Hz 영역에 Sidechain 연동 후 Dynamic EQ를 걸어주면 보컬이 선명하게 앞으로 나옵니다.", views: 28, likes_count: 9, created_at: new Date().toISOString() }
       ];
     }
     rawCommunityPosts = rawCommunityPosts.filter(p => !deletedIds.includes(String(p.id)));
@@ -1198,56 +1398,128 @@ async function fetchCommunityPosts() {
 function renderCommunityPosts() {
   const listEl = document.getElementById('communityList');
   const keyword = document.getElementById('commSearchKeyword').value.trim().toLowerCase();
+  const sortBy = document.getElementById('commSortOption')?.value || 'latest';
   const deletedIds = getDeletedIds(DELETED_POSTS_STORAGE_KEY);
 
-  let filtered = rawCommunityPosts.filter(p => !deletedIds.includes(String(p.id)));
-  if (currentCommCat !== 'all') { filtered = filtered.filter(p => p.category === currentCommCat); }
+  let enriched = rawCommunityPosts
+    .filter(p => !deletedIds.includes(String(p.id)))
+    .map(p => {
+      const stats = getPostStats(p);
+      const commentCount = getCommentCountForPost(p.id);
+      return {
+        ...p,
+        title: stats.editedTitle || p.title,
+        content: stats.editedContent || p.content,
+        category: stats.editedCategory || p.category,
+        _views: stats.views,
+        _likes: stats.likes,
+        _daw: stats.daw,
+        _pluginTag: stats.pluginTag,
+        _comments: commentCount
+      };
+    });
+
+  if (currentCommCat !== 'all') {
+    enriched = enriched.filter(p => p.category === currentCommCat);
+  }
+
   if (keyword !== '') {
-    filtered = filtered.filter(p => 
+    enriched = enriched.filter(p => 
       (p.title && p.title.toLowerCase().includes(keyword)) ||
       (p.content && p.content.toLowerCase().includes(keyword)) ||
-      (p.author_nickname && p.author_nickname.toLowerCase().includes(keyword))
+      (p.author_nickname && p.author_nickname.toLowerCase().includes(keyword)) ||
+      (p._daw && p._daw.toLowerCase().includes(keyword)) ||
+      (p._pluginTag && p._pluginTag.toLowerCase().includes(keyword))
     );
   }
 
-  if (filtered.length === 0) {
-    listEl.innerHTML = `<div style="text-align: center; padding: 3rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">게시글이 존재하지 않습니다. 첫 번째 글을 작성해 보세요.</div>`;
+  enriched.sort((a, b) => {
+    const aNotice = a.category === '공지사항' ? 1 : 0;
+    const bNotice = b.category === '공지사항' ? 1 : 0;
+    if (aNotice !== bNotice) return bNotice - aNotice;
+
+    if (sortBy === 'popular') return b._likes - a._likes;
+    if (sortBy === 'comments') return b._comments - a._comments;
+    if (sortBy === 'views') return b._views - a._views;
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
+  if (enriched.length === 0) {
+    listEl.innerHTML = `<div style="text-align: center; padding: 3rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">조건에 해당하는 게시글이 없습니다. 첫 번째 글을 작성해 보세요.</div>`;
     return;
   }
 
-  listEl.innerHTML = filtered.map(p => {
+  listEl.innerHTML = enriched.map(p => {
     const isNotice = p.category === '공지사항';
     const cardClass = isNotice ? 'comm-card notice-card' : 'comm-card';
     const badgeClass = isNotice ? 'comm-category-badge notice' : 'comm-category-badge';
     const dateStr = new Date(p.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
+    const plainPreview = String(p.content || '').replace(/\[밑줄\]|\[\/밑줄\]|\*\*/g, '');
 
     return `
       <div class="${cardClass}" onclick="openPostDetail(${safeId})">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
-          <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem; margin-bottom:0.45rem;">
+          <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.2rem;">
             <span class="${badgeClass}">${escapeHtml(p.category || '자유수다')}</span>
             <span class="comm-author">${escapeHtml(p.author_nickname)}</span>
+            ${p._daw ? `<span class="comm-daw-badge">${escapeHtml(p._daw)}</span>` : ''}
+            ${p._pluginTag ? `<span class="comm-plugin-tag"># ${escapeHtml(p._pluginTag)}</span>` : ''}
           </div>
           <span style="font-size:0.78rem; color:var(--text-secondary);">${escapeHtml(dateStr)}</span>
         </div>
-        <h4 style="margin:0.5rem 0 0.4rem 0; font-size:1.1rem; color:var(--text-primary); font-weight:700;">${escapeHtml(p.title)}</h4>
-        <p style="font-size:0.92rem; color:var(--text-secondary); line-height:1.6; white-space: pre-wrap; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${escapeHtml(p.content)}</p>
+        <h4 style="margin:0.5rem 0 0.4rem 0; font-size:1.12rem; color:var(--text-primary); font-weight:800;">${escapeHtml(p.title)}</h4>
+        <p style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6; white-space: pre-wrap; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${escapeHtml(plainPreview)}</p>
+        <div class="comm-card-footer">
+          <div class="comm-stats-group">
+            <span>추천 ${p._likes}</span>
+            <span>댓글 ${p._comments}</span>
+            <span>조회 ${p._views}</span>
+          </div>
+          <span style="color:var(--accent-gold);">상세 보기</span>
+        </div>
       </div>
     `;
   }).join('');
 }
 
-function showPostWritePage() {
+function showPostWritePage(editPostObj = null) {
   if (!currentUser && supabaseClient) {
     alert('로그인이 필요한 기능입니다.');
     openModal('loginModal');
     return;
   }
-  document.getElementById('standalonePostForm').reset();
-  document.getElementById('editorGuideOverlay').style.opacity = '0.85';
+
+  const form = document.getElementById('standalonePostForm');
+  form.reset();
   document.getElementById('writeOptNotice').style.display = isUserAdmin(currentUser) ? 'block' : 'none';
+
+  const headingEl = document.getElementById('postWriteHeading');
+  const submitBtn = document.getElementById('btnSubmitPost');
+
+  if (editPostObj) {
+    editingPostId = editPostObj.id;
+    const stats = getPostStats(editPostObj);
+    headingEl.innerText = '커뮤니티 게시글 수정';
+    submitBtn.innerText = '수정 내용 저장';
+    document.getElementById('writeCategorySelect').value = stats.editedCategory || editPostObj.category || '자유수다';
+    document.getElementById('writePluginTag').value = stats.pluginTag || '';
+    document.getElementById('writeTitle').value = stats.editedTitle || editPostObj.title || '';
+    document.getElementById('writeContent').value = stats.editedContent || editPostObj.content || '';
+    document.getElementById('editorGuideOverlay').style.opacity = '0';
+  } else {
+    editingPostId = null;
+    headingEl.innerText = '프로듀서 커뮤니티 글 작성';
+    submitBtn.innerText = '작성 완료 및 등록';
+    document.getElementById('editorGuideOverlay').style.opacity = '0.85';
+  }
+
   showPage('postWrite');
+}
+
+function cancelPostWrite() {
+  editingPostId = null;
+  showPage('community');
 }
 
 function handleEditorTyping() {
@@ -1269,6 +1541,7 @@ function formatEditorText(command) {
 
   textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
   textarea.focus();
+  handleEditorTyping();
 }
 
 function insertEditorLink() {
@@ -1280,11 +1553,20 @@ function insertEditorLink() {
 }
 
 function insertEditorMedia(type) {
-  const label = type === 'image' ? '이미지 URL' : '동영상(유튜브 등) URL';
+  let label = '이미지 URL';
+  if (type === 'video') label = '유튜브 영상 URL';
+  if (type === 'audio') label = 'SoundCloud 링크 또는 오디오(.mp3/.wav) URL';
+
   const url = prompt(`첨부할 ${label}을 입력하세요 (https:// 포함):`, 'https://');
   if (!url || !/^https?:\/\//i.test(url.trim())) return;
   const textarea = document.getElementById('writeContent');
-  textarea.value += type === 'image' ? `\n![이미지첨부](${url.trim()})\n` : `\n[동영상링크](${url.trim()})\n`;
+  if (type === 'image') {
+    textarea.value += `\n![이미지첨부](${url.trim()})\n`;
+  } else if (type === 'audio') {
+    textarea.value += `\n[오디오링크](${url.trim()})\n`;
+  } else {
+    textarea.value += `\n[동영상링크](${url.trim()})\n`;
+  }
   handleEditorTyping();
 }
 
@@ -1294,6 +1576,7 @@ async function handleStandalonePostSubmit(e) {
 
   await withSubmitLock('postSubmit', btn, async () => {
     const category = document.getElementById('writeCategorySelect').value;
+    const pluginTag = document.getElementById('writePluginTag')?.value.trim() || '';
     const title = document.getElementById('writeTitle').value.trim();
     const content = document.getElementById('writeContent').value.trim();
 
@@ -1302,8 +1585,57 @@ async function handleStandalonePostSubmit(e) {
       return;
     }
 
+    // 수정 모드일 경우
+    if (editingPostId !== null) {
+      const metaMap = getPostMetaMap();
+      const key = String(editingPostId);
+      metaMap[key] = {
+        ...(metaMap[key] || {}),
+        editedCategory: category,
+        editedTitle: title,
+        editedContent: content,
+        pluginTag: pluginTag,
+        daw: currentUserDaw
+      };
+      savePostMetaMap(metaMap);
+
+      if (supabaseClient) {
+        try {
+          const numId = !isNaN(Number(editingPostId)) ? Number(editingPostId) : editingPostId;
+          await supabaseClient.from('posts').update({ category, title, content }).eq('id', numId);
+        } catch (err) {}
+      }
+
+      const target = rawCommunityPosts.find(p => String(p.id) === String(editingPostId));
+      if (target) {
+        target.category = category;
+        target.title = title;
+        target.content = content;
+      }
+
+      const finishedId = editingPostId;
+      editingPostId = null;
+      alert('게시글이 수정되었습니다.');
+      openPostDetail(finishedId);
+      return;
+    }
+
+    // 신규 작성 모드일 경우
     if (!supabaseClient) {
-      alert('게시글이 성공적으로 등록되었습니다. (데모 모드)');
+      const demoId = Date.now();
+      rawCommunityPosts.unshift({
+        id: demoId,
+        category,
+        author_nickname: originalNickname || '@aftrdry',
+        author_daw: currentUserDaw,
+        plugin_tag: pluginTag,
+        title,
+        content,
+        views: 1,
+        likes_count: 0,
+        created_at: new Date().toISOString()
+      });
+      alert('게시글이 등록되었습니다.');
       showPage('community');
       return;
     }
@@ -1312,14 +1644,33 @@ async function handleStandalonePostSubmit(e) {
     if (!session) { alert('로그인이 만료되었습니다.'); openModal('loginModal'); return; }
 
     const user = session.user;
-    const nickname = user.user_metadata?.nickname || '@' + user.email.split('@')[0];
+    const nickname = originalNickname || user.user_metadata?.nickname || '@' + user.email.split('@')[0];
 
-    const { error } = await supabaseClient.from('posts').insert([{
-      user_id: user.id, author_nickname: nickname, category, title, content
-    }]);
+    const { data: insertedData, error } = await supabaseClient
+      .from('posts')
+      .insert([{
+        user_id: user.id,
+        author_nickname: nickname,
+        category,
+        title,
+        content
+      }])
+      .select()
+      .maybeSingle();
 
-    if (error) { alert('게시글 작성 실패: ' + error.message); }
-    else {
+    if (error) {
+      alert('게시글 작성 실패: ' + error.message);
+    } else {
+      if (insertedData && insertedData.id) {
+        const metaMap = getPostMetaMap();
+        metaMap[String(insertedData.id)] = {
+          daw: currentUserDaw,
+          pluginTag: pluginTag,
+          extraViews: 1,
+          extraLikes: 0
+        };
+        savePostMetaMap(metaMap);
+      }
       alert('게시글이 등록되었습니다.');
       showPage('community');
       await fetchCommunityPosts();
@@ -1327,41 +1678,263 @@ async function handleStandalonePostSubmit(e) {
   });
 }
 
+function isUserOwnerOfPost(post) {
+  if (!currentUser || !post) return false;
+  const emailPrefix = currentUser.email ? currentUser.email.split('@')[0] : '';
+  const userNick = originalNickname || currentUser.user_metadata?.nickname || (emailPrefix ? '@' + emailPrefix : '');
+  if (isUserAdmin(currentUser)) return true;
+  if (post.user_id && String(currentUser.id) === String(post.user_id)) return true;
+  if (post.author_nickname) {
+    const cleanAuthor = post.author_nickname.replace(/^@/, '');
+    const cleanUser = userNick.replace(/^@/, '');
+    if (cleanAuthor === cleanUser || cleanAuthor === emailPrefix) return true;
+  }
+  return false;
+}
+
 function openPostDetail(id) {
   const post = rawCommunityPosts.find(p => String(p.id) === String(id));
   if (!post) return;
+
+  currentOpenPostId = post.id;
+
+  // 조회수 1 증가 기록
+  const metaMap = getPostMetaMap();
+  const strId = String(post.id);
+  metaMap[strId] = {
+    ...(metaMap[strId] || {}),
+    extraViews: ((metaMap[strId] && metaMap[strId].extraViews) || 0) + 1
+  };
+  savePostMetaMap(metaMap);
+
+  const stats = getPostStats(post);
+  const displayCategory = stats.editedCategory || post.category;
+  const displayTitle = stats.editedTitle || post.title;
+  const displayContent = stats.editedContent || post.content;
 
   const container = document.getElementById('postDetailContainer');
   const actionBtns = document.getElementById('postDetailActionBtns');
   const dateStr = new Date(post.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-  const emailPrefix = currentUser?.email ? currentUser.email.split('@')[0] : '';
-  const userNick = currentUser?.user_metadata?.nickname || (emailPrefix ? '@' + emailPrefix : '');
-  const isAdmin = isUserAdmin(currentUser);
-  const isMyPost = currentUser && (
-    (post.user_id && String(currentUser.id) === String(post.user_id)) ||
-    (post.author_nickname && (
-      post.author_nickname === userNick ||
-      post.author_nickname.replace(/^@/, '') === userNick.replace(/^@/, '') ||
-      post.author_nickname.replace(/^@/, '') === emailPrefix
-    )) ||
-    isAdmin
-  );
-
+  const isMyPost = isUserOwnerOfPost(post);
   const safeId = typeof post.id === 'string' ? `'${post.id}'` : post.id;
-  actionBtns.innerHTML = isMyPost ? `<button type="button" class="nav-btn danger-outline-btn" onclick="deletePost(${safeId})">삭제하기</button>` : '';
+
+  actionBtns.innerHTML = isMyPost
+    ? `
+      <button type="button" class="nav-btn" onclick="triggerEditCurrentPost(${safeId})">수정하기</button>
+      <button type="button" class="nav-btn danger-outline-btn" onclick="deletePost(${safeId})">삭제하기</button>
+    `
+    : '';
 
   container.innerHTML = `
-    <div style="margin-bottom:1.5rem;">
-      <span class="comm-category-badge ${post.category === '공지사항' ? 'notice' : ''}">${escapeHtml(post.category)}</span>
-      <span class="comm-author" style="font-size:1rem; margin-left:0.5rem;">${escapeHtml(post.author_nickname)}</span>
-      <span style="font-size:0.82rem; color:var(--text-secondary); float:right;">${escapeHtml(dateStr)}</span>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.2rem;">
+      <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.35rem;">
+        <span class="comm-category-badge ${displayCategory === '공지사항' ? 'notice' : ''}">${escapeHtml(displayCategory)}</span>
+        <span class="comm-author" style="font-size:1rem;">${escapeHtml(post.author_nickname)}</span>
+        ${stats.daw ? `<span class="comm-daw-badge">${escapeHtml(stats.daw)}</span>` : ''}
+        ${stats.pluginTag ? `<span class="comm-plugin-tag"># ${escapeHtml(stats.pluginTag)}</span>` : ''}
+      </div>
+      <div style="font-size:0.82rem; color:var(--text-secondary);">
+        <span>조회 ${stats.views}</span> · <span>${escapeHtml(dateStr)}</span>
+      </div>
     </div>
-    <h2 style="font-size:1.8rem; font-weight:900; margin-bottom:1.2rem; color:var(--text-primary);">${escapeHtml(post.title)}</h2>
-    <div style="font-size:1.02rem; color:var(--text-primary); line-height:1.8; white-space: pre-wrap; padding: 1.5rem 0; border-top:1px solid var(--border-color); border-bottom:1px solid var(--border-color);">${renderSafeContent(post.content)}</div>
+    <h2 style="font-size:1.8rem; font-weight:900; margin-bottom:1.2rem; color:var(--text-primary); line-height:1.4;">${escapeHtml(displayTitle)}</h2>
+    <div style="font-size:1.02rem; color:var(--text-primary); line-height:1.85; white-space: pre-wrap; padding: 1.5rem 0; border-top:1px solid var(--border-color);">${renderSafeContent(displayContent)}</div>
+    <div class="post-upvote-bar">
+      <button type="button" id="btnPostUpvote" class="upvote-action-btn ${stats.voted ? 'voted' : ''}" onclick="togglePostUpvote(${safeId})">
+        <span>유익한 글 추천</span>
+        <span id="postUpvoteCountText" style="color:var(--accent-gold);">${stats.likes}</span>
+      </button>
+      <span style="font-size:0.8rem; color:var(--text-secondary);">사운드 팁이나 피드백이 도움이 되었다면 추천을 눌러주세요.</span>
+    </div>
   `;
 
+  renderPostComments(post.id);
   showPage('postDetail');
+}
+
+function triggerEditCurrentPost(id) {
+  const post = rawCommunityPosts.find(p => String(p.id) === String(id));
+  if (!post) return;
+  showPostWritePage(post);
+}
+
+function togglePostUpvote(postId) {
+  const post = rawCommunityPosts.find(p => String(p.id) === String(postId));
+  if (!post) return;
+
+  const map = getPostMetaMap();
+  const key = String(post.id);
+  const current = map[key] || {};
+  const nextVoted = !current.voted;
+  const delta = nextVoted ? 1 : -1;
+
+  map[key] = {
+    ...current,
+    voted: nextVoted,
+    extraLikes: Math.max(0, (Number(current.extraLikes) || 0) + delta)
+  };
+  savePostMetaMap(map);
+
+  const stats = getPostStats(post);
+  const btn = document.getElementById('btnPostUpvote');
+  const countEl = document.getElementById('postUpvoteCountText');
+  if (btn) btn.classList.toggle('voted', stats.voted);
+  if (countEl) countEl.innerText = stats.likes;
+}
+
+/* 댓글 렌더링, 작성, 삭제 */
+async function renderPostComments(postId) {
+  const listEl = document.getElementById('postCommentsList');
+  const badgeEl = document.getElementById('postCommentCountBadge');
+  if (!listEl) return;
+
+  const strPostId = String(postId);
+
+  if (supabaseClient) {
+    try {
+      const numId = !isNaN(Number(postId)) ? Number(postId) : postId;
+      const { data, error } = await supabaseClient
+        .from('comments')
+        .select('*')
+        .eq('post_id', numId)
+        .order('created_at', { ascending: true });
+      if (!error && data) {
+        postCommentsCache[strPostId] = data;
+      }
+    } catch (e) {}
+  }
+
+  const dbList = postCommentsCache[strPostId] || [];
+  const localMap = getLocalCommentsMap();
+  const localList = localMap[strPostId] || [];
+
+  const merged = [];
+  const seen = new Set();
+  dbList.concat(localList).forEach(c => {
+    const key = String(c.id || c.created_at);
+    if (!seen.has(key)) {
+      seen.add(key);
+      merged.push(c);
+    }
+  });
+
+  if (badgeEl) badgeEl.innerText = merged.length;
+
+  if (merged.length === 0) {
+    listEl.innerHTML = `<div style="padding:1.5rem; text-align:center; color:var(--text-secondary); font-size:0.86rem; background:var(--bg-color); border:1px solid var(--border-color); border-radius:8px;">아직 등록된 댓글이 없습니다. 첫 번째 피드백을 남겨보세요.</div>`;
+    return;
+  }
+
+  listEl.innerHTML = merged.map(c => {
+    const cDate = new Date(c.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const emailPrefix = currentUser?.email ? currentUser.email.split('@')[0] : '';
+    const userNick = originalNickname || currentUser?.user_metadata?.nickname || (emailPrefix ? '@' + emailPrefix : '');
+    const canDelete = currentUser && (
+      isUserAdmin(currentUser) ||
+      (c.user_id && String(c.user_id) === String(currentUser.id)) ||
+      (c.author_nickname && c.author_nickname.replace(/^@/, '') === userNick.replace(/^@/, ''))
+    );
+    const safeCommentId = typeof c.id === 'string' ? `'${c.id}'` : c.id;
+
+    return `
+      <div class="comm-comment-item">
+        <div class="comm-comment-top">
+          <div>
+            <span class="comm-author" style="font-size:0.88rem;">${escapeHtml(c.author_nickname)}</span>
+            ${c.author_daw ? `<span class="comm-daw-badge">${escapeHtml(c.author_daw)}</span>` : ''}
+            <span style="font-size:0.75rem; color:var(--text-secondary);">${escapeHtml(cDate)}</span>
+          </div>
+          ${canDelete ? `<button type="button" class="nav-btn danger-outline-btn" style="padding:0.2rem 0.6rem; font-size:0.74rem;" onclick="deleteCommentItem('${escapeHtml(strPostId)}', ${safeCommentId})">삭제</button>` : ''}
+        </div>
+        <div class="comm-comment-body">${renderSafeContent(c.content)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function handleCommentSubmit(e) {
+  e.preventDefault();
+  if (!currentUser && supabaseClient) {
+    alert('댓글을 작성하려면 로그인이 필요합니다.');
+    openModal('loginModal');
+    return;
+  }
+  if (currentOpenPostId === null) return;
+
+  const btn = document.getElementById('btnSubmitComment');
+  await withSubmitLock('commentSubmit', btn, async () => {
+    const inputEl = document.getElementById('commentInputText');
+    const content = inputEl.value.trim();
+    if (!content) return;
+
+    const strPostId = String(currentOpenPostId);
+    const emailPrefix = currentUser?.email ? currentUser.email.split('@')[0] : 'producer';
+    const nickname = originalNickname || currentUser?.user_metadata?.nickname || '@' + emailPrefix;
+
+    let savedDbComment = null;
+    if (supabaseClient && currentUser) {
+      try {
+        const numPostId = !isNaN(Number(currentOpenPostId)) ? Number(currentOpenPostId) : currentOpenPostId;
+        const { data, error } = await supabaseClient
+          .from('comments')
+          .insert([{
+            post_id: numPostId,
+            user_id: currentUser.id,
+            author_nickname: nickname,
+            author_daw: currentUserDaw,
+            content: content
+          }])
+          .select()
+          .maybeSingle();
+        if (!error && data) {
+          savedDbComment = data;
+        }
+      } catch (err) {}
+    }
+
+    if (!savedDbComment) {
+      const localMap = getLocalCommentsMap();
+      if (!localMap[strPostId]) localMap[strPostId] = [];
+      localMap[strPostId].push({
+        id: 'local_' + Date.now(),
+        post_id: currentOpenPostId,
+        user_id: currentUser?.id || 'local',
+        author_nickname: nickname,
+        author_daw: currentUserDaw,
+        content: content,
+        created_at: new Date().toISOString()
+      });
+      saveLocalCommentsMap(localMap);
+    }
+
+    inputEl.value = '';
+    await renderPostComments(currentOpenPostId);
+  });
+}
+
+async function deleteCommentItem(postId, commentId) {
+  if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
+  const strPostId = String(postId);
+
+  const localMap = getLocalCommentsMap();
+  if (localMap[strPostId]) {
+    localMap[strPostId] = localMap[strPostId].filter(c => String(c.id) !== String(commentId));
+    saveLocalCommentsMap(localMap);
+  }
+
+  if (postCommentsCache[strPostId]) {
+    postCommentsCache[strPostId] = postCommentsCache[strPostId].filter(c => String(c.id) !== String(commentId));
+  }
+
+  if (supabaseClient && !String(commentId).startsWith('local_')) {
+    try {
+      const numCid = !isNaN(Number(commentId)) ? Number(commentId) : commentId;
+      await supabaseClient.from('comments').delete().eq('id', numCid);
+    } catch (e) {}
+  }
+
+  await renderPostComments(postId);
 }
 
 async function deletePost(id) {
@@ -1419,7 +1992,7 @@ async function initMyPageData() {
     originalNickname = '@aftrdry';
     document.getElementById('myPageEmail').value = 'aftrdry@outlook.kr';
     document.getElementById('myPageNickname').value = originalNickname;
-    document.getElementById('myPageDaw').value = 'Logic Pro';
+    document.getElementById('myPageDaw').value = currentUserDaw;
     onNicknameInputChanged();
     return;
   }
@@ -1434,7 +2007,10 @@ async function initMyPageData() {
     if (data && data.nickname) {
       originalNickname = data.nickname;
       document.getElementById('myPageNickname').value = originalNickname;
-      if (data.main_daw) document.getElementById('myPageDaw').value = data.main_daw;
+      if (data.main_daw) {
+        currentUserDaw = data.main_daw;
+        document.getElementById('myPageDaw').value = data.main_daw;
+      }
     } else {
       originalNickname = currentUser.user_metadata?.nickname || '@' + currentUser.email.split('@')[0];
       document.getElementById('myPageNickname').value = originalNickname;
@@ -1504,6 +2080,8 @@ async function handleProfileUpdateSubmit(e) {
   await withSubmitLock('profileUpdate', saveBtn, async () => {
     const nickname = document.getElementById('myPageNickname').value.trim();
     const main_daw = document.getElementById('myPageDaw').value;
+    currentUserDaw = main_daw;
+    try { localStorage.setItem('plugazit_user_daw', main_daw); } catch (err) {}
 
     if (!isNicknameVerified) { alert('닉네임 중복 확인을 완료해 주세요.'); return; }
     if (!supabaseClient) { alert('프로필이 저장되었습니다.'); return; }
@@ -1577,7 +2155,7 @@ async function fetchMyActivityPosts() {
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) return;
-    const myPosts = rawCommunityPosts.filter(p => String(p.user_id) === String(session.user.id) && !deletedIds.includes(String(p.id)));
+    const myPosts = rawCommunityPosts.filter(p => isUserOwnerOfPost(p) && !deletedIds.includes(String(p.id)));
 
     if (myPosts.length === 0) {
       listEl.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding: 2rem;">작성한 게시글이 없습니다.</p>`;
@@ -1586,11 +2164,12 @@ async function fetchMyActivityPosts() {
 
     listEl.innerHTML = myPosts.map(p => {
       const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
+      const stats = getPostStats(p);
       return `
         <div class="comm-card" onclick="openPostDetail(${safeId})">
-          <span class="comm-category-badge">${escapeHtml(p.category)}</span>
-          <h4 style="margin:0.4rem 0; font-size:1.05rem; font-weight:700;">${escapeHtml(p.title)}</h4>
-          <p style="font-size:0.85rem; color:var(--text-secondary);">${escapeHtml(new Date(p.created_at).toLocaleDateString('ko-KR'))}</p>
+          <span class="comm-category-badge">${escapeHtml(stats.editedCategory || p.category)}</span>
+          <h4 style="margin:0.4rem 0; font-size:1.05rem; font-weight:700;">${escapeHtml(stats.editedTitle || p.title)}</h4>
+          <p style="font-size:0.85rem; color:var(--text-secondary);">${escapeHtml(new Date(p.created_at).toLocaleDateString('ko-KR'))} · 추천 ${stats.likes} · 조회 ${stats.views}</p>
         </div>
       `;
     }).join('');
@@ -1602,6 +2181,13 @@ async function checkUserSession() {
   const { data: { session } } = await supabaseClient.auth.getSession();
   currentUser = session?.user || null;
   updateUIAuthStatus(currentUser);
+  if (currentUser) {
+    try {
+      const { data } = await supabaseClient.from('profiles').select('nickname, main_daw').eq('id', currentUser.id).maybeSingle();
+      if (data?.nickname) originalNickname = data.nickname;
+      if (data?.main_daw) currentUserDaw = data.main_daw;
+    } catch (e) {}
+  }
 }
 
 function updateUIAuthStatus(user) {
@@ -1625,7 +2211,7 @@ async function handleLoginSubmit(e) {
 
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) { alert('로그인 실패: 이메일 또는 비밀번호를 확인해 주세요.'); }
-    else { closeModal('loginModal'); updateUIAuthStatus(data.user); alert('성공적으로 로그인되었습니다.'); }
+    else { closeModal('loginModal'); await checkUserSession(); alert('성공적으로 로그인되었습니다.'); }
   });
 }
 
@@ -1677,14 +2263,6 @@ async function handleLogout() {
   location.reload();
 }
 
-function extractYoutubeId(input) {
-  if (!input) return "";
-  const trimmed = input.trim();
-  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
-  const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
-  return match ? match[1] : "";
-}
-
 async function handleDealSubmit(e) {
   e.preventDefault();
   if (!isUserAdmin(currentUser) && supabaseClient) {
@@ -1700,6 +2278,8 @@ async function handleDealSubmit(e) {
     const sub = document.getElementById('dealSubCat')?.value.trim() || "전체";
     const orig = parseFloat(document.getElementById('dealOrigPrice').value) || 0;
     const disc = parseFloat(document.getElementById('dealDiscPrice').value) || 0;
+    const promoCode = document.getElementById('dealPromoCode')?.value.trim() || "DIRECT-DISCOUNT";
+    const perk = document.getElementById('dealPerk')?.value.trim() || "공식 스토어 한정 프로모션";
     const desc = document.getElementById('dealDesc').value.trim();
     const storeUrl = document.getElementById('dealUrl').value.trim();
     const customImg = document.getElementById('dealImgUrl')?.value.trim() || "";
@@ -1762,6 +2342,8 @@ async function handleDealSubmit(e) {
       discountPrice: disc,
       discountRateNum: rateNum,
       discountRate: rateStr,
+      code: promoCode,
+      perk: perk,
       storeUrl,
       daysLeft: 7,
       imgUrl: resolvedImgUrl,
@@ -1774,6 +2356,7 @@ async function handleDealSubmit(e) {
 
     dealsData.unshift(newDeal);
     resolveLiveYoutubeAndOfficialImage(newDeal);
+    updateSavedDealCountBadge();
     renderDeals();
     alert('새로운 딜 정보가 데이터베이스에 영구 등록되었습니다.');
     e.target.reset();
@@ -1787,9 +2370,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (savedTheme === 'light' || savedTheme === 'dark') {
       document.documentElement.setAttribute('data-theme', savedTheme);
     }
+    const savedDaw = localStorage.getItem('plugazit_user_daw');
+    if (savedDaw) currentUserDaw = savedDaw;
   } catch (e) {}
 
   renderSubCategories();
+  updateSavedDealCountBadge();
   renderDeals();
   await checkUserSession();
   await fetchDealsFromSupabase();
