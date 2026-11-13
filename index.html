@@ -13,6 +13,17 @@
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* 다크/라이트 테마별 세로 이행시 '기·회' 포인트 강조 스타일 */
+    .acrostic-point {
+      font-weight: 900;
+      color: var(--accent-gold);
+      transition: color 0.3s ease;
+    }
+    [data-theme="light"] .acrostic-point {
+      color: var(--accent-color);
+    }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -51,8 +62,8 @@
     <div class="hero-slogan-section">
       <h1 class="hero-title">Right Near, Your Azit.</h1>
       <p class="hero-subtitle">
-        기다림의 연속,<br>
-        <span class="sub-line">회상으로 되찾는 나만의 음악</span>
+        <span class="acrostic-point">기</span>다림의 끝,<br>
+        <span class="sub-line"><span class="acrostic-point">회</span>심의 무대를 준비할 곳</span>
       </p>
     </div>
 
