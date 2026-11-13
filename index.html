@@ -66,7 +66,7 @@
           <button type="button" class="cat-chip" onclick="setMainCategory('fx', this)">이펙터 & 유틸리티</button>
           <button type="button" class="cat-chip" onclick="setMainCategory('free', this)">100% FREE</button>
           <button type="button" class="cat-chip" id="btnMainCatSaved" onclick="setMainCategory('saved', this)">관심 딜 (<span id="savedDealCount">0</span>)</button>
-          <button type="button" class="cat-chip affiliate" onclick="filterCategory('affiliate', this)">브랜드 제휴 문의</button>
+          <button type="button" class="cat-chip affiliate" onclick="openInquiryModal('브랜드 제휴 및 광고 문의')">브랜드 제휴 문의</button>
         </div>
         <div class="sub-cat-bar" id="subCatBar"></div>
       </div>
@@ -102,7 +102,10 @@
           <h2 style="font-weight:800; font-size:1.6rem;">Producer Community</h2>
           <p style="color:var(--text-secondary); font-size:0.9rem;">사운드 믹싱 팁, 플러그인 활용 노하우, 작업곡 피드백을 자유롭게 나누세요.</p>
         </div>
-        <button type="button" class="btn-buy" style="width:auto; padding:0.65rem 1.4rem;" onclick="showPostWritePage()">글 작성하기</button>
+        <div style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+          <button type="button" class="nav-btn" style="padding:0.65rem 1.1rem;" onclick="openInquiryModal()">관리자 1:1 문의</button>
+          <button type="button" class="btn-buy" style="width:auto; padding:0.65rem 1.4rem;" onclick="showPostWritePage()">글 작성하기</button>
+        </div>
       </div>
 
       <div class="main-cat-bar" style="margin-bottom: 1.2rem;">
@@ -112,6 +115,7 @@
         <button type="button" class="cat-chip" onclick="setCommunityCategory('VST/신스', this)">VST/신스</button>
         <button type="button" class="cat-chip" onclick="setCommunityCategory('자유수다', this)">자유수다</button>
         <button type="button" class="cat-chip" onclick="setCommunityCategory('곡피드백', this)">곡 피드백</button>
+        <button type="button" class="cat-chip" id="btnCommCatScrapped" onclick="setCommunityCategory('scrapped', this)">스크랩한 글 (<span id="scrappedPostCount">0</span>)</button>
       </div>
 
       <div class="filter-control-bar">
@@ -199,9 +203,9 @@
     <!-- POST DETAIL & COMMENTS VIEW -->
     <section id="postDetailView" aria-label="게시글 상세 보기">
       <div class="standalone-panel-box" style="max-width: 840px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:1px solid var(--border-color); padding-bottom:1.2rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:1px solid var(--border-color); padding-bottom:1.2rem; flex-wrap:wrap; gap:0.5rem;">
           <button type="button" class="nav-btn" onclick="showPage('community')">목록으로 돌아가기</button>
-          <div id="postDetailActionBtns" style="display:flex; gap:0.5rem;"></div>
+          <div id="postDetailActionBtns" style="display:flex; gap:0.5rem; flex-wrap:wrap;"></div>
         </div>
         <div id="postDetailContainer"></div>
 
@@ -231,7 +235,7 @@
         <div class="main-cat-bar" style="margin-bottom: 2rem;">
           <button type="button" class="cat-chip active" onclick="switchMyPageTab('profile', this)">프로필 설정</button>
           <button type="button" class="cat-chip" onclick="switchMyPageTab('security', this)">비밀번호 및 계정 보안</button>
-          <button type="button" class="cat-chip" onclick="switchMyPageTab('activity', this)">내 활동 (작성글)</button>
+          <button type="button" class="cat-chip" onclick="switchMyPageTab('activity', this)">내 활동 (작성글 / 스크랩)</button>
         </div>
 
         <div id="mpTabProfile" class="mp-tab-content">
@@ -299,8 +303,13 @@
 
         <div id="mpTabActivity" class="mp-tab-content" style="display:none;">
           <h4 style="font-weight:800; font-size:1.1rem; margin-bottom:1rem; color:var(--text-primary);">내가 작성한 커뮤니티 게시글</h4>
-          <div id="myActivityList">
+          <div id="myActivityList" style="margin-bottom:2.2rem;">
             <p style="color:var(--text-secondary); text-align:center; padding: 2rem;">작성한 게시글을 불러오는 중입니다...</p>
+          </div>
+
+          <h4 style="font-weight:800; font-size:1.1rem; margin-bottom:1rem; color:var(--accent-gold); border-top:1px solid var(--border-color); padding-top:1.8rem;">내가 스크랩한 커뮤니티 글</h4>
+          <div id="myScrappedList">
+            <p style="color:var(--text-secondary); text-align:center; padding: 2rem;">스크랩한 게시글이 없습니다.</p>
           </div>
         </div>
       </div>
@@ -330,13 +339,34 @@
             <div class="form-group"><label for="dealDiscPrice">할인가 ($)</label><input type="number" step="0.01" min="0" id="dealDiscPrice" required placeholder="134"></div>
           </div>
           <div class="admin-grid-2">
-            <div class="form-group"><label for="dealImgUrl">제품 실제 UI 이미지 URL</label><input type="url" id="dealImgUrl" placeholder="https://... (미입력 시 유튜브 공식 HD 썸네일 자동 적용)"></div>
+            <div class="form-group"><label for="dealImgUrl">제품 실제 UI 이미지 URL</label><input type="url" id="dealImgUrl" placeholder="https://... (미입력 시 내장 그래픽 UI 자동 적용)"></div>
             <div class="form-group"><label for="dealYoutubeInput">공식 유튜브 영상 URL 또는 11자리 ID</label><input type="text" id="dealYoutubeInput" placeholder="예: https://youtu.be/d9W2j2_y4v8"></div>
           </div>
           <div class="form-group"><label for="dealDesc">상세 설명</label><textarea id="dealDesc" rows="2" required placeholder="공식 홈페이지 기준 핵심 기능 요약"></textarea></div>
           <div class="form-group"><label for="dealUrl">제휴/구매 링크 URL</label><input type="url" id="dealUrl" required placeholder="https://..."></div>
           <button type="submit" class="btn-buy" id="btnSubmitDeal" style="margin-top:1rem;">새로운 딜 DB 등록 / 업데이트</button>
         </form>
+      </div>
+
+      <!-- 관리자: 신고 접수 및 1:1 문의 통합 관리 대시보드 -->
+      <div class="admin-grid-2" style="align-items: start;">
+        <div class="standalone-panel-box" style="margin:0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 style="font-weight:800; font-size:1.2rem; color:#e74c3c;">커뮤니티 신고 접수 내역 (<span id="adminReportCount">0</span>)</h3>
+            <button type="button" class="nav-btn" style="padding:0.3rem 0.7rem; font-size:0.78rem;" onclick="renderAdminDashboard()">새로고침</button>
+          </div>
+          <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1.2rem;">사용자들이 신고한 게시글 및 댓글 목록입니다. 원본 확인 후 즉시 삭제하거나 반려할 수 있습니다.</p>
+          <div id="adminReportsList" class="admin-ticket-list"></div>
+        </div>
+
+        <div class="standalone-panel-box" style="margin:0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 style="font-weight:800; font-size:1.2rem; color:var(--accent-gold);">1:1 관리자 문의 내역 (<span id="adminInquiryCount">0</span>)</h3>
+            <button type="button" class="nav-btn" style="padding:0.3rem 0.7rem; font-size:0.78rem;" onclick="renderAdminDashboard()">새로고침</button>
+          </div>
+          <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1.2rem;">회원이 접수한 서비스 문의, 버그 제보 및 제휴 요청 내역입니다.</p>
+          <div id="adminInquiriesList" class="admin-ticket-list"></div>
+        </div>
       </div>
     </section>
   </main>
@@ -349,6 +379,8 @@
       <button type="button" onclick="openLegalModal('terms')">서비스 이용약관</button>
       <span>|</span>
       <button type="button" onclick="openLegalModal('privacy')" style="color:var(--text-primary); font-weight:700;">개인정보 처리방침</button>
+      <span>|</span>
+      <button type="button" onclick="openInquiryModal()">관리자 1:1 문의</button>
     </div>
   </footer>
 
@@ -357,6 +389,67 @@
     <div class="modal-box large-detail-modal" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('dealDetailModal')">×</button>
       <div id="dealDetailContent"></div>
+    </div>
+  </div>
+
+  <!-- 게시글 / 댓글 신고 모달 -->
+  <div class="modal-overlay" id="reportModal" role="dialog" aria-modal="true" aria-label="게시물 신고하기" onclick="checkModalBackdropClose(event, 'reportModal')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('reportModal')">×</button>
+      <h3 style="margin-bottom:0.5rem; font-weight:800; color:#e74c3c;">커뮤니티 게시물 신고</h3>
+      <p id="reportTargetSummary" style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:1.2rem;"></p>
+      <form id="reportForm" onsubmit="handleReportSubmit(event)">
+        <div class="form-group">
+          <label for="reportReasonSelect">신고 사유 선택</label>
+          <select id="reportReasonSelect" required>
+            <option value="불법 복제 소프트웨어(크랙/시리얼) 공유">불법 복제 소프트웨어(크랙/시리얼) 공유</option>
+            <option value="도배, 스팸 및 부적절한 영리 홍보">도배, 스팸 및 부적절한 영리 홍보</option>
+            <option value="타인 비방, 욕설 및 혐오 표현">타인 비방, 욕설 및 혐오 표현</option>
+            <option value="음원/샘플 저작권 침해">음원/샘플 저작권 침해</option>
+            <option value="기타 커뮤니티 가이드 위반">기타 커뮤니티 가이드 위반</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="reportDetailInput">상세 사유 (선택)</label>
+          <textarea id="reportDetailInput" rows="3" maxlength="500" placeholder="관리자가 참고할 수 있도록 구체적인 정황을 적어주세요."></textarea>
+        </div>
+        <button type="submit" class="btn-buy" id="btnSubmitReport" style="background:#c0392b; margin-top:0.8rem;">신고 접수하기</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 1:1 관리자 문의 모달 -->
+  <div class="modal-overlay" id="inquiryModal" role="dialog" aria-modal="true" aria-label="관리자 1:1 문의" onclick="checkModalBackdropClose(event, 'inquiryModal')">
+    <div class="modal-box" style="max-width:540px;" onclick="event.stopPropagation()">
+      <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('inquiryModal')">×</button>
+      <h3 style="margin-bottom:0.4rem; font-weight:800; color:var(--accent-gold);">관리자 1:1 문의 및 제보</h3>
+      <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:1.3rem;">서비스 이용 문의, 딜 정보 제보, 버그 리포트 및 제휴 제안을 남겨주시면 관리자가 확인 후 답변드립니다.</p>
+      <form id="inquiryForm" onsubmit="handleInquirySubmit(event)">
+        <div class="admin-grid-2">
+          <div class="form-group">
+            <label for="inquiryCategory">문의 유형</label>
+            <select id="inquiryCategory" required>
+              <option value="서비스 이용 및 계정 문의">서비스 이용 및 계정 문의</option>
+              <option value="새로운 VST 딜/할인 제보">새로운 VST 딜/할인 제보</option>
+              <option value="버그 리포트 및 기능 건의">버그 리포트 및 기능 건의</option>
+              <option value="브랜드 제휴 및 광고 문의">브랜드 제휴 및 광고 문의</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="inquiryReplyEmail">회신받을 이메일</label>
+            <input type="email" id="inquiryReplyEmail" required placeholder="email@domain.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="inquiryTitle">문의 제목</label>
+          <input type="text" id="inquiryTitle" required maxlength="120" placeholder="문의 제목을 입력해 주세요">
+        </div>
+        <div class="form-group">
+          <label for="inquiryContent">문의 내용</label>
+          <textarea id="inquiryContent" rows="4" required maxlength="2000" placeholder="문의하실 내용을 상세히 작성해 주세요..."></textarea>
+        </div>
+        <button type="submit" class="btn-buy" id="btnSubmitInquiry" style="margin-top:0.8rem;">관리자에게 문의 전송</button>
+      </form>
     </div>
   </div>
 
