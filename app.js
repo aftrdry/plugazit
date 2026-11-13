@@ -11,6 +11,8 @@ let currentOpenPostId = null;
 let editingPostId = null;
 let originalNickname = "";
 let isNicknameVerified = true;
+let currentReportTarget = null;
+
 if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
@@ -35,8 +37,12 @@ function extractYoutubeId(input) {
 }
 function renderSafeContent(rawText) {
   let safe = escapeHtml(rawText);
-  safe = safe.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-  safe = safe.replace(/\[밑줄\]([\s\S]+?)\[\/밑줄\]/g, '<u>$1</u>');
+  safe = safe.replace(/\*\*([\s\S]+?)\*\*/g, '<b style="font-weight:800; color:var(--accent-gold);">$1</b>');
+  safe = safe.replace(/\[밑줄\]([\s\S]+?)\[\/밑줄\]/g, '<u style="text-underline-offset:4px;">$1</u>');
+  safe = safe.replace(/\*{4}([^\n]+)/g, '<b style="font-weight:800; color:var(--accent-gold);">$1</b>');
+  safe = safe.replace(/\[밑줄\]\[\/밑줄\]([^\n]+)/g, '<u style="text-underline-offset:4px;">$1</u>');
+  safe = safe.replace(/\*{4}/g, '');
+  safe = safe.replace(/\[밑줄\]\[\/밑줄\]/g, '');
   safe = safe.replace(/!\[이미지첨부\]\((https?:\/\/[^\s)]+)\)/g, '<img src="$1" alt="첨부 이미지" referrerpolicy="no-referrer" style="max-width:100%; border-radius:8px; margin:0.8rem 0; display:block;">');
   safe = safe.replace(/\[(동영상링크|오디오링크|링크)\]\((https?:\/\/[^\s)]+)\)/g, function(match, label, url) {
     const ytId = extractYoutubeId(url);
@@ -76,8 +82,12 @@ async function withSubmitLock(lockKey, btnEl, asyncFn) {
 const DELETED_POSTS_STORAGE_KEY = 'plugazit_deleted_post_ids_v1';
 const DELETED_DEALS_STORAGE_KEY = 'plugazit_deleted_deal_ids_v1';
 const SAVED_DEALS_STORAGE_KEY = 'plugazit_saved_deal_ids_v1';
+const SCRAPPED_POSTS_STORAGE_KEY = 'plugazit_scrapped_post_ids_v1';
 const POST_META_STORAGE_KEY = 'plugazit_post_meta_v1';
 const LOCAL_COMMENTS_STORAGE_KEY = 'plugazit_local_comments_v1';
+const LOCAL_REPORTS_STORAGE_KEY = 'plugazit_local_reports_v1';
+const LOCAL_INQUIRIES_STORAGE_KEY = 'plugazit_local_inquiries_v1';
+
 function getDeletedIds(storageKey) {
   try {
     const raw = localStorage.getItem(storageKey);
@@ -121,6 +131,56 @@ function updateSavedDealCountBadge() {
   const deletedDealIds = getDeletedIds(DELETED_DEALS_STORAGE_KEY);
   const validSaved = getSavedDealIds().filter(id => !deletedDealIds.includes(String(id)) && dealsData.some(d => String(d.id) === String(id)));
   el.innerText = validSaved.length;
+}
+function getScrappedPostIds() {
+  return getDeletedIds(SCRAPPED_POSTS_STORAGE_KEY);
+}
+function toggleScrapPost(postId, event) {
+  if (event) event.stopPropagation();
+  try {
+    const list = getScrappedPostIds();
+    const strId = String(postId);
+    const idx = list.indexOf(strId);
+    if (idx >= 0) {
+      list.splice(idx, 1);
+    } else {
+      list.push(strId);
+    }
+    localStorage.setItem(SCRAPPED_POSTS_STORAGE_KEY, JSON.stringify(list));
+    updateScrappedPostCountBadge();
+    const btn = document.getElementById('btnPostScrap');
+    if (btn) {
+      const nowScrapped = list.includes(strId);
+      btn.classList.toggle('voted', nowScrapped);
+      btn.innerText = nowScrapped ? '스크랩됨' : '+ 스크랩';
+    }
+    if (currentCommCat === 'scrapped') renderCommunityPosts();
+  } catch (e) {}
+}
+function updateScrappedPostCountBadge() {
+  const el = document.getElementById('scrappedPostCount');
+  if (!el) return;
+  const deletedIds = getDeletedIds(DELETED_POSTS_STORAGE_KEY);
+  const valid = getScrappedPostIds().filter(id => !deletedIds.includes(String(id)));
+  el.innerText = valid.length;
+}
+function getLocalReportsList() {
+  try {
+    const raw = localStorage.getItem(LOCAL_REPORTS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+function saveLocalReportsList(list) {
+  try { localStorage.setItem(LOCAL_REPORTS_STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
+}
+function getLocalInquiriesList() {
+  try {
+    const raw = localStorage.getItem(LOCAL_INQUIRIES_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+function saveLocalInquiriesList(list) {
+  try { localStorage.setItem(LOCAL_INQUIRIES_STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
 }
 function getPostMetaMap() {
   try {
@@ -216,6 +276,8 @@ function showPage(page) {
     fetchCommunityPosts();
   } else if (page === 'mypage') {
     initMyPageData();
+  } else if (page === 'admin') {
+    renderAdminDashboard();
   }
 }
 function openModal(id) { document.getElementById(id)?.classList.add('active'); }
@@ -272,10 +334,7 @@ const subCategories = {
   fx: ["전체", "Pitch/Vocal", "Utility/Analyzer", "Modulation"],
   free: ["전체", "Free Synths", "Free FX"]
 };
-/* 
- * 404/웹오버뷰 문제를 일으키던 api.microlink.io 스크린샷을 완전 퇴출하고,
- * 각 제조사의 실제 공식 플러그인 UI 화면(YouTube Official HD CDN)과 정확한 공식 데모 영상을 직결함
- */
+
 const dealsData = [
   {
     id: 1,
@@ -688,10 +747,6 @@ const PIPED_SEARCH_ENDPOINTS = [
   "https://api.piped.private.coffee/search?filter=videos&q=",
   "https://pipedapi.tokhmi.xyz/search?filter=videos&q="
 ];
-/* 
- * 웹사이트 전체 오버뷰(스크린샷)나 404를 가져오던 Microlink 호출을 제거하고,
- * 유튜브 공식 영상 ID 및 고화질 썸네일만 안전하게 보강함
- */
 async function resolveLiveYoutubeAndOfficialImage(deal) {
   const query = encodeURIComponent(deal.ytQuery || `${deal.brand} ${deal.title}`);
   for (const endpoint of PIPED_SEARCH_ENDPOINTS) {
@@ -757,7 +812,6 @@ function setSubCategory(sub, el) {
   renderDeals();
 }
 function onDealFilterChange() { renderDeals(); }
-/* 유튜브 maxresdefault가 없는 영상(120px 더미)일 경우 즉시 hqdefault 고화질 썸네일로 자동 전환 */
 function verifyImageNotDummy(imgEl, dealId) {
   if (imgEl.naturalWidth > 0 && imgEl.naturalWidth <= 120) {
     handleImgError(imgEl, dealId);
@@ -1152,7 +1206,7 @@ async function deleteDealItem(dealId) {
 }
 function filterCategory(cat) {
   if (cat === 'affiliate') {
-    alert('제휴 문의: aftrdry@outlook.kr 또는 공식 디스코드 채널로 연락해 주시기 바랍니다.');
+    openInquiryModal('브랜드 제휴 및 광고 문의');
   }
 }
 let currentCommCat = 'all';
@@ -1209,6 +1263,7 @@ async function fetchCommunityPosts() {
       ];
     }
     rawCommunityPosts = rawCommunityPosts.filter(p => !deletedIds.includes(String(p.id)));
+    updateScrappedPostCountBadge();
     renderCommunityPosts();
     return;
   }
@@ -1218,6 +1273,7 @@ async function fetchCommunityPosts() {
       listEl.innerHTML = `<div style="text-align: center; padding: 2.5rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">게시글 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</div>`;
     } else {
       rawCommunityPosts = (data || []).filter(p => !deletedIds.includes(String(p.id)));
+      updateScrappedPostCountBadge();
       renderCommunityPosts();
     }
   } catch (err) { console.error(err); }
@@ -1227,6 +1283,8 @@ function renderCommunityPosts() {
   const keyword = document.getElementById('commSearchKeyword').value.trim().toLowerCase();
   const sortBy = document.getElementById('commSortOption')?.value || 'latest';
   const deletedIds = getDeletedIds(DELETED_POSTS_STORAGE_KEY);
+  const scrappedIds = getScrappedPostIds();
+
   let enriched = rawCommunityPosts
     .filter(p => !deletedIds.includes(String(p.id)))
     .map(p => {
@@ -1245,7 +1303,11 @@ function renderCommunityPosts() {
       };
     });
   if (currentCommCat !== 'all') {
-    enriched = enriched.filter(p => p.category === currentCommCat);
+    if (currentCommCat === 'scrapped') {
+      enriched = enriched.filter(p => scrappedIds.includes(String(p.id)));
+    } else {
+      enriched = enriched.filter(p => p.category === currentCommCat);
+    }
   }
   if (keyword !== '') {
     enriched = enriched.filter(p => 
@@ -1266,7 +1328,10 @@ function renderCommunityPosts() {
     return new Date(b.created_at) - new Date(a.created_at);
   });
   if (enriched.length === 0) {
-    listEl.innerHTML = `<div style="text-align: center; padding: 3rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">조건에 해당하는 게시글이 없습니다. 첫 번째 글을 작성해 보세요.</div>`;
+    const emptyMsg = currentCommCat === 'scrapped'
+      ? '스크랩한 커뮤니티 게시글이 없습니다.'
+      : '조건에 해당하는 게시글이 없습니다. 첫 번째 글을 작성해 보세요.';
+    listEl.innerHTML = `<div style="text-align: center; padding: 3rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">${emptyMsg}</div>`;
     return;
   }
   listEl.innerHTML = enriched.map(p => {
@@ -1276,6 +1341,7 @@ function renderCommunityPosts() {
     const dateStr = new Date(p.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
     const plainPreview = String(p.content || '').replace(/\[밑줄\]|\[\/밑줄\]|\*\*/g, '');
+    const isScrapped = scrappedIds.includes(String(p.id));
     return `
       <div class="${cardClass}" onclick="openPostDetail(${safeId})">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem; margin-bottom:0.45rem;">
@@ -1294,6 +1360,7 @@ function renderCommunityPosts() {
             <span>추천 ${p._likes}</span>
             <span>댓글 ${p._comments}</span>
             <span>조회 ${p._views}</span>
+            ${isScrapped ? `<span style="color:var(--accent-gold);">★ 스크랩됨</span>` : ''}
           </div>
           <span style="color:var(--accent-gold);">상세 보기</span>
         </div>
@@ -1342,14 +1409,24 @@ function handleEditorTyping() {
 }
 function formatEditorText(command) {
   const textarea = document.getElementById('writeContent');
+  if (!textarea) return;
   const start = textarea.selectionStart;
   const end = textarea.selectionEnd;
   const selectedText = textarea.value.substring(start, end);
-  let replacement = selectedText;
-  if (command === 'bold') replacement = `**${selectedText}**`;
-  if (command === 'underline') replacement = `[밑줄]${selectedText}[/밑줄]`;
-  textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
-  textarea.focus();
+  const openTag = command === 'bold' ? '**' : '[밑줄]';
+  const closeTag = command === 'bold' ? '**' : '[/밑줄]';
+  if (selectedText.length > 0) {
+    const replacement = `${openTag}${selectedText}${closeTag}`;
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + openTag.length, start + openTag.length + selectedText.length);
+  } else {
+    const replacement = `${openTag}${closeTag}`;
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.focus();
+    const cursorCenter = start + openTag.length;
+    textarea.setSelectionRange(cursorCenter, cursorCenter);
+  }
   handleEditorTyping();
 }
 function insertEditorLink() {
@@ -1502,12 +1579,13 @@ function openPostDetail(id) {
   const dateStr = new Date(post.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   const isMyPost = isUserOwnerOfPost(post);
   const safeId = typeof post.id === 'string' ? `'${post.id}'` : post.id;
-  actionBtns.innerHTML = isMyPost
-    ? `
-      <button type="button" class="nav-btn" onclick="triggerEditCurrentPost(${safeId})">수정하기</button>
-      <button type="button" class="nav-btn danger-outline-btn" onclick="deletePost(${safeId})">삭제하기</button>
-    `
-    : '';
+  const isScrapped = getScrappedPostIds().includes(strId);
+
+  actionBtns.innerHTML = `
+    <button type="button" class="nav-btn" onclick="openReportModal('post', ${safeId}, '${escapeHtml(displayTitle)}')">신고하기</button>
+    ${isMyPost ? `<button type="button" class="nav-btn" onclick="triggerEditCurrentPost(${safeId})">수정하기</button>` : ''}
+    ${isMyPost ? `<button type="button" class="nav-btn danger-outline-btn" onclick="deletePost(${safeId})">삭제하기</button>` : ''}
+  `;
   container.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.2rem;">
       <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.35rem;">
@@ -1523,11 +1601,16 @@ function openPostDetail(id) {
     <h2 style="font-size:1.8rem; font-weight:900; margin-bottom:1.2rem; color:var(--text-primary); line-height:1.4;">${escapeHtml(displayTitle)}</h2>
     <div style="font-size:1.02rem; color:var(--text-primary); line-height:1.85; white-space: pre-wrap; padding: 1.5rem 0; border-top:1px solid var(--border-color);">${renderSafeContent(displayContent)}</div>
     <div class="post-upvote-bar">
-      <button type="button" id="btnPostUpvote" class="upvote-action-btn ${stats.voted ? 'voted' : ''}" onclick="togglePostUpvote(${safeId})">
-        <span>유익한 글 추천</span>
-        <span id="postUpvoteCountText" style="color:var(--accent-gold);">${stats.likes}</span>
-      </button>
-      <span style="font-size:0.8rem; color:var(--text-secondary);">사운드 팁이나 피드백이 도움이 되었다면 추천을 눌러주세요.</span>
+      <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+        <button type="button" id="btnPostUpvote" class="upvote-action-btn ${stats.voted ? 'voted' : ''}" onclick="togglePostUpvote(${safeId})">
+          <span>유익한 글 추천</span>
+          <span id="postUpvoteCountText" style="color:var(--accent-gold);">${stats.likes}</span>
+        </button>
+        <button type="button" id="btnPostScrap" class="upvote-action-btn ${isScrapped ? 'voted' : ''}" onclick="toggleScrapPost(${safeId}, event)">
+          ${isScrapped ? '스크랩됨' : '+ 스크랩'}
+        </button>
+      </div>
+      <span style="font-size:0.8rem; color:var(--text-secondary);">사운드 팁이나 피드백이 도움이 되었다면 추천 또는 스크랩해 두세요.</span>
     </div>
   `;
   renderPostComments(post.id);
@@ -1603,6 +1686,7 @@ async function renderPostComments(postId) {
       (c.author_nickname && c.author_nickname.replace(/^@/, '') === userNick.replace(/^@/, ''))
     );
     const safeCommentId = typeof c.id === 'string' ? `'${c.id}'` : c.id;
+    const shortSnippet = String(c.content || '').substring(0, 30);
     return `
       <div class="comm-comment-item">
         <div class="comm-comment-top">
@@ -1611,7 +1695,10 @@ async function renderPostComments(postId) {
             ${c.author_daw ? `<span class="comm-daw-badge">${escapeHtml(c.author_daw)}</span>` : ''}
             <span style="font-size:0.75rem; color:var(--text-secondary);">${escapeHtml(cDate)}</span>
           </div>
-          ${canDelete ? `<button type="button" class="nav-btn danger-outline-btn" style="padding:0.2rem 0.6rem; font-size:0.74rem;" onclick="deleteCommentItem('${escapeHtml(strPostId)}', ${safeCommentId})">삭제</button>` : ''}
+          <div style="display:flex; gap:0.4rem;">
+            <button type="button" class="nav-btn" style="padding:0.2rem 0.6rem; font-size:0.74rem;" onclick="openReportModal('comment', ${safeCommentId}, '${escapeHtml(shortSnippet)}')">신고</button>
+            ${canDelete ? `<button type="button" class="nav-btn danger-outline-btn" style="padding:0.2rem 0.6rem; font-size:0.74rem;" onclick="deleteCommentItem('${escapeHtml(strPostId)}', ${safeCommentId})">삭제</button>` : ''}
+          </div>
         </div>
         <div class="comm-comment-body">${renderSafeContent(c.content)}</div>
       </div>
@@ -1689,7 +1776,9 @@ async function deleteCommentItem(postId, commentId) {
       await supabaseClient.from('comments').delete().eq('id', numCid);
     } catch (e) {}
   }
-  await renderPostComments(postId);
+  if (currentOpenPostId && String(currentOpenPostId) === strPostId) {
+    await renderPostComments(postId);
+  }
 }
 async function deletePost(id) {
   if (!confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
@@ -1722,6 +1811,7 @@ async function deletePost(id) {
     console.error(err);
   }
   alert('게시글이 성공적으로 삭제되었습니다.');
+  updateScrappedPostCountBadge();
   showPage('community');
   renderCommunityPosts();
 }
@@ -1866,19 +1956,18 @@ async function handleAccountDeleteRequest() {
 }
 async function fetchMyActivityPosts() {
   const listEl = document.getElementById('myActivityList');
+  const scrapEl = document.getElementById('myScrappedList');
   const deletedIds = getDeletedIds(DELETED_POSTS_STORAGE_KEY);
-  if (!supabaseClient) {
-    listEl.innerHTML = `<div class="comm-card"><h4 style="font-weight:700;">[데모] 내가 작성한 글 샘플 제목</h4><p style="font-size:0.88rem; color:var(--text-secondary);">내용 요약...</p></div>`;
-    return;
+  const scrappedIds = getScrappedPostIds();
+
+  if (rawCommunityPosts.length === 0) {
+    await fetchCommunityPosts();
   }
-  try {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) return;
-    const myPosts = rawCommunityPosts.filter(p => isUserOwnerOfPost(p) && !deletedIds.includes(String(p.id)));
-    if (myPosts.length === 0) {
-      listEl.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding: 2rem;">작성한 게시글이 없습니다.</p>`;
-      return;
-    }
+
+  const myPosts = rawCommunityPosts.filter(p => isUserOwnerOfPost(p) && !deletedIds.includes(String(p.id)));
+  if (myPosts.length === 0) {
+    listEl.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding: 1.5rem;">작성한 게시글이 없습니다.</p>`;
+  } else {
     listEl.innerHTML = myPosts.map(p => {
       const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
       const stats = getPostStats(p);
@@ -1890,7 +1979,26 @@ async function fetchMyActivityPosts() {
         </div>
       `;
     }).join('');
-  } catch (err) { console.error(err); }
+  }
+
+  if (scrapEl) {
+    const myScrapped = rawCommunityPosts.filter(p => scrappedIds.includes(String(p.id)) && !deletedIds.includes(String(p.id)));
+    if (myScrapped.length === 0) {
+      scrapEl.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding: 1.5rem;">스크랩한 게시글이 없습니다.</p>`;
+    } else {
+      scrapEl.innerHTML = myScrapped.map(p => {
+        const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
+        const stats = getPostStats(p);
+        return `
+          <div class="comm-card" onclick="openPostDetail(${safeId})">
+            <span class="comm-category-badge">${escapeHtml(stats.editedCategory || p.category)}</span>
+            <span class="comm-author">${escapeHtml(p.author_nickname)}</span>
+            <h4 style="margin:0.4rem 0; font-size:1.05rem; font-weight:700;">${escapeHtml(stats.editedTitle || p.title)}</h4>
+          </div>
+        `;
+      }).join('');
+    }
+  }
 }
 async function checkUserSession() {
   if (!supabaseClient) return;
@@ -2053,6 +2161,340 @@ async function handleDealSubmit(e) {
     showPage('deals');
   });
 }
+
+/* 게시물 및 댓글 신고 처리 */
+function openReportModal(targetType, targetId, targetTitle) {
+  if (!currentUser && supabaseClient) {
+    alert('신고 기능을 이용하려면 로그인이 필요합니다.');
+    openModal('loginModal');
+    return;
+  }
+  currentReportTarget = { targetType, targetId, targetTitle };
+  const summaryEl = document.getElementById('reportTargetSummary');
+  if (summaryEl) {
+    summaryEl.innerText = `신고 대상 (${targetType === 'comment' ? '댓글' : '게시글'}): ${targetTitle}`;
+  }
+  document.getElementById('reportForm')?.reset();
+  openModal('reportModal');
+}
+
+async function handleReportSubmit(e) {
+  e.preventDefault();
+  if (!currentReportTarget) return;
+  const btn = document.getElementById('btnSubmitReport');
+
+  await withSubmitLock('reportSubmit', btn, async () => {
+    const reason = document.getElementById('reportReasonSelect').value;
+    const detail = document.getElementById('reportDetailInput').value.trim();
+    const reporterEmail = currentUser?.email || 'guest@plugazit.com';
+
+    const newReport = {
+      id: 'rep_' + Date.now(),
+      targetType: currentReportTarget.targetType,
+      targetId: currentReportTarget.targetId,
+      targetTitle: currentReportTarget.targetTitle,
+      postId: currentOpenPostId,
+      reason,
+      detail,
+      reporterEmail,
+      created_at: new Date().toISOString()
+    };
+
+    if (supabaseClient && currentUser) {
+      try {
+        await supabaseClient.from('reports').insert([{
+          target_type: newReport.targetType,
+          target_id: String(newReport.targetId),
+          target_title: newReport.targetTitle,
+          reason: newReport.reason,
+          detail: newReport.detail,
+          reporter_email: newReport.reporterEmail
+        }]);
+      } catch (err) {}
+    }
+
+    const reportList = getLocalReportsList();
+    reportList.unshift(newReport);
+    saveLocalReportsList(reportList);
+
+    closeModal('reportModal');
+    alert('신고가 정상적으로 접수되었습니다. 관리자 검토 후 조치됩니다.');
+  });
+}
+
+/* 관리자 1:1 문의 처리 */
+function openInquiryModal(defaultCategory = '') {
+  const form = document.getElementById('inquiryForm');
+  if (form) form.reset();
+  const catSelect = document.getElementById('inquiryCategory');
+  if (catSelect && defaultCategory) catSelect.value = defaultCategory;
+  const emailInput = document.getElementById('inquiryReplyEmail');
+  if (emailInput && currentUser?.email) emailInput.value = currentUser.email;
+  openModal('inquiryModal');
+}
+
+async function handleInquirySubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnSubmitInquiry');
+  await withSubmitLock('inquirySubmit', btn, async () => {
+    const category = document.getElementById('inquiryCategory').value;
+    const replyEmail = document.getElementById('inquiryReplyEmail').value.trim();
+    const title = document.getElementById('inquiryTitle').value.trim();
+    const content = document.getElementById('inquiryContent').value.trim();
+    if (!replyEmail || !title || !content) return;
+
+    const newInquiry = {
+      id: 'inq_' + Date.now(),
+      category,
+      replyEmail,
+      title,
+      content,
+      userNickname: originalNickname || currentUser?.user_metadata?.nickname || 'Guest',
+      created_at: new Date().toISOString()
+    };
+
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from('inquiries').insert([{
+          category: newInquiry.category,
+          reply_email: newInquiry.replyEmail,
+          title: newInquiry.title,
+          content: newInquiry.content,
+          user_nickname: newInquiry.userNickname
+        }]);
+      } catch (err) {}
+    }
+
+    const list = getLocalInquiriesList();
+    list.unshift(newInquiry);
+    saveLocalInquiriesList(list);
+
+    closeModal('inquiryModal');
+    alert('관리자에게 1:1 문의가 접수되었습니다. 입력하신 이메일로 회신드리겠습니다.');
+  });
+}
+
+/* Admin Center 통합 관리 대시보드 (신고/문의 관리 + 전체 게시글·댓글 직접 삭제 권한) */
+async function renderAdminDashboard() {
+  if (!isUserAdmin(currentUser) && supabaseClient) return;
+
+  await fetchCommunityPosts();
+
+  const reportsEl = document.getElementById('adminReportsList');
+  const inquiriesEl = document.getElementById('adminInquiriesList');
+  const allPostsEl = document.getElementById('adminAllPostsList');
+  const allCommentsEl = document.getElementById('adminAllCommentsList');
+
+  let reports = getLocalReportsList();
+  let inquiries = getLocalInquiriesList();
+
+  if (supabaseClient) {
+    try {
+      const { data: dbReports } = await supabaseClient.from('reports').select('*').order('created_at', { ascending: false });
+      if (dbReports) {
+        const seen = new Set(reports.map(r => String(r.id)));
+        dbReports.forEach(r => {
+          const key = 'db_rep_' + r.id;
+          if (!seen.has(key)) {
+            reports.push({
+              id: key,
+              targetType: r.target_type || 'post',
+              targetId: r.target_id,
+              targetTitle: r.target_title || '',
+              reason: r.reason || '',
+              detail: r.detail || '',
+              reporterEmail: r.reporter_email || '',
+              created_at: r.created_at
+            });
+          }
+        });
+      }
+    } catch (e) {}
+
+    try {
+      const { data: dbInq } = await supabaseClient.from('inquiries').select('*').order('created_at', { ascending: false });
+      if (dbInq) {
+        const seen = new Set(inquiries.map(i => String(i.id)));
+        dbInq.forEach(i => {
+          const key = 'db_inq_' + i.id;
+          if (!seen.has(key)) {
+            inquiries.push({
+              id: key,
+              category: i.category || '문의',
+              replyEmail: i.reply_email || '',
+              title: i.title || '',
+              content: i.content || '',
+              userNickname: i.user_nickname || '',
+              created_at: i.created_at
+            });
+          }
+        });
+      }
+    } catch (e) {}
+  }
+
+  const repCountEl = document.getElementById('adminReportCount');
+  const inqCountEl = document.getElementById('adminInquiryCount');
+  if (repCountEl) repCountEl.innerText = reports.length;
+  if (inqCountEl) inqCountEl.innerText = inquiries.length;
+
+  if (reportsEl) {
+    if (reports.length === 0) {
+      reportsEl.innerHTML = `<div style="padding:1.2rem; text-align:center; color:var(--text-secondary); font-size:0.84rem;">접수된 신고 내역이 없습니다.</div>`;
+    } else {
+      reportsEl.innerHTML = reports.map(r => {
+        const safeTargetId = typeof r.targetId === 'string' ? `'${r.targetId}'` : r.targetId;
+        const safePostId = typeof r.postId === 'string' ? `'${r.postId}'` : (r.postId || safeTargetId);
+        return `
+          <div class="admin-ticket-card">
+            <div class="admin-ticket-top">
+              <span class="tag-badge" style="background:rgba(231,76,60,0.18); color:#e74c3c;">[${r.targetType === 'comment' ? '댓글' : '게시글'}] ${escapeHtml(r.reason)}</span>
+              <span style="font-size:0.74rem; color:var(--text-secondary);">${escapeHtml(new Date(r.created_at).toLocaleDateString('ko-KR'))}</span>
+            </div>
+            <div style="font-size:0.88rem; font-weight:700; margin:0.35rem 0;">대상: ${escapeHtml(r.targetTitle)}</div>
+            ${r.detail ? `<div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.4rem;">상세: ${escapeHtml(r.detail)}</div>` : ''}
+            <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-top:0.5rem;">
+              ${r.targetType === 'post'
+                ? `<button type="button" class="nav-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem;" onclick="openPostDetail(${safeTargetId})">글 보기</button>
+                   <button type="button" class="nav-btn danger-outline-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem;" onclick="adminForceDeletePost(${safeTargetId}, '${escapeHtml(r.id)}')">게시글 즉시 삭제</button>`
+                : `<button type="button" class="nav-btn danger-outline-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem;" onclick="adminForceDeleteComment(${safePostId}, ${safeTargetId}, '${escapeHtml(r.id)}')">댓글 즉시 삭제</button>`
+              }
+              <button type="button" class="nav-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem;" onclick="resolveAdminReport('${escapeHtml(r.id)}')">처리 완료</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  if (inquiriesEl) {
+    if (inquiries.length === 0) {
+      inquiriesEl.innerHTML = `<div style="padding:1.2rem; text-align:center; color:var(--text-secondary); font-size:0.84rem;">접수된 문의 내역이 없습니다.</div>`;
+    } else {
+      inquiriesEl.innerHTML = inquiries.map(inq => `
+        <div class="admin-ticket-card">
+          <div class="admin-ticket-top">
+            <span class="tag-badge tag-discount">${escapeHtml(inq.category)}</span>
+            <span style="font-size:0.74rem; color:var(--text-secondary);">${escapeHtml(new Date(inq.created_at).toLocaleDateString('ko-KR'))}</span>
+          </div>
+          <div style="font-size:0.9rem; font-weight:800; margin:0.35rem 0;">${escapeHtml(inq.title)}</div>
+          <div style="font-size:0.82rem; color:var(--text-primary); white-space:pre-wrap; margin-bottom:0.5rem;">${escapeHtml(inq.content)}</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem;">
+            <span style="font-size:0.75rem; color:var(--accent-gold); font-weight:700;">${escapeHtml(inq.replyEmail)} (${escapeHtml(inq.userNickname)})</span>
+            <div style="display:flex; gap:0.4rem;">
+              <a href="mailto:${escapeHtml(inq.replyEmail)}?subject=${encodeURIComponent('[PlugAzit 답변] ' + inq.title)}" class="nav-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem; text-decoration:none;">메일 답장</a>
+              <button type="button" class="nav-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem;" onclick="resolveAdminInquiry('${escapeHtml(inq.id)}')">답변 완료</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  /* 전체 게시글 목록 및 즉시 삭제 */
+  const deletedPostIds = getDeletedIds(DELETED_POSTS_STORAGE_KEY);
+  const activePosts = rawCommunityPosts.filter(p => !deletedPostIds.includes(String(p.id)));
+  const allPostsCountEl = document.getElementById('adminAllPostsCount');
+  if (allPostsCountEl) allPostsCountEl.innerText = activePosts.length;
+
+  if (allPostsEl) {
+    if (activePosts.length === 0) {
+      allPostsEl.innerHTML = `<div style="padding:1.2rem; text-align:center; color:var(--text-secondary); font-size:0.84rem;">등록된 게시글이 없습니다.</div>`;
+    } else {
+      allPostsEl.innerHTML = activePosts.map(p => {
+        const stats = getPostStats(p);
+        const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
+        return `
+          <div class="admin-ticket-card" style="display:flex; justify-content:space-between; align-items:center; gap:0.6rem;">
+            <div style="overflow:hidden;">
+              <div style="font-size:0.75rem; color:var(--accent-gold); font-weight:700;">[${escapeHtml(stats.editedCategory || p.category)}] ${escapeHtml(p.author_nickname)}</div>
+              <div style="font-size:0.88rem; font-weight:700; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(stats.editedTitle || p.title)}</div>
+            </div>
+            <div style="display:flex; gap:0.35rem; flex-shrink:0;">
+              <button type="button" class="nav-btn" style="padding:0.25rem 0.6rem; font-size:0.74rem;" onclick="openPostDetail(${safeId})">열람</button>
+              <button type="button" class="nav-btn danger-outline-btn" style="padding:0.25rem 0.6rem; font-size:0.74rem;" onclick="adminForceDeletePost(${safeId})">삭제</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  /* 전체 댓글 목록 및 즉시 삭제 */
+  const allComments = [];
+  const seenCommentKeys = new Set();
+  const localMap = getLocalCommentsMap();
+
+  Object.keys(postCommentsCache).forEach(pid => {
+    (postCommentsCache[pid] || []).forEach(c => {
+      const k = String(c.id || c.created_at);
+      if (!seenCommentKeys.has(k)) {
+        seenCommentKeys.add(k);
+        allComments.push({ ...c, _postId: pid });
+      }
+    });
+  });
+  Object.keys(localMap).forEach(pid => {
+    (localMap[pid] || []).forEach(c => {
+      const k = String(c.id || c.created_at);
+      if (!seenCommentKeys.has(k)) {
+        seenCommentKeys.add(k);
+        allComments.push({ ...c, _postId: pid });
+      }
+    });
+  });
+
+  const allCommentsCountEl = document.getElementById('adminAllCommentsCount');
+  if (allCommentsCountEl) allCommentsCountEl.innerText = allComments.length;
+
+  if (allCommentsEl) {
+    if (allComments.length === 0) {
+      allCommentsEl.innerHTML = `<div style="padding:1.2rem; text-align:center; color:var(--text-secondary); font-size:0.84rem;">등록된 댓글이 없습니다.</div>`;
+    } else {
+      allCommentsEl.innerHTML = allComments.map(c => {
+        const safeCid = typeof c.id === 'string' ? `'${c.id}'` : c.id;
+        const safePid = typeof c._postId === 'string' ? `'${c._postId}'` : c._postId;
+        return `
+          <div class="admin-ticket-card" style="display:flex; justify-content:space-between; align-items:center; gap:0.6rem;">
+            <div style="overflow:hidden;">
+              <div style="font-size:0.75rem; color:var(--accent-gold); font-weight:700;">${escapeHtml(c.author_nickname)}</div>
+              <div style="font-size:0.84rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(c.content)}</div>
+            </div>
+            <div style="display:flex; gap:0.35rem; flex-shrink:0;">
+              <button type="button" class="nav-btn" style="padding:0.25rem 0.6rem; font-size:0.74rem;" onclick="openPostDetail(${safePid})">원문</button>
+              <button type="button" class="nav-btn danger-outline-btn" style="padding:0.25rem 0.6rem; font-size:0.74rem;" onclick="adminForceDeleteComment(${safePid}, ${safeCid})">삭제</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+}
+
+async function adminForceDeletePost(postId, reportId = null) {
+  await deletePost(postId);
+  if (reportId) resolveAdminReport(reportId);
+  showPage('admin');
+}
+
+async function adminForceDeleteComment(postId, commentId, reportId = null) {
+  await deleteCommentItem(postId, commentId);
+  if (reportId) resolveAdminReport(reportId);
+  renderAdminDashboard();
+}
+
+function resolveAdminReport(reportId) {
+  const list = getLocalReportsList().filter(r => String(r.id) !== String(reportId));
+  saveLocalReportsList(list);
+  renderAdminDashboard();
+}
+
+function resolveAdminInquiry(inquiryId) {
+  const list = getLocalInquiriesList().filter(i => String(i.id) !== String(inquiryId));
+  saveLocalInquiriesList(list);
+  renderAdminDashboard();
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const savedTheme = localStorage.getItem('plugazit_theme');
@@ -2064,6 +2506,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (e) {}
   renderSubCategories();
   updateSavedDealCountBadge();
+  updateScrappedPostCountBadge();
   renderDeals();
   await checkUserSession();
   await fetchDealsFromSupabase();

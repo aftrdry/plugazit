@@ -336,6 +336,16 @@ select:focus { border-color: var(--accent-gold) !important; }
 }
 .comm-comment-form textarea:focus { border-color: var(--accent-gold); }
 
+.admin-ticket-list {
+  display: flex; flex-direction: column; gap: 0.8rem; max-height: 440px; overflow-y: auto;
+}
+.admin-ticket-card {
+  background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem;
+}
+.admin-ticket-top {
+  display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+}
+
 .inline-media-box {
   margin: 1rem 0; border-radius: 8px; overflow: hidden;
   border: 1px solid var(--border-color); background: var(--bg-color); padding: 0.8rem;
