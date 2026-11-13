@@ -653,3 +653,148 @@ footer a:hover { color: var(--accent-gold); }
   background: var(--accent-gold);
   border-radius: 2px;
 }
+/* =========================================================
+   MOBILE RESPONSIVE PATCH (PC 화면은 건드리지 않고 모바일만 최적화)
+   ========================================================= */
+@media (max-width: 768px) {
+  body {
+    padding-top: 0 !important;
+  }
+
+  header {
+    position: sticky !important;
+    top: 0;
+    height: auto !important;
+    min-height: unset !important;
+    padding: 0.75rem 1rem !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.65rem !important;
+  }
+
+  .logo-container {
+    height: 44px !important;
+    justify-content: space-between;
+  }
+
+  .brand-logo-img {
+    height: 40px !important;
+  }
+
+  nav {
+    width: 100%;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 0.4rem !important;
+    padding-bottom: 0.2rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-tab-link,
+  .social-link-btn,
+  .nav-btn {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    padding: 0.42rem 0.75rem !important;
+    font-size: 0.82rem !important;
+  }
+
+  .toggle-switch {
+    flex-shrink: 0 !important;
+    margin: 0 0.2rem !important;
+  }
+
+  #authNav, #userNav {
+    gap: 0.4rem !important;
+    flex-shrink: 0 !important;
+    margin-left: auto;
+  }
+
+  .container {
+    padding: 1.2rem 1rem 3rem 1rem !important;
+  }
+
+  .hero-slogan-section {
+    padding: 0.6rem 0 1.4rem 0 !important;
+    margin-bottom: 1.4rem !important;
+  }
+
+  .hero-title {
+    font-size: 1.85rem !important;
+    line-height: 1.25 !important;
+    word-break: keep-all;
+  }
+
+  .hero-subtitle {
+    font-size: 0.95rem !important;
+  }
+
+  .deals-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.2rem !important;
+  }
+
+  .deals-grid.list-mode .deal-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
+  .deals-grid.list-mode .plugin-img-wrapper {
+    width: 100% !important;
+    height: 190px !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+  }
+
+  .deals-grid.list-mode .deal-card-body {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 1.3rem !important;
+    gap: 1rem !important;
+  }
+
+  .deals-grid.list-mode .price-box {
+    text-align: left !important;
+  }
+
+  .filter-control-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.7rem !important;
+  }
+
+  .search-input-box {
+    max-width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  .sort-and-view-controls {
+    width: 100%;
+    justify-content: space-between !important;
+  }
+
+  .sort-select-box {
+    flex: 1;
+  }
+
+  .sort-select-box select {
+    width: 100% !important;
+  }
+
+  .standalone-panel-box {
+    padding: 1.3rem 1rem !important;
+  }
+
+  .modal-box {
+    width: 94% !important;
+    padding: 1.4rem 1.1rem !important;
+    max-height: 88vh !important;
+  }
+}
