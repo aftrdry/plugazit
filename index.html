@@ -20,7 +20,6 @@
 </head>
 <body>
 
-  <!-- Header -->
   <header role="banner">
     <a href="#" class="logo-container" onclick="resetToHome(); return false;" aria-label="PlugAzit 홈으로 이동">
       <img src="PlugAzit.png" alt="PlugAzit" class="brand-logo-img" />
@@ -39,7 +38,6 @@
       </button>
     </nav>
 
-    <!-- 모바일에서도 스크롤에 밀리지 않고 우측 상단에 항상 고정되도록 nav 바깥(header 직속)에 배치 -->
     <div id="authNav">
       <button type="button" class="nav-btn" onclick="openModal('loginModal')">로그인</button>
       <button type="button" class="nav-btn" onclick="openModal('signupModal')">회원가입</button>
@@ -51,7 +49,6 @@
   </header>
 
   <main class="container" role="main">
-    <!-- Hero Slogan: 오직 이곳에만 빈티지 타자기 감성 폰트 포인트 적용 -->
     <div class="hero-slogan-section">
       <span class="hero-eyebrow">ARCHIVE & SOUND CURATION</span>
       <h1 class="hero-title">Right Near, Your Azit.</h1>
@@ -100,7 +97,7 @@
     <section id="communityView" aria-label="프로듀서 커뮤니티">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
         <div>
-          <h2 style="font-weight:700; font-size:1.55rem; letter-spacing:-0.02em;">Producer Community</h2>
+          <h2 style="font-weight:700; font-size:1.5rem; letter-spacing:-0.02em;">Producer Community</h2>
           <p style="color:var(--text-secondary); font-size:0.88rem; margin-top:0.2rem;">사운드 믹싱 팁, 플러그인 활용 노하우, 작업곡 피드백을 자유롭게 나누세요.</p>
         </div>
         <div style="display:flex; gap:0.55rem; align-items:center;">
@@ -140,11 +137,11 @@
       </div>
     </section>
 
-    <!-- POST WRITE / EDIT VIEW (순수 굵게 + 밑줄 + 글자색 강조 + 형광펜 분리 탑재) -->
+    <!-- POST WRITE / EDIT VIEW -->
     <section id="postWriteView" aria-label="커뮤니티 게시글 작성">
       <div class="standalone-panel-box" style="max-width: 800px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.8rem;">
-          <h2 id="postWriteHeading" style="font-weight:700; font-size:1.45rem; color:var(--text-primary);">프로듀서 커뮤니티 글 작성</h2>
+          <h2 id="postWriteHeading" style="font-weight:700; font-size:1.4rem; color:var(--text-primary);">프로듀서 커뮤니티 글 작성</h2>
           <button type="button" class="nav-btn" onclick="showPage('community')">목록으로 돌아가기</button>
         </div>
 
@@ -174,10 +171,27 @@
           <div class="form-group">
             <label for="writeContentEditor">본문 내용</label>
             <div class="editor-toolbar">
-              <button type="button" class="editor-tool-btn" id="btnToolBold" onmousedown="event.preventDefault(); formatEditorText('bold')" title="글자 두께만 굵게"><b>B</b> 굵게</button>
-              <button type="button" class="editor-tool-btn" id="btnToolUnderline" onmousedown="event.preventDefault(); formatEditorText('underline')" title="밑줄"><u>U</u> 밑줄</button>
-              <button type="button" class="editor-tool-btn" id="btnToolColor" onmousedown="event.preventDefault(); formatEditorText('color')" title="선택 영역 골드 글자색 적용"><span class="tool-color-dot"></span>글자색 강조</button>
-              <button type="button" class="editor-tool-btn" id="btnToolHighlight" onmousedown="event.preventDefault(); formatEditorText('highlight')" title="선택 영역 형광펜 하이라이트"><span class="tool-highlight-box">H</span>형광펜</button>
+              <button type="button" class="editor-tool-btn" id="btnToolBold" onmousedown="event.preventDefault(); formatEditorText('bold')">굵게</button>
+              <button type="button" class="editor-tool-btn" id="btnToolUnderline" onmousedown="event.preventDefault(); formatEditorText('underline')">밑줄</button>
+
+              <select id="editorTextColorSelect" class="editor-tool-select" aria-label="글자색 선택" onchange="applyEditorColorOption('foreColor', this.value); this.selectedIndex=0;">
+                <option value="">글자색 선택</option>
+                <option value="default">기본 글자색</option>
+                <option value="#c6ae82">샴페인 골드</option>
+                <option value="#8fa874">세이지 그린</option>
+                <option value="#7ca1b4">스틸 블루</option>
+                <option value="#d46a6a">코랄 레드</option>
+              </select>
+
+              <select id="editorHighlightSelect" class="editor-tool-select" aria-label="형광펜 선택" onchange="applyEditorColorOption('hiliteColor', this.value); this.selectedIndex=0;">
+                <option value="">형광펜 선택</option>
+                <option value="none">형광펜 해제</option>
+                <option value="rgba(198, 174, 130, 0.28)">골드 형광펜</option>
+                <option value="rgba(143, 168, 116, 0.28)">그린 형광펜</option>
+                <option value="rgba(124, 161, 180, 0.28)">블루 형광펜</option>
+                <option value="rgba(212, 106, 106, 0.28)">레드 형광펜</option>
+              </select>
+
               <button type="button" class="editor-tool-btn" onclick="insertEditorLink()">링크 삽입</button>
               <button type="button" class="editor-tool-btn" onclick="insertEditorMedia('image')">이미지 첨부</button>
               <button type="button" class="editor-tool-btn" onclick="insertEditorMedia('video')">유튜브 첨부</button>
@@ -187,7 +201,7 @@
               <div class="editor-guide-placeholder" id="editorGuideOverlay">
                 <h5>커뮤니티 이용 규칙 및 에디터 안내</h5>
                 <p>1. 타인 비방, 불법 크랙 공유, 스팸 게시글은 사전 통보 없이 삭제될 수 있습니다.<br>
-                   2. 상단 툴바의 [굵게], [밑줄], [글자색 강조], [형광펜]을 누르면 기호 노출 없이 작성 화면에 즉시 반영됩니다.</p>
+                   2. 상단 툴바에서 굵게, 밑줄, 글자색 선택, 형광펜 선택을 누르면 기호 없이 작성 화면에 즉시 반영됩니다.</p>
               </div>
               <div id="writeContentEditor" class="editor-textarea wysiwyg-editor" contenteditable="true" role="textbox" aria-multiline="true" oninput="handleEditorTyping()" onkeyup="updateToolbarActiveState()" onmouseup="updateToolbarActiveState()"></div>
               <textarea id="writeContent" style="display:none;" aria-hidden="true"></textarea>
@@ -231,7 +245,7 @@
     <section id="myPageView" aria-label="마이페이지">
       <div class="standalone-panel-box" style="max-width: 720px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.8rem; border-bottom:1px solid var(--border-color); padding-bottom:1.1rem;">
-          <h2 style="font-weight:700; font-size:1.45rem; color:var(--text-primary);">마이페이지 (프로필 및 계정 관리)</h2>
+          <h2 style="font-weight:700; font-size:1.4rem; color:var(--text-primary);">마이페이지 (프로필 및 계정 관리)</h2>
           <button type="button" class="nav-btn" onclick="showPage('deals')">스토어로 돌아가기</button>
         </div>
 
@@ -607,6 +621,9 @@
       <button type="button" class="btn-buy" style="margin-top:1.3rem;" onclick="closeModal('termsModal')">확인</button>
     </div>
   </div>
+
+  <!-- 은은한 빛 입자(Ambient Glow Particle) 캔버스 -->
+  <canvas id="ambientDragCanvas" aria-hidden="true"></canvas>
 
   <script src="app.js"></script>
 </body>
