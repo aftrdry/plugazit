@@ -12,7 +12,6 @@ let editingPostId = null;
 let originalNickname = "";
 let isNicknameVerified = true;
 let currentReportTarget = null;
-let savedEditorRange = null;
 
 if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -43,14 +42,10 @@ function renderSafeContent(rawText) {
   let safe = escapeHtml(rawText);
   safe = safe.replace(/\*\*([\s\S]+?)\*\*/g, '<b style="font-weight:800;">$1</b>');
   safe = safe.replace(/\[밑줄\]([\s\S]+?)\[\/밑줄\]/g, '<u style="text-underline-offset:4px;">$1</u>');
-  safe = safe.replace(/\[색상:(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)\]([\s\S]+?)\[\/색상\]/g, '<span class="comm-custom-color" style="color:$1;">$2</span>');
-  safe = safe.replace(/\[색상\]([\s\S]+?)\[\/색상\]/g, '<span class="comm-custom-color" style="color:#c6ae82;">$1</span>');
-  safe = safe.replace(/\[형광펜:(#[0-9a-fA-F]{3,8}|rgba?\([^\)]+\))\]([\s\S]+?)\[\/형광펜\]/g, '<mark class="comm-custom-hl" style="background:$1; color:inherit; padding:0.08rem 0.28rem; border-radius:4px;">$2</mark>');
-  safe = safe.replace(/\[형광펜\]([\s\S]+?)\[\/형광펜\]/g, '<mark class="comm-custom-hl" style="background:rgba(198,174,130,0.25); color:inherit; padding:0.08rem 0.28rem; border-radius:4px;">$1</mark>');
-
   safe = safe.replace(/\*{4}([^\n]+)/g, '<b style="font-weight:800;">$1</b>');
   safe = safe.replace(/\[밑줄\]\[\/밑줄\]([^\n]+)/g, '<u style="text-underline-offset:4px;">$1</u>');
   safe = safe.replace(/\*{4}/g, '').replace(/\[밑줄\]\[\/밑줄\]/g, '');
+  safe = safe.replace(/\[색상[^\]]*\]|\[\/색상\]|\[형광펜[^\]]*\]|\[\/형광펜\]/g, '');
 
   safe = safe.replace(/!\[이미지첨부\]\((https?:\/\/[^\s)]+)\)/g, '<img src="$1" alt="첨부 이미지" referrerpolicy="no-referrer" style="max-width:100%; border-radius:8px; margin:0.8rem 0; display:block;">');
   safe = safe.replace(/\[(동영상링크|오디오링크|링크)\]\((https?:\/\/[^\s)]+)\)/g, function(match, label, url) {
@@ -70,20 +65,6 @@ function renderSafeContent(rawText) {
   return safe;
 }
 
-function rgbToHexOrRgba(colorStr) {
-  if (!colorStr) return '';
-  const trimmed = colorStr.trim();
-  if (trimmed.startsWith('#') || trimmed.startsWith('rgba')) return trimmed;
-  const m = trimmed.match(/^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
-  if (m) {
-    const r = Number(m[1]).toString(16).padStart(2, '0');
-    const g = Number(m[2]).toString(16).padStart(2, '0');
-    const b = Number(m[3]).toString(16).padStart(2, '0');
-    return `#${r}${g}${b}`;
-  }
-  return trimmed;
-}
-
 function serializeWysiwygEditor(rootEl) {
   if (!rootEl) return '';
   function walk(node) {
@@ -97,18 +78,6 @@ function serializeWysiwygEditor(rootEl) {
 
     if (tag === 'b' || tag === 'strong') return `**${inner}**`;
     if (tag === 'u') return `[밑줄]${inner}[/밑줄]`;
-    if (tag === 'mark') {
-      const bg = rgbToHexOrRgba(node.getAttribute('data-hl') || node.style?.backgroundColor || 'rgba(198,174,130,0.25)');
-      return `[형광펜:${bg}]${inner}[/형광펜]`;
-    }
-    if (tag === 'span' || tag === 'font') {
-      const dataCol = node.getAttribute('data-color') || rgbToHexOrRgba(node.style?.color || node.getAttribute('color') || '');
-      const dataHl = node.getAttribute('data-hl') || rgbToHexOrRgba(node.style?.backgroundColor || '');
-      let res = inner;
-      if (dataCol && dataCol !== 'inherit') res = `[색상:${dataCol}]${res}[/색상]`;
-      if (dataHl && dataHl !== 'transparent' && dataHl !== 'rgba(0, 0, 0, 0)') res = `[형광펜:${dataHl}]${res}[/형광펜]`;
-      return res;
-    }
     if (tag === 'div' || tag === 'p') {
       const prev = node.previousSibling;
       const prefix = (prev && prev.nodeName.toLowerCase() !== 'br') ? '\n' : '';
@@ -124,10 +93,7 @@ function storedTextToWysiwygHtml(rawText) {
   let html = escapeHtml(rawText);
   html = html.replace(/\*\*([\s\S]+?)\*\*/g, '<b>$1</b>');
   html = html.replace(/\[밑줄\]([\s\S]+?)\[\/밑줄\]/g, '<u>$1</u>');
-  html = html.replace(/\[색상:(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)\]([\s\S]+?)\[\/색상\]/g, '<span class="comm-custom-color" data-color="$1" style="color:$1;">$2</span>');
-  html = html.replace(/\[색상\]([\s\S]+?)\[\/색상\]/g, '<span class="comm-custom-color" data-color="#c6ae82" style="color:#c6ae82;">$1</span>');
-  html = html.replace(/\[형광펜:(#[0-9a-fA-F]{3,8}|rgba?\([^\)]+\))\]([\s\S]+?)\[\/형광펜\]/g, '<mark class="comm-custom-hl" data-hl="$1" style="background:$1; color:inherit; padding:0.08rem 0.28rem; border-radius:4px;">$2</mark>');
-  html = html.replace(/\[형광펜\]([\s\S]+?)\[\/형광펜\]/g, '<mark class="comm-custom-hl" data-hl="rgba(198,174,130,0.25)" style="background:rgba(198,174,130,0.25); color:inherit; padding:0.08rem 0.28rem; border-radius:4px;">$1</mark>');
+  html = html.replace(/\[색상[^\]]*\]|\[\/색상\]|\[형광펜[^\]]*\]|\[\/형광펜\]/g, '');
   html = html.replace(/\n/g, '<br>');
   return html;
 }
@@ -1095,58 +1061,37 @@ function renderCommunityPosts() {
   }).join('');
 }
 
-/* 에디터 선택 영역 보존 및 다중 글자색 / 형광펜 옵션 적용 */
-function saveCurrentEditorSelection() {
-  const editorEl = document.getElementById('writeContentEditor');
-  const sel = window.getSelection();
-  if (editorEl && sel && sel.rangeCount > 0) {
-    const range = sel.getRangeAt(0);
-    if (editorEl.contains(range.commonAncestorContainer)) {
-      savedEditorRange = range.cloneRange();
-    }
-  }
-}
-
-function restoreEditorSelection() {
-  const editorEl = document.getElementById('writeContentEditor');
-  if (!editorEl) return;
-  editorEl.focus();
-  if (savedEditorRange) {
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(savedEditorRange);
-  }
-}
-
 function setupEnhancedEditorAndEffects() {
-  // 1) 상세 모달 여백 및 빛나는 스크롤바/파티클 CSS 자동 주입 (기존 파일 수정이 덜 되었더라도 100% 작동 보장)
   if (!document.getElementById('plugazitDynamicEnhanceStyle')) {
     const st = document.createElement('style');
     st.id = 'plugazitDynamicEnhanceStyle';
     st.textContent = `
-      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
       ::-webkit-scrollbar-track { background: var(--bg-color); }
       ::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, rgba(198,174,130,0.32), rgba(74,90,58,0.48));
+        background: linear-gradient(180deg, rgba(198,174,130,0.28), rgba(74,90,58,0.42));
         border-radius: 999px;
-        box-shadow: 0 0 8px rgba(198,174,130,0.22);
+        box-shadow: 0 0 6px rgba(198,174,130,0.18);
       }
       ::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb:active {
-        background: linear-gradient(180deg, rgba(198,174,130,0.65), rgba(92,112,72,0.75));
-        box-shadow: 0 0 14px rgba(198,174,130,0.45);
+        background: linear-gradient(180deg, rgba(198,174,130,0.52), rgba(92,112,72,0.62));
+        box-shadow: 0 0 10px rgba(198,174,130,0.32);
       }
-      .scroll-glow-particle {
-        position: fixed; right: 6px; border-radius: 50%; pointer-events: none; z-index: 9999;
-        background: radial-gradient(circle, rgba(198,174,130,0.75) 0%, rgba(198,174,130,0) 72%);
-        animation: plugazitParticleFade 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      /* 반딧불이처럼 아주 작은 점(1.5px~3px)들이 천천히 은은하게 퍼지는 효과 */
+      .scroll-firefly-dot {
+        position: fixed;
+        right: 5px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        background: rgba(212, 190, 148, 0.65);
+        box-shadow: 0 0 5px 1px rgba(198, 174, 130, 0.38);
+        animation: plugazitFireflyFloat var(--dur, 2.3s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
       }
-      @keyframes plugazitParticleFade {
-        0% { opacity: 0.75; transform: translate(0, 0) scale(1); }
-        100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.15); }
-      }
-      .editor-select-tool {
-        height: 30px !important; padding: 0 1.8rem 0 0.6rem !important; font-size: 0.78rem !important;
-        border-radius: 6px !important; background-position: right 0.5rem center !important;
+      @keyframes plugazitFireflyFloat {
+        0% { opacity: 0; transform: translate(0, 0) scale(0.5); }
+        22% { opacity: var(--max-op, 0.52); transform: translate(calc(var(--dx) * 0.28), calc(var(--dy) * 0.28)) scale(1); }
+        100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.25); }
       }
       .detail-top-header { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; padding-right:2.2rem; margin-bottom:1.2rem; }
       .detail-brand-tag { font-size:0.75rem; font-weight:600; color:var(--accent-gold); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.2rem; }
@@ -1166,63 +1111,13 @@ function setupEnhancedEditorAndEffects() {
     document.head.appendChild(st);
   }
 
-  // 2) 에디터 툴바에 이모티콘 없는 깔끔한 글자색/형광펜 선택 드롭다운 구성
-  const toolbar = document.querySelector('.editor-toolbar');
-  if (toolbar && !document.getElementById('editorTextColorSelect')) {
-    const oldColorBtn = document.getElementById('btnToolColor');
-    const oldHlBtn = document.getElementById('btnToolHighlight');
-    if (oldColorBtn) oldColorBtn.remove();
-    if (oldHlBtn) oldHlBtn.remove();
+  // 글자색 및 형광펜 옵션 요소 완전 제거 (HTML에 남아있더라도 자동 삭제)
+  ['btnToolColor', 'btnToolHighlight', 'editorTextColorSelect', 'editorHighlightSelect'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
 
-    const colorSelect = document.createElement('select');
-    colorSelect.id = 'editorTextColorSelect';
-    colorSelect.className = 'editor-select-tool';
-    colorSelect.setAttribute('aria-label', '글자색 선택');
-    colorSelect.innerHTML = `
-      <option value="">글자색 선택</option>
-      <option value="#c6ae82">샴페인 골드</option>
-      <option value="#8fa874">올리브 그린</option>
-      <option value="#e07a5f">코랄 레드</option>
-      <option value="#7ea8be">스카이 블루</option>
-      <option value="inherit">기본 글자색</option>
-    `;
-    colorSelect.addEventListener('mousedown', saveCurrentEditorSelection);
-    colorSelect.addEventListener('change', function() {
-      applyEditorTextColor(this.value);
-    });
-
-    const hlSelect = document.createElement('select');
-    hlSelect.id = 'editorHighlightSelect';
-    hlSelect.className = 'editor-select-tool';
-    hlSelect.setAttribute('aria-label', '형광펜 선택');
-    hlSelect.innerHTML = `
-      <option value="">형광펜 선택</option>
-      <option value="rgba(198,174,130,0.28)">골드 형광펜</option>
-      <option value="rgba(143,168,116,0.28)">올리브 형광펜</option>
-      <option value="rgba(224,122,95,0.26)">코랄 형광펜</option>
-      <option value="none">형광펜 해제</option>
-    `;
-    hlSelect.addEventListener('mousedown', saveCurrentEditorSelection);
-    hlSelect.addEventListener('change', function() {
-      applyEditorHighlight(this.value);
-    });
-
-    const underlineBtn = document.getElementById('btnToolUnderline');
-    if (underlineBtn && underlineBtn.nextSibling) {
-      toolbar.insertBefore(hlSelect, underlineBtn.nextSibling);
-      toolbar.insertBefore(colorSelect, hlSelect);
-    } else {
-      toolbar.appendChild(colorSelect);
-      toolbar.appendChild(hlSelect);
-    }
-  }
-
-  // 3) 에디터 및 입력창 키보드 홀드(꾹 누르기: ㅇㅇㅇㅇㅇㅇ) 연속 타이핑 보장 엔진
-  const editorEl = document.getElementById('writeContentEditor');
-  if (editorEl) {
-    ['keyup', 'mouseup', 'touchend'].forEach(ev => editorEl.addEventListener(ev, saveCurrentEditorSelection));
-  }
-
+  // 키보드 자판 홀드(꾹 누르기: ㅇㅇㅇㅇㅇㅇ) 연속 타이핑 보장 엔진
   let holdRepeatTimer = null;
   let holdLastKey = '';
   let holdNativeRepeatFired = false;
@@ -1249,7 +1144,7 @@ function setupEnhancedEditorAndEffects() {
           clearInterval(holdRepeatTimer);
           return;
         }
-        if (Date.now() - startTime < 360) return;
+        if (Date.now() - startTime < 350) return;
         if (document.activeElement !== target) {
           clearInterval(holdRepeatTimer);
           return;
@@ -1274,37 +1169,43 @@ function setupEnhancedEditorAndEffects() {
     });
   });
 
-  // 4) 스크롤바 드래그 및 이동 시 은은하게 퍼지는 빛 입자(Subtle Glow Particle) 효과
-  let lastScrollParticleAt = 0;
-  function emitSubtleScrollParticle(intensity = 1) {
+  // 반딧불이처럼 아주 작은 원형 빛 점들이 천천히 퍼지는 스크롤 파티클
+  let lastFireflyAt = 0;
+  function emitFireflyScrollDots(burst = false) {
     const now = Date.now();
-    if (now - lastScrollParticleAt < 65) return;
-    lastScrollParticleAt = now;
+    if (!burst && now - lastFireflyAt < 95) return;
+    lastFireflyAt = now;
 
     const docH = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
     const ratio = Math.min(1, Math.max(0, window.scrollY / docH));
-    const thumbY = 70 + ratio * (window.innerHeight - 140);
+    const thumbY = 60 + ratio * (window.innerHeight - 120);
 
-    const count = intensity > 1 ? 3 : 1;
+    const count = burst ? 3 : (Math.random() > 0.35 ? 1 : 2);
     for (let i = 0; i < count; i++) {
-      const p = document.createElement('div');
-      p.className = 'scroll-glow-particle';
-      const size = (3.5 + Math.random() * 4).toFixed(1);
-      const dx = (-8 - Math.random() * 18).toFixed(1) + 'px';
-      const dy = ((Math.random() - 0.5) * 26).toFixed(1) + 'px';
-      p.style.width = `${size}px`;
-      p.style.height = `${size}px`;
-      p.style.top = `${thumbY + (Math.random() - 0.5) * 24}px`;
-      p.style.setProperty('--dx', dx);
-      p.style.setProperty('--dy', dy);
-      document.body.appendChild(p);
-      setTimeout(() => p.remove(), 900);
+      const dot = document.createElement('div');
+      dot.className = 'scroll-firefly-dot';
+      const size = (1.5 + Math.random() * 1.6).toFixed(1);
+      const dx = (-6 - Math.random() * 20).toFixed(1) + 'px';
+      const dy = ((Math.random() - 0.5) * 32).toFixed(1) + 'px';
+      const dur = (1.9 + Math.random() * 0.9).toFixed(2) + 's';
+      const maxOp = (0.32 + Math.random() * 0.26).toFixed(2);
+
+      dot.style.width = `${size}px`;
+      dot.style.height = `${size}px`;
+      dot.style.top = `${thumbY + (Math.random() - 0.5) * 30}px`;
+      dot.style.setProperty('--dx', dx);
+      dot.style.setProperty('--dy', dy);
+      dot.style.setProperty('--dur', dur);
+      dot.style.setProperty('--max-op', maxOp);
+
+      document.body.appendChild(dot);
+      setTimeout(() => dot.remove(), 2900);
     }
   }
 
-  window.addEventListener('scroll', () => emitSubtleScrollParticle(1), { passive: true });
+  window.addEventListener('scroll', () => emitFireflyScrollDots(false), { passive: true });
   window.addEventListener('mouseup', (e) => {
-    if (window.innerWidth - e.clientX <= 24) emitSubtleScrollParticle(2);
+    if (window.innerWidth - e.clientX <= 24) emitFireflyScrollDots(true);
   });
 }
 
@@ -1363,109 +1264,33 @@ function updateToolbarActiveState() {
   } catch (e) {}
 }
 
-function applyInlineStyleToSelection(type, value) {
-  restoreEditorSelection();
-  const editorEl = document.getElementById('writeContentEditor');
-  if (!editorEl) return;
-  const sel = window.getSelection();
-  if (!sel || sel.rangeCount === 0) return;
-  const range = sel.getRangeAt(0);
-
-  if (value === 'inherit' || value === 'none') {
-    const parentEl = sel.anchorNode?.parentElement;
-    const targetTag = type === 'hl' ? 'mark' : 'span';
-    if (parentEl && parentEl.tagName?.toLowerCase() === targetTag) {
-      const txt = document.createTextNode(parentEl.textContent);
-      parentEl.parentNode.replaceChild(txt, parentEl);
-    }
-    handleEditorTyping();
-    return;
-  }
-
-  const wrapper = document.createElement(type === 'hl' ? 'mark' : 'span');
-  if (type === 'hl') {
-    wrapper.className = 'comm-custom-hl';
-    wrapper.setAttribute('data-hl', value);
-    wrapper.style.backgroundColor = value;
-    wrapper.style.color = 'inherit';
-    wrapper.style.padding = '0.08rem 0.28rem';
-    wrapper.style.borderRadius = '4px';
-  } else {
-    wrapper.className = 'comm-custom-color';
-    wrapper.setAttribute('data-color', value);
-    wrapper.style.color = value;
-  }
-
-  if (!range.collapsed) {
-    wrapper.appendChild(range.extractContents());
-    range.insertNode(wrapper);
-    sel.removeAllRanges();
-    const newRange = document.createRange();
-    newRange.selectNodeContents(wrapper);
-    sel.addRange(newRange);
-    savedEditorRange = newRange.cloneRange();
-  } else {
-    wrapper.innerHTML = '​';
-    range.insertNode(wrapper);
-    const newRange = document.createRange();
-    newRange.setStart(wrapper.firstChild, 1);
-    newRange.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(newRange);
-    savedEditorRange = newRange.cloneRange();
-  }
-  handleEditorTyping();
-}
-
-function applyEditorTextColor(colorVal) {
-  if (!colorVal) return;
-  applyInlineStyleToSelection('color', colorVal);
-  const selEl = document.getElementById('editorTextColorSelect');
-  if (selEl) selEl.value = '';
-}
-
-function applyEditorHighlight(hlVal) {
-  if (!hlVal) return;
-  applyInlineStyleToSelection('hl', hlVal);
-  const selEl = document.getElementById('editorHighlightSelect');
-  if (selEl) selEl.value = '';
-}
-
 function formatEditorText(command) {
   const editorEl = document.getElementById('writeContentEditor');
   if (!editorEl) return;
   editorEl.focus();
   if (command === 'bold' || command === 'underline') {
     document.execCommand(command, false, null);
-  } else if (command === 'color') {
-    applyInlineStyleToSelection('color', '#c6ae82');
-  } else if (command === 'highlight') {
-    applyInlineStyleToSelection('hl', 'rgba(198,174,130,0.28)');
   }
-  saveCurrentEditorSelection();
   handleEditorTyping();
 }
 
 function insertTextAtEditorCursor(text) {
-  restoreEditorSelection();
   const editorEl = document.getElementById('writeContentEditor');
   if (!editorEl) return;
+  editorEl.focus();
   if (!document.execCommand('insertText', false, text)) {
     editorEl.innerHTML += escapeHtml(text).replace(/\n/g, '<br>');
   }
-  saveCurrentEditorSelection();
   handleEditorTyping();
 }
 
 function insertEditorLink() {
-  saveCurrentEditorSelection();
   const url = prompt('삽입할 웹 링크 URL을 입력하세요 (https:// 포함):', 'https://');
   if (!url || !/^https?:\/\//i.test(url.trim())) return;
   insertTextAtEditorCursor(` [링크](${url.trim()}) `);
 }
 
 function insertEditorMedia(type) {
-  saveCurrentEditorSelection();
   let label = '이미지 URL';
   if (type === 'video') label = '유튜브 영상 URL';
   if (type === 'audio') label = 'SoundCloud 링크 또는 오디오(.mp3/.wav) URL';
