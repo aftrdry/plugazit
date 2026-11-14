@@ -11,10 +11,9 @@
   <meta property="og:url" content="https://plugazit.com">
   <meta name="theme-color" content="#101211">
 
-  <!-- 빈티지 타자기 폰트 (Special Elite & Courier Prime) + Pretendard 로드 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -38,20 +37,21 @@
       <button type="button" class="toggle-switch" onclick="toggleTheme()" title="다크/라이트 테마 변경" aria-label="다크 모드 및 라이트 모드 전환">
         <span class="toggle-knob"></span>
       </button>
-      
-      <div id="authNav">
-        <button type="button" class="nav-btn" onclick="openModal('loginModal')">로그인</button>
-        <button type="button" class="nav-btn" onclick="openModal('signupModal')">회원가입</button>
-      </div>
-      <div id="userNav" style="display:none;">
-        <button type="button" class="nav-btn" onclick="showPage('mypage')">마이페이지</button>
-        <button type="button" class="nav-btn" onclick="handleLogout()">로그아웃</button>
-      </div>
     </nav>
+
+    <!-- 모바일에서도 스크롤에 밀리지 않고 우측 상단에 항상 고정되도록 nav 바깥(header 직속)에 배치 -->
+    <div id="authNav">
+      <button type="button" class="nav-btn" onclick="openModal('loginModal')">로그인</button>
+      <button type="button" class="nav-btn" onclick="openModal('signupModal')">회원가입</button>
+    </div>
+    <div id="userNav" style="display:none;">
+      <button type="button" class="nav-btn" onclick="showPage('mypage')">마이페이지</button>
+      <button type="button" class="nav-btn" onclick="handleLogout()">로그아웃</button>
+    </div>
   </header>
 
   <main class="container" role="main">
-    <!-- Hero Slogan: 불필요한 한글 부제를 덜어내고 빈티지 타자기 감성의 핵심 헤드라인만 미니멀하게 배치 -->
+    <!-- Hero Slogan: 오직 이곳에만 빈티지 타자기 감성 폰트 포인트 적용 -->
     <div class="hero-slogan-section">
       <span class="hero-eyebrow">ARCHIVE & SOUND CURATION</span>
       <h1 class="hero-title">Right Near, Your Azit.</h1>
@@ -61,25 +61,25 @@
     <section id="dealsView" aria-label="VST 딜 스토어">
       <div class="category-section">
         <div class="main-cat-bar" role="tablist">
-          <button type="button" class="cat-chip active" id="btnMainCatAll" onclick="setMainCategory('all', this)">전체 딜</button>
+          <button type="button" class="cat-chip active" id="btnMainCatAll" onclick="setMainCategory('all', this)">전체 딜 보기</button>
           <button type="button" class="cat-chip" onclick="setMainCategory('mixing', this)">믹싱 & 마스터링</button>
-          <button type="button" class="cat-chip" onclick="setMainCategory('synth', this)">신디사이저 / 악기</button>
+          <button type="button" class="cat-chip" onclick="setMainCategory('synth', this)">신디사이저 / 가상악기</button>
           <button type="button" class="cat-chip" onclick="setMainCategory('fx', this)">이펙터 & 유틸리티</button>
           <button type="button" class="cat-chip" onclick="setMainCategory('free', this)">100% FREE</button>
           <button type="button" class="cat-chip" id="btnMainCatSaved" onclick="setMainCategory('saved', this)">관심 딜 (<span id="savedDealCount">0</span>)</button>
-          <button type="button" class="cat-chip affiliate" onclick="filterCategory('affiliate', this)">제휴 문의</button>
+          <button type="button" class="cat-chip affiliate" onclick="filterCategory('affiliate', this)">브랜드 제휴 문의</button>
         </div>
         <div class="sub-cat-bar" id="subCatBar"></div>
       </div>
 
       <div class="filter-control-bar">
         <div class="search-input-box">
-          <input type="search" id="dealSearchKeyword" placeholder="플러그인, 브랜드, 키워드 검색..." aria-label="플러그인 검색" oninput="onDealFilterChange()">
+          <input type="search" id="dealSearchKeyword" placeholder="플러그인명, 브랜드, 키워드 검색..." aria-label="플러그인 검색" oninput="onDealFilterChange()">
         </div>
         <div class="sort-and-view-controls">
           <div class="sort-select-box">
             <select id="dealSortOption" aria-label="정렬 기준 선택" onchange="onDealFilterChange()">
-              <option value="recommended">추천순</option>
+              <option value="recommended">추천순 (기본)</option>
               <option value="priceLow">가격 낮은순</option>
               <option value="priceHigh">가격 높은순</option>
               <option value="discountHigh">할인율 높은순</option>
@@ -87,8 +87,8 @@
             </select>
           </div>
           <div class="view-toggle-btns" role="group" aria-label="뷰 모드 전환">
-            <button type="button" class="view-btn active" id="btnCardView" onclick="setDealViewMode('card')">카드</button>
-            <button type="button" class="view-btn" id="btnListView" onclick="setDealViewMode('list')">리스트</button>
+            <button type="button" class="view-btn active" id="btnCardView" onclick="setDealViewMode('card')">카드형</button>
+            <button type="button" class="view-btn" id="btnListView" onclick="setDealViewMode('list')">리스트형</button>
           </div>
         </div>
       </div>
@@ -98,14 +98,14 @@
 
     <!-- COMMUNITY VIEW -->
     <section id="communityView" aria-label="프로듀서 커뮤니티">
-      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1.6rem; flex-wrap:wrap; gap:1rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
         <div>
-          <span class="hero-eyebrow">PRODUCER NOTES</span>
-          <h2 style="font-weight:600; font-size:1.55rem; letter-spacing:-0.02em; margin-top:0.2rem;">Community</h2>
+          <h2 style="font-weight:700; font-size:1.55rem; letter-spacing:-0.02em;">Producer Community</h2>
+          <p style="color:var(--text-secondary); font-size:0.88rem; margin-top:0.2rem;">사운드 믹싱 팁, 플러그인 활용 노하우, 작업곡 피드백을 자유롭게 나누세요.</p>
         </div>
-        <div style="display:flex; gap:0.5rem; align-items:center;">
-          <button type="button" class="nav-btn" style="padding:0.55rem 1rem;" onclick="openInquiryModal()">1:1 문의</button>
-          <button type="button" class="btn-buy" style="width:auto; padding:0.55rem 1.25rem;" onclick="showPostWritePage()">글 작성하기</button>
+        <div style="display:flex; gap:0.55rem; align-items:center;">
+          <button type="button" class="nav-btn" style="padding:0.6rem 1.05rem;" onclick="openInquiryModal()">관리자 문의</button>
+          <button type="button" class="btn-buy" style="width:auto; padding:0.6rem 1.35rem;" onclick="showPostWritePage()">글 작성하기</button>
         </div>
       </div>
 
@@ -116,20 +116,20 @@
         <button type="button" class="cat-chip" onclick="setCommunityCategory('VST/신스', this)">VST/신스</button>
         <button type="button" class="cat-chip" onclick="setCommunityCategory('자유수다', this)">자유수다</button>
         <button type="button" class="cat-chip" onclick="setCommunityCategory('곡피드백', this)">곡 피드백</button>
-        <button type="button" class="cat-chip" id="btnCommCatScrapped" onclick="setCommunityCategory('scrapped', this)">스크랩 (<span id="scrappedPostCount">0</span>)</button>
+        <button type="button" class="cat-chip" id="btnCommCatScrapped" onclick="setCommunityCategory('scrapped', this)">스크랩한 글 (<span id="scrappedPostCount">0</span>)</button>
       </div>
 
       <div class="filter-control-bar">
-        <div class="search-input-box" style="max-width: 480px;">
-          <input type="search" id="commSearchKeyword" placeholder="제목, 내용, 작성자, DAW, 태그 검색..." aria-label="커뮤니티 게시글 검색" oninput="renderCommunityPosts()">
+        <div class="search-input-box" style="max-width: 500px;">
+          <input type="search" id="commSearchKeyword" placeholder="글 제목, 내용, 작성자, DAW, 플러그인 태그 검색..." aria-label="커뮤니티 게시글 검색" oninput="renderCommunityPosts()">
         </div>
         <div class="sort-and-view-controls">
           <div class="sort-select-box">
             <select id="commSortOption" aria-label="커뮤니티 게시글 정렬" onchange="renderCommunityPosts()">
-              <option value="latest">최신순</option>
-              <option value="popular">추천순</option>
-              <option value="comments">댓글순</option>
-              <option value="views">조회순</option>
+              <option value="latest">최신 등록순</option>
+              <option value="popular">추천 인기순</option>
+              <option value="comments">댓글 많은순</option>
+              <option value="views">조회수 높은순</option>
             </select>
           </div>
         </div>
@@ -140,18 +140,18 @@
       </div>
     </section>
 
-    <!-- POST WRITE / EDIT VIEW (실시간 WYSIWYG 에디터 탑재) -->
+    <!-- POST WRITE / EDIT VIEW (순수 굵게 + 밑줄 + 글자색 강조 + 형광펜 분리 탑재) -->
     <section id="postWriteView" aria-label="커뮤니티 게시글 작성">
-      <div class="standalone-panel-box" style="max-width: 780px;">
+      <div class="standalone-panel-box" style="max-width: 800px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.8rem;">
-          <h2 id="postWriteHeading" style="font-weight:600; font-size:1.4rem; color:var(--text-primary);">커뮤니티 노트 작성</h2>
-          <button type="button" class="nav-btn" onclick="showPage('community')">목록으로</button>
+          <h2 id="postWriteHeading" style="font-weight:700; font-size:1.45rem; color:var(--text-primary);">프로듀서 커뮤니티 글 작성</h2>
+          <button type="button" class="nav-btn" onclick="showPage('community')">목록으로 돌아가기</button>
         </div>
 
         <form id="standalonePostForm" onsubmit="handleStandalonePostSubmit(event)">
           <div class="admin-grid-2">
             <div class="form-group">
-              <label for="writeCategorySelect">카테고리</label>
+              <label for="writeCategorySelect">게시판 카테고리</label>
               <select id="writeCategorySelect">
                 <option value="믹싱/마스터링">믹싱/마스터링</option>
                 <option value="VST/신스">VST/신스</option>
@@ -161,7 +161,7 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="writePluginTag">관련 장비 / 플러그인 태그 (선택)</label>
+              <label for="writePluginTag">관련 플러그인 / 장비 태그 (선택)</label>
               <input type="text" id="writePluginTag" maxlength="50" placeholder="예: Pro-Q 3, Serum, 보컬믹싱">
             </div>
           </div>
@@ -172,31 +172,32 @@
           </div>
           
           <div class="form-group">
-            <label for="writeContentEditor">본문 내용 (드래그 또는 버튼 클릭 시 효과가 즉시 적용됩니다)</label>
+            <label for="writeContentEditor">본문 내용</label>
             <div class="editor-toolbar">
-              <button type="button" class="editor-tool-btn" id="btnToolBold" onmousedown="event.preventDefault(); formatEditorText('bold')"><b>B</b> 굵게</button>
-              <button type="button" class="editor-tool-btn" id="btnToolUnderline" onmousedown="event.preventDefault(); formatEditorText('underline')"><u>U</u> 밑줄</button>
-              <button type="button" class="editor-tool-btn" onclick="insertEditorLink()">링크</button>
-              <button type="button" class="editor-tool-btn" onclick="insertEditorMedia('image')">이미지</button>
-              <button type="button" class="editor-tool-btn" onclick="insertEditorMedia('video')">유튜브</button>
-              <button type="button" class="editor-tool-btn" onclick="insertEditorMedia('audio')">오디오/SoundCloud</button>
+              <button type="button" class="editor-tool-btn" id="btnToolBold" onmousedown="event.preventDefault(); formatEditorText('bold')" title="글자 두께만 굵게"><b>B</b> 굵게</button>
+              <button type="button" class="editor-tool-btn" id="btnToolUnderline" onmousedown="event.preventDefault(); formatEditorText('underline')" title="밑줄"><u>U</u> 밑줄</button>
+              <button type="button" class="editor-tool-btn" id="btnToolColor" onmousedown="event.preventDefault(); formatEditorText('color')" title="선택 영역 골드 글자색 적용"><span class="tool-color-dot"></span>글자색 강조</button>
+              <button type="button" class="editor-tool-btn" id="btnToolHighlight" onmousedown="event.preventDefault(); formatEditorText('highlight')" title="선택 영역 형광펜 하이라이트"><span class="tool-highlight-box">H</span>형광펜</button>
+              <button type="button" class="editor-tool-btn" onclick="insertEditorLink()">링크 삽입</button>
+              <button type="button" class="editor-tool-btn" onclick="insertEditorMedia('image')">이미지 첨부</button>
+              <button type="button" class="editor-tool-btn" onclick="insertEditorMedia('video')">유튜브 첨부</button>
+              <button type="button" class="editor-tool-btn" onclick="insertEditorMedia('audio')">오디오/사운드클라우드</button>
             </div>
             <div class="editor-textarea-wrapper">
               <div class="editor-guide-placeholder" id="editorGuideOverlay">
-                <h5>클린 프로듀서 가이드</h5>
-                <p>타인 비방, 불법 크랙 공유, 스팸 게시물은 예고 없이 삭제됩니다.<br>
-                   상단 [굵게], [밑줄] 버튼을 누르면 기호 노출 없이 즉시 서식이 반영됩니다.</p>
+                <h5>커뮤니티 이용 규칙 및 에디터 안내</h5>
+                <p>1. 타인 비방, 불법 크랙 공유, 스팸 게시글은 사전 통보 없이 삭제될 수 있습니다.<br>
+                   2. 상단 툴바의 [굵게], [밑줄], [글자색 강조], [형광펜]을 누르면 기호 노출 없이 작성 화면에 즉시 반영됩니다.</p>
               </div>
-              <!-- 기호(** / [밑줄]) 없이 즉시 서식이 보이는 실시간 WYSIWYG 편집 영역 -->
               <div id="writeContentEditor" class="editor-textarea wysiwyg-editor" contenteditable="true" role="textbox" aria-multiline="true" oninput="handleEditorTyping()" onkeyup="updateToolbarActiveState()" onmouseup="updateToolbarActiveState()"></div>
               <textarea id="writeContent" style="display:none;" aria-hidden="true"></textarea>
             </div>
-            <p style="font-size:0.74rem; color:var(--text-secondary); margin-top:0.45rem;">유튜브, SoundCloud, 오디오(.mp3/.wav) URL 첨부 시 본문 내 플레이어가 자동 생성됩니다.</p>
+            <p style="font-size:0.76rem; color:var(--text-secondary); margin-top:0.45rem;">유튜브, SoundCloud 링크 또는 직접 오디오(.mp3, .wav) URL 첨부 시 본문에서 바로 재생됩니다.</p>
           </div>
 
           <div style="display:flex; gap:0.8rem; margin-top:1.5rem;">
-            <button type="submit" class="btn-buy" id="btnSubmitPost" style="flex:1;">작성 완료</button>
-            <button type="button" class="nav-btn" style="padding: 0.75rem 1.4rem;" onclick="cancelPostWrite()">취소</button>
+            <button type="submit" class="btn-buy" id="btnSubmitPost" style="flex:1;">작성 완료 및 등록</button>
+            <button type="button" class="nav-btn" style="padding: 0.78rem 1.5rem;" onclick="cancelPostWrite()">취소</button>
           </div>
         </form>
       </div>
@@ -204,22 +205,22 @@
 
     <!-- POST DETAIL & COMMENTS VIEW -->
     <section id="postDetailView" aria-label="게시글 상세 보기">
-      <div class="standalone-panel-box" style="max-width: 820px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:1px solid var(--border-color); padding-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
-          <button type="button" class="nav-btn" onclick="showPage('community')">목록으로</button>
+      <div class="standalone-panel-box" style="max-width: 840px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:1px solid var(--border-color); padding-bottom:1.1rem; flex-wrap:wrap; gap:0.5rem;">
+          <button type="button" class="nav-btn" onclick="showPage('community')">목록으로 돌아가기</button>
           <div id="postDetailActionBtns" style="display:flex; gap:0.45rem; flex-wrap:wrap;"></div>
         </div>
         <div id="postDetailContainer"></div>
 
         <div class="comm-comments-section" id="postCommentsSection">
           <div class="comm-comments-header">
-            <h4>댓글 <span id="postCommentCountBadge" style="color:var(--accent-gold); font-family:var(--font-mono);">0</span></h4>
+            <h4>프로듀서 댓글 및 피드백 <span id="postCommentCountBadge" style="color:var(--accent-gold);">0</span></h4>
           </div>
           <div id="postCommentsList" class="comm-comments-list"></div>
           <form id="postCommentForm" class="comm-comment-form" onsubmit="handleCommentSubmit(event)">
-            <textarea id="commentInputText" rows="3" required maxlength="2000" placeholder="믹싱 조언, 플러그인 팁, 또는 곡에 대한 피드백을 남겨주세요..."></textarea>
+            <textarea id="commentInputText" rows="3" required maxlength="2000" placeholder="믹싱 조언, 플러그인 팁, 또는 곡에 대한 건설적인 피드백을 남겨주세요..."></textarea>
             <div style="display:flex; justify-content:flex-end; margin-top:0.6rem;">
-              <button type="submit" class="btn-buy" id="btnSubmitComment" style="width:auto; padding:0.55rem 1.3rem;">댓글 등록</button>
+              <button type="submit" class="btn-buy" id="btnSubmitComment" style="width:auto; padding:0.58rem 1.35rem;">댓글 등록</button>
             </div>
           </form>
         </div>
@@ -228,16 +229,16 @@
 
     <!-- MY PAGE VIEW -->
     <section id="myPageView" aria-label="마이페이지">
-      <div class="standalone-panel-box" style="max-width: 700px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.8rem; border-bottom:1px solid var(--border-color); padding-bottom:1rem;">
-          <h2 style="font-weight:600; font-size:1.4rem; color:var(--text-primary);">마이페이지</h2>
-          <button type="button" class="nav-btn" onclick="showPage('deals')">스토어로</button>
+      <div class="standalone-panel-box" style="max-width: 720px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.8rem; border-bottom:1px solid var(--border-color); padding-bottom:1.1rem;">
+          <h2 style="font-weight:700; font-size:1.45rem; color:var(--text-primary);">마이페이지 (프로필 및 계정 관리)</h2>
+          <button type="button" class="nav-btn" onclick="showPage('deals')">스토어로 돌아가기</button>
         </div>
 
         <div class="main-cat-bar" style="margin-bottom: 1.8rem;">
           <button type="button" class="cat-chip active" onclick="switchMyPageTab('profile', this)">프로필 설정</button>
-          <button type="button" class="cat-chip" onclick="switchMyPageTab('security', this)">계정 보안</button>
-          <button type="button" class="cat-chip" onclick="switchMyPageTab('activity', this)">내 활동 / 스크랩</button>
+          <button type="button" class="cat-chip" onclick="switchMyPageTab('security', this)">비밀번호 및 계정 보안</button>
+          <button type="button" class="cat-chip" onclick="switchMyPageTab('activity', this)">내 활동 (작성글 / 스크랩)</button>
         </div>
 
         <div id="mpTabProfile" class="mp-tab-content">
@@ -252,10 +253,10 @@
                 <input type="text" id="myPageNickname" required maxlength="30" placeholder="@aftrdry" oninput="onNicknameInputChanged()">
                 <button type="button" class="nickname-check-btn" onclick="checkNicknameDuplicate()">중복 확인</button>
               </div>
-              <p id="nicknameCheckMsg" style="font-size:0.76rem; margin-top:0.4rem;"></p>
+              <p id="nicknameCheckMsg" style="font-size:0.78rem; margin-top:0.4rem;"></p>
             </div>
             <div class="form-group">
-              <label for="myPageDaw">주 사용 DAW</label>
+              <label for="myPageDaw">주 사용 DAW (커뮤니티 활동 시 프로필 배지로 표시됩니다)</label>
               <select id="myPageDaw">
                 <option value="Logic Pro">Logic Pro</option>
                 <option value="Cubase">Cubase</option>
@@ -266,7 +267,7 @@
                 <option value="Reaper">Reaper</option>
               </select>
             </div>
-            <button type="submit" class="btn-buy" id="btnSaveProfile" style="margin-top:1.2rem;">프로필 저장</button>
+            <button type="submit" class="btn-buy" id="btnSaveProfile" style="margin-top:1.3rem;">프로필 정보 저장</button>
           </form>
         </div>
 
@@ -293,23 +294,23 @@
                 <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('confirmNewPassword', this)">보기</button>
               </div>
             </div>
-            <button type="submit" class="btn-buy" id="btnChangePw" style="margin-top:1.2rem;">비밀번호 변경</button>
+            <button type="submit" class="btn-buy" id="btnChangePw" style="margin-top:1.3rem;">비밀번호 안전하게 변경</button>
           </form>
 
           <div class="account-danger-zone">
-            <h4>회원 탈퇴 및 데이터 파기</h4>
-            <p>탈퇴 시 프로필 및 작성 게시글이 즉시 파기되며 복구할 수 없습니다.</p>
+            <h4>회원 탈퇴 및 개인정보 파기</h4>
+            <p>탈퇴 시 프로필 정보 및 작성하신 커뮤니티 게시글 데이터가 즉시 파기되며 복구할 수 없습니다.</p>
             <button type="button" class="nav-btn danger-outline-btn" onclick="handleAccountDeleteRequest()">회원 탈퇴 신청</button>
           </div>
         </div>
 
         <div id="mpTabActivity" class="mp-tab-content" style="display:none;">
-          <h4 style="font-weight:600; font-size:1rem; margin-bottom:0.8rem; color:var(--text-primary);">내가 작성한 게시글</h4>
+          <h4 style="font-weight:600; font-size:1.05rem; margin-bottom:0.9rem; color:var(--text-primary);">내가 작성한 커뮤니티 게시글</h4>
           <div id="myActivityList" style="margin-bottom:2rem;">
             <p style="color:var(--text-secondary); text-align:center; padding: 1.5rem;">작성한 게시글을 불러오는 중입니다...</p>
           </div>
 
-          <h4 style="font-weight:600; font-size:1rem; margin-bottom:0.8rem; color:var(--accent-gold); border-top:1px solid var(--border-color); padding-top:1.4rem;">스크랩한 게시글</h4>
+          <h4 style="font-weight:600; font-size:1.05rem; margin-bottom:0.9rem; color:var(--accent-gold); border-top:1px solid var(--border-color); padding-top:1.5rem;">내가 스크랩한 커뮤니티 글</h4>
           <div id="myScrappedList">
             <p style="color:var(--text-secondary); text-align:center; padding: 1.5rem;">스크랩한 게시글이 없습니다.</p>
           </div>
@@ -320,8 +321,8 @@
     <!-- ADMIN VIEW -->
     <section id="adminView" aria-label="관리자 센터">
       <div class="standalone-panel-box" style="margin-bottom:2rem;">
-        <h2 style="font-weight:600; font-size:1.35rem; margin-bottom:0.35rem; color:var(--accent-gold);">VST Deal Management</h2>
-        <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1.4rem;">등록된 상품은 Supabase 'deals' 테이블에 영구 저장됩니다.</p>
+        <h2 style="font-weight:700; font-size:1.35rem; margin-bottom:0.35rem; color:var(--accent-gold);">VST Deal Management (Admin)</h2>
+        <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:1.4rem;">등록된 상품은 Supabase 데이터베이스('deals' 테이블)에 영구 저장됩니다.</p>
         <form id="dealForm" onsubmit="handleDealSubmit(event)">
           <div class="admin-grid-2">
             <div class="form-group"><label for="dealBrand">브랜드명</label><input type="text" id="dealBrand" required placeholder="예: FabFilter"></div>
@@ -330,23 +331,23 @@
           <div class="admin-grid-4">
             <div class="form-group"><label for="dealMainCat">메인 카테고리</label>
               <select id="dealMainCat">
-                <option value="synth">신디사이저 / 악기</option>
+                <option value="synth">신디사이저 / 가상악기</option>
                 <option value="mixing">믹싱 & 마스터링</option>
                 <option value="fx">이펙터 & 유틸리티</option>
                 <option value="free">100% FREE</option>
               </select>
             </div>
-            <div class="form-group"><label for="dealSubCat">서브 태그</label><input type="text" id="dealSubCat" placeholder="예: EQ, Synth"></div>
+            <div class="form-group"><label for="dealSubCat">서브 카테고리 태그</label><input type="text" id="dealSubCat" placeholder="예: EQ, Synth"></div>
             <div class="form-group"><label for="dealOrigPrice">정가 ($)</label><input type="number" step="0.01" min="0" id="dealOrigPrice" required placeholder="179"></div>
             <div class="form-group"><label for="dealDiscPrice">할인가 ($)</label><input type="number" step="0.01" min="0" id="dealDiscPrice" required placeholder="134"></div>
           </div>
           <div class="admin-grid-2">
-            <div class="form-group"><label for="dealImgUrl">제품 UI 이미지 URL</label><input type="url" id="dealImgUrl" placeholder="https://... (미입력 시 유튜브 HD 썸네일 자동 적용)"></div>
-            <div class="form-group"><label for="dealYoutubeInput">공식 유튜브 URL 또는 ID</label><input type="text" id="dealYoutubeInput" placeholder="예: https://youtu.be/d9W2j2_y4v8"></div>
+            <div class="form-group"><label for="dealImgUrl">제품 실제 UI 이미지 URL</label><input type="url" id="dealImgUrl" placeholder="https://... (미입력 시 유튜브 공식 HD 썸네일 자동 적용)"></div>
+            <div class="form-group"><label for="dealYoutubeInput">공식 유튜브 영상 URL 또는 11자리 ID</label><input type="text" id="dealYoutubeInput" placeholder="예: https://youtu.be/d9W2j2_y4v8"></div>
           </div>
-          <div class="form-group"><label for="dealDesc">핵심 한 줄 설명</label><textarea id="dealDesc" rows="2" required placeholder="핵심 기능 요약"></textarea></div>
-          <div class="form-group"><label for="dealUrl">구매 링크 URL</label><input type="url" id="dealUrl" required placeholder="https://..."></div>
-          <button type="submit" class="btn-buy" id="btnSubmitDeal" style="margin-top:0.8rem;">딜 등록 / 업데이트</button>
+          <div class="form-group"><label for="dealDesc">상세 설명</label><textarea id="dealDesc" rows="2" required placeholder="공식 홈페이지 기준 핵심 기능 요약"></textarea></div>
+          <div class="form-group"><label for="dealUrl">제휴/구매 링크 URL</label><input type="url" id="dealUrl" required placeholder="https://..."></div>
+          <button type="submit" class="btn-buy" id="btnSubmitDeal" style="margin-top:0.8rem;">새로운 딜 DB 등록 / 업데이트</button>
         </form>
       </div>
 
@@ -354,7 +355,7 @@
       <div class="admin-grid-2" style="align-items:start; margin-bottom:2rem;">
         <div class="standalone-panel-box" style="margin:0;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
-            <h3 style="font-weight:600; font-size:1.1rem; color:#e74c3c;">신고 접수 내역 (<span id="adminReportCount">0</span>)</h3>
+            <h3 style="font-weight:700; font-size:1.1rem; color:#e74c3c;">커뮤니티 신고 접수 내역 (<span id="adminReportCount">0</span>)</h3>
             <button type="button" class="nav-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem;" onclick="renderAdminDashboard()">새로고침</button>
           </div>
           <div id="adminReportsList" class="admin-ticket-list"></div>
@@ -362,7 +363,7 @@
 
         <div class="standalone-panel-box" style="margin:0;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
-            <h3 style="font-weight:600; font-size:1.1rem; color:var(--accent-gold);">1:1 문의 내역 (<span id="adminInquiryCount">0</span>)</h3>
+            <h3 style="font-weight:700; font-size:1.1rem; color:var(--accent-gold);">1:1 관리자 문의 내역 (<span id="adminInquiryCount">0</span>)</h3>
             <button type="button" class="nav-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem;" onclick="renderAdminDashboard()">새로고침</button>
           </div>
           <div id="adminInquiriesList" class="admin-ticket-list"></div>
@@ -373,17 +374,17 @@
       <div class="standalone-panel-box" style="margin-bottom:2rem;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem; flex-wrap:wrap; gap:0.5rem;">
           <div>
-            <h3 style="font-weight:600; font-size:1.15rem; color:var(--accent-gold);">게시글 & 댓글 통합 관리</h3>
+            <h3 style="font-weight:700; font-size:1.15rem; color:var(--accent-gold);">커뮤니티 게시글 & 댓글 통합 관리 (관리자 삭제 권한)</h3>
           </div>
           <button type="button" class="nav-btn" style="padding:0.35rem 0.8rem; font-size:0.78rem;" onclick="renderAdminDashboard()">목록 새로고침</button>
         </div>
         <div class="admin-grid-2" style="align-items:start; margin-top:1rem;">
           <div>
-            <h4 style="font-weight:600; font-size:0.9rem; margin-bottom:0.7rem; color:var(--text-secondary);">전체 게시글 (<span id="adminAllPostsCount">0</span>)</h4>
+            <h4 style="font-weight:600; font-size:0.9rem; margin-bottom:0.7rem; color:var(--text-secondary);">전체 게시글 관리 (<span id="adminAllPostsCount">0</span>)</h4>
             <div id="adminAllPostsList" class="admin-ticket-list"></div>
           </div>
           <div>
-            <h4 style="font-weight:600; font-size:0.9rem; margin-bottom:0.7rem; color:var(--text-secondary);">전체 댓글 (<span id="adminAllCommentsCount">0</span>)</h4>
+            <h4 style="font-weight:600; font-size:0.9rem; margin-bottom:0.7rem; color:var(--text-secondary);">전체 댓글 관리 (<span id="adminAllCommentsCount">0</span>)</h4>
             <div id="adminAllCommentsList" class="admin-ticket-list"></div>
           </div>
         </div>
@@ -392,15 +393,15 @@
   </main>
 
   <footer role="contentinfo">
-    <p style="font-family:var(--font-mono); font-size:0.78rem;">© 2026 PlugAzit. All rights reserved.  |  
-       <a href="mailto:aftrdry@outlook.kr">aftrdry@outlook.kr</a>
+    <p>© 2026 PlugAzit. All rights reserved.  |  
+       Contact: <a href="mailto:aftrdry@outlook.kr">aftrdry@outlook.kr</a>
     </p>
     <div class="footer-links">
-      <button type="button" onclick="openLegalModal('terms')">이용약관</button>
-      <span>·</span>
-      <button type="button" onclick="openLegalModal('privacy')" style="color:var(--text-primary);">개인정보 처리방침</button>
-      <span>·</span>
-      <button type="button" onclick="openInquiryModal()">1:1 문의</button>
+      <button type="button" onclick="openLegalModal('terms')">서비스 이용약관</button>
+      <span>|</span>
+      <button type="button" onclick="openLegalModal('privacy')" style="color:var(--text-primary); font-weight:600;">개인정보 처리방침</button>
+      <span>|</span>
+      <button type="button" onclick="openInquiryModal()">관리자 문의</button>
     </div>
   </footer>
 
@@ -416,8 +417,8 @@
   <div class="modal-overlay" id="reportModal" role="dialog" aria-modal="true" aria-label="게시물 신고" onclick="checkModalBackdropClose(event, 'reportModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('reportModal')">×</button>
-      <h3 style="margin-bottom:0.5rem; font-weight:600; color:#e74c3c;">게시물 신고</h3>
-      <p id="reportTargetSummary" style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1.2rem;"></p>
+      <h3 style="margin-bottom:0.5rem; font-weight:700; color:#e74c3c;">커뮤니티 게시물 신고</h3>
+      <p id="reportTargetSummary" style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:1.2rem;"></p>
       <form id="reportForm" onsubmit="handleReportSubmit(event)">
         <div class="form-group">
           <label for="reportReasonSelect">신고 사유</label>
@@ -433,7 +434,7 @@
           <label for="reportDetailInput">상세 사유 (선택)</label>
           <textarea id="reportDetailInput" rows="3" maxlength="500" placeholder="구체적인 신고 사유를 입력해 주세요."></textarea>
         </div>
-        <button type="submit" class="btn-buy" id="btnSubmitReport" style="background:#b83b2b; margin-top:0.8rem;">신고 접수</button>
+        <button type="submit" class="btn-buy" id="btnSubmitReport" style="background:#b83b2b; margin-top:0.8rem;">신고 접수하기</button>
       </form>
     </div>
   </div>
@@ -442,8 +443,8 @@
   <div class="modal-overlay" id="inquiryModal" role="dialog" aria-modal="true" aria-label="관리자 문의" onclick="checkModalBackdropClose(event, 'inquiryModal')">
     <div class="modal-box" style="max-width:520px;" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('inquiryModal')">×</button>
-      <h3 style="margin-bottom:0.4rem; font-weight:600; color:var(--accent-gold);">1:1 문의</h3>
-      <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1.2rem;">이용 문의, 딜 제보, 버그 리포트 및 제휴 제안을 남겨주세요.</p>
+      <h3 style="margin-bottom:0.4rem; font-weight:700; color:var(--accent-gold);">관리자 1:1 문의</h3>
+      <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:1.2rem;">서비스 이용 문의, 딜 제보, 버그 리포트 및 브랜드 제휴 문의를 남겨주세요.</p>
       <form id="inquiryForm" onsubmit="handleInquirySubmit(event)">
         <div class="admin-grid-2">
           <div class="form-group">
@@ -461,14 +462,14 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="inquiryTitle">제목</label>
+          <label for="inquiryTitle">문의 제목</label>
           <input type="text" id="inquiryTitle" required maxlength="120" placeholder="제목을 입력해 주세요">
         </div>
         <div class="form-group">
-          <label for="inquiryContent">내용</label>
-          <textarea id="inquiryContent" rows="4" required maxlength="2000" placeholder="내용을 작성해 주세요..."></textarea>
+          <label for="inquiryContent">문의 내용</label>
+          <textarea id="inquiryContent" rows="4" required maxlength="2000" placeholder="문의 내용을 상세히 작성해 주세요..."></textarea>
         </div>
-        <button type="submit" class="btn-buy" id="btnSubmitInquiry" style="margin-top:0.8rem;">문의 전송</button>
+        <button type="submit" class="btn-buy" id="btnSubmitInquiry" style="margin-top:0.8rem;">문의 접수하기</button>
       </form>
     </div>
   </div>
@@ -476,7 +477,7 @@
   <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-label="로그인" onclick="checkModalBackdropClose(event, 'loginModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('loginModal')">×</button>
-      <h3 style="margin-bottom:1.4rem; font-weight:600;">로그인</h3>
+      <h3 style="margin-bottom:1.4rem; font-weight:700;">로그인</h3>
       <form onsubmit="handleLoginSubmit(event)">
         <div class="form-group">
           <label for="loginEmail">이메일 계정</label>
@@ -490,7 +491,7 @@
           </div>
         </div>
         <div class="find-auth-links">
-          <a href="#" onclick="openModal('findEmailModal'); closeModal('loginModal'); return false;">이메일 힌트 찾기</a>
+          <a href="#" onclick="openModal('findEmailModal'); closeModal('loginModal'); return false;">아이디(이메일) 힌트 찾기</a>
           <a href="#" onclick="openModal('resetPwModal'); closeModal('loginModal'); return false;">비밀번호 재설정</a>
         </div>
         <button type="submit" class="btn-buy" id="btnLoginSubmit" style="margin-top:1.2rem;">로그인</button>
@@ -501,9 +502,9 @@
   <div class="modal-overlay" id="resetPwModal" role="dialog" aria-modal="true" aria-label="비밀번호 재설정" onclick="checkModalBackdropClose(event, 'resetPwModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('resetPwModal')">×</button>
-      <h3 style="margin-bottom:1rem; font-weight:600;">비밀번호 재설정</h3>
-      <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1.2rem;">
-        가입하신 이메일 주소를 입력하시면 재설정 링크를 발송해 드립니다.
+      <h3 style="margin-bottom:1rem; font-weight:700;">비밀번호 재설정</h3>
+      <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:1.2rem;">
+        가입하신 이메일 주소를 입력하시면 비밀번호 재설정 링크를 발송해 드립니다.
       </p>
       <form onsubmit="handleResetPasswordSubmit(event)">
         <div class="form-group">
@@ -518,9 +519,9 @@
   <div class="modal-overlay" id="findEmailModal" role="dialog" aria-modal="true" aria-label="아이디 힌트 찾기" onclick="checkModalBackdropClose(event, 'findEmailModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('findEmailModal')">×</button>
-      <h3 style="margin-bottom:1rem; font-weight:600;">이메일 힌트 찾기</h3>
-      <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1.2rem;">
-        등록한 프로듀서 닉네임을 입력하시면 가입 이메일 힌트를 제공합니다.
+      <h3 style="margin-bottom:1rem; font-weight:700;">아이디 힌트 찾기</h3>
+      <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:1.2rem;">
+        가입 시 등록한 프로듀서 닉네임을 입력하시면 가입 이메일 힌트를 제공합니다.
       </p>
       <form onsubmit="handleFindEmailSubmit(event)">
         <div class="form-group">
@@ -535,7 +536,7 @@
   <div class="modal-overlay" id="signupModal" role="dialog" aria-modal="true" aria-label="회원가입" onclick="checkModalBackdropClose(event, 'signupModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('signupModal')">×</button>
-      <h3 style="margin-bottom:1.4rem; font-weight:600;">회원가입</h3>
+      <h3 style="margin-bottom:1.4rem; font-weight:700;">회원가입</h3>
       <form onsubmit="handleSignupSubmit(event)">
         <div class="form-group">
           <label for="signupNickname">프로듀서 닉네임</label>
@@ -552,13 +553,13 @@
             <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('signupPassword', this)">보기</button>
           </div>
         </div>
-        <div class="form-group" style="margin-top: 1rem;">
-          <label style="display:flex; align-items:flex-start; gap:0.5rem; cursor:pointer; font-weight:400; font-size:0.8rem; line-height:1.5;">
+        <div class="form-group" style="margin-top: 1.1rem;">
+          <label style="display:flex; align-items:flex-start; gap:0.5rem; cursor:pointer; font-weight:400; font-size:0.82rem; line-height:1.5;">
             <input type="checkbox" id="termsCheck" required style="width:auto; margin-top:0.25rem;">
-            <span>[필수] 만 14세 이상이며, <a href="#" onclick="openLegalModal('terms'); return false;" style="color:var(--accent-gold); text-decoration:underline;">이용약관</a> 및 <a href="#" onclick="openLegalModal('privacy'); return false;" style="color:var(--accent-gold); text-decoration:underline;">개인정보 처리방침</a>에 동의합니다.</span>
+            <span>[필수] 만 14세 이상이며, <a href="#" onclick="openLegalModal('terms'); return false;" style="color:var(--accent-gold); text-decoration:underline;">서비스 이용약관</a> 및 <a href="#" onclick="openLegalModal('privacy'); return false;" style="color:var(--accent-gold); text-decoration:underline;">개인정보 처리방침</a>에 동의합니다.</span>
           </label>
         </div>
-        <button type="submit" class="btn-buy" id="btnSignupSubmit" style="margin-top:1.2rem;">가입 완료</button>
+        <button type="submit" class="btn-buy" id="btnSignupSubmit" style="margin-top:1.3rem;">가입 완료</button>
       </form>
     </div>
   </div>
@@ -566,7 +567,7 @@
   <div class="modal-overlay" id="termsModal" role="dialog" aria-modal="true" aria-label="약관 및 개인정보 처리방침" onclick="checkModalBackdropClose(event, 'termsModal')">
     <div class="modal-box" style="max-width: 620px;" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('termsModal')">×</button>
-      <h3 style="margin-bottom:1rem; font-weight:600;">약관 및 법적 고지</h3>
+      <h3 style="margin-bottom:1.1rem; font-weight:700;">약관 및 법적 고지</h3>
 
       <div class="main-cat-bar" style="margin-bottom: 1rem;">
         <button type="button" class="cat-chip active" id="tabBtnTerms" onclick="switchLegalTab('terms')">서비스 이용약관</button>
@@ -603,7 +604,7 @@
            - 개인정보 보호 책임자 및 문의: aftrdry@outlook.kr</p>
       </div>
 
-      <button type="button" class="btn-buy" style="margin-top:1.2rem;" onclick="closeModal('termsModal')">확인</button>
+      <button type="button" class="btn-buy" style="margin-top:1.3rem;" onclick="closeModal('termsModal')">확인</button>
     </div>
   </div>
 
