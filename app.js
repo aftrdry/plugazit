@@ -37,9 +37,9 @@ function extractYoutubeId(input) {
 }
 function renderSafeContent(rawText) {
   let safe = escapeHtml(rawText);
-  safe = safe.replace(/\*\*([\s\S]+?)\*\*/g, '<b style="font-weight:800; color:var(--accent-gold);">$1</b>');
+  safe = safe.replace(/\*\*([\s\S]+?)\*\*/g, '<b style="font-weight:600; color:var(--accent-gold);">$1</b>');
   safe = safe.replace(/\[밑줄\]([\s\S]+?)\[\/밑줄\]/g, '<u style="text-underline-offset:4px;">$1</u>');
-  safe = safe.replace(/\*{4}([^\n]+)/g, '<b style="font-weight:800; color:var(--accent-gold);">$1</b>');
+  safe = safe.replace(/\*{4}([^\n]+)/g, '<b style="font-weight:600; color:var(--accent-gold);">$1</b>');
   safe = safe.replace(/\[밑줄\]\[\/밑줄\]([^\n]+)/g, '<u style="text-underline-offset:4px;">$1</u>');
   safe = safe.replace(/\*{4}/g, '');
   safe = safe.replace(/\[밑줄\]\[\/밑줄\]/g, '');
@@ -54,12 +54,50 @@ function renderSafeContent(rawText) {
       return `<div class="inline-media-box"><iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=${scUrl}&color=%23c2a878&auto_play=false&show_comments=true"></iframe></div>`;
     }
     if (/\.(mp3|wav|ogg|flac|m4a)(\?.*)?$/i.test(url)) {
-      return `<div class="inline-media-box"><div style="font-size:0.78rem; color:var(--accent-gold); font-weight:700;">오디오 트랙 미리듣기</div><audio controls preload="metadata" src="${url}"></audio></div>`;
+      return `<div class="inline-media-box"><div style="font-size:0.76rem; color:var(--accent-gold); font-family:var(--font-mono);">AUDIO TRACK PREVIEW</div><audio controls preload="metadata" src="${url}"></audio></div>`;
     }
-    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-gold); text-decoration:underline; font-weight:700;">[${label} 열기]</a>`;
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-gold); text-decoration:underline;">[${label} 열기]</a>`;
   });
   return safe;
 }
+
+/* WYSIWYG 에디터 <-> DB 저장 포맷 양방향 변환기 */
+function serializeWysiwygEditor(rootEl) {
+  if (!rootEl) return '';
+  function walk(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node.nodeValue;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return '';
+    const tag = node.tagName.toLowerCase();
+    if (tag === 'br') return '\n';
+    let inner = '';
+    node.childNodes.forEach(child => { inner += walk(child); });
+    if (tag === 'b' || tag === 'strong') {
+      return inner.trim() ? `**${inner}**` : inner;
+    }
+    if (tag === 'u') {
+      return inner.trim() ? `[밑줄]${inner}[/밑줄]` : inner;
+    }
+    if (tag === 'div' || tag === 'p') {
+      const prev = node.previousSibling;
+      const prefix = (prev && prev.nodeName.toLowerCase() !== 'br') ? '\n' : '';
+      return prefix + inner;
+    }
+    return inner;
+  }
+  return walk(rootEl).replace(/\u00A0/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function storedTextToWysiwygHtml(rawText) {
+  if (!rawText) return '';
+  let html = escapeHtml(rawText);
+  html = html.replace(/\*\*([\s\S]+?)\*\*/g, '<b>$1</b>');
+  html = html.replace(/\[밑줄\]([\s\S]+?)\[\/밑줄\]/g, '<u>$1</u>');
+  html = html.replace(/\n/g, '<br>');
+  return html;
+}
+
 const activeLocks = new Set();
 async function withSubmitLock(lockKey, btnEl, asyncFn) {
   if (activeLocks.has(lockKey)) return;
@@ -866,13 +904,13 @@ function renderDeals() {
   else if (sortOption === 'endingSoon') { filtered.sort((a, b) => a.daysLeft - b.daysLeft); }
   if (filtered.length === 0) {
     const emptyMsg = currentMainCat === 'saved'
-      ? '관심 딜로 저장한 플러그인이 없습니다. 각 카드 우측 상단의 [+ 관심 등록] 버튼을 눌러 추가해 보세요.'
+      ? '관심 딜로 저장한 플러그인이 없습니다.'
       : '검색 조건에 해당되는 VST 딜 정보가 없습니다.';
     container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">${emptyMsg}</div>`;
     return;
   }
   container.innerHTML = filtered.map(d => {
-    const krw = d.discountPrice === 0 ? "0원 (무료)" : `약 ${(d.discountPrice * USD_TO_KRW).toLocaleString()}원`;
+    const krw = d.discountPrice === 0 ? "FREE" : `₩${(d.discountPrice * USD_TO_KRW).toLocaleString()}`;
     const origKrw = d.original ? `$${escapeHtml(d.original)}` : '';
     const tagClass = d.discountPrice === 0 ? 'tag-free' : 'tag-discount';
     const safeDealId = typeof d.id === 'string' ? `'${d.id}'` : d.id;
@@ -881,7 +919,7 @@ function renderDeals() {
     return `
       <div class="deal-card" onclick="openDealDetailModal(${safeDealId})">
         <button type="button" class="bookmark-toggle-btn ${isSaved ? 'saved' : ''}" onclick="toggleSaveDeal(${safeDealId}, event)">
-          ${isSaved ? '관심 저장됨' : '+ 관심 등록'}
+          ${isSaved ? '★ Saved' : '+ Save'}
         </button>
         <div class="plugin-img-wrapper">
           <div class="plugin-ui-fallback" style="display:none;">
@@ -904,16 +942,18 @@ function renderDeals() {
               <span class="tag-badge ${tagClass}">${escapeHtml(d.discountRate)}</span>
             </div>
             <div class="deal-title">${escapeHtml(d.title)}</div>
-            <div class="sub-cat-tag"># ${escapeHtml(d.sub)}</div>
+            <div class="sub-cat-tag">#${escapeHtml(d.sub)}</div>
             <div class="description-text">${escapeHtml(d.desc)}</div>
           </div>
           <div>
             <div class="price-box">
-              <span class="original-price">${origKrw}</span>
-              <span class="discount-price">$${escapeHtml(d.discountPrice)}</span>
-              <div class="krw-price">한화 추산: ${krw}</div>
+              <div>
+                <span class="original-price">${origKrw}</span>
+                <span class="discount-price">$${escapeHtml(d.discountPrice)}</span>
+              </div>
+              <div class="krw-price">${krw}</div>
             </div>
-            <button type="button" class="btn-buy" onclick="event.stopPropagation(); window.open('${escapeHtml(safeStoreUrl)}', '_blank', 'noopener,noreferrer')">공식 스토어 딜 바로가기</button>
+            <button type="button" class="btn-buy" onclick="event.stopPropagation(); window.open('${escapeHtml(safeStoreUrl)}', '_blank', 'noopener,noreferrer')">스토어 바로가기</button>
           </div>
         </div>
       </div>
@@ -955,13 +995,13 @@ function buildPriceChartSvg(deal, rangeMode = 'all') {
     const gy = getY(gVal).toFixed(1);
     gridLinesHtml += `
       <line x1="${padL}" y1="${gy}" x2="${svgW - padR}" y2="${gy}" stroke="var(--border-color)" stroke-width="1" stroke-dasharray="${i === 0 ? 'none' : '3 3'}" />
-      <text x="${padL - 10}" y="${Number(gy) + 4}" fill="var(--text-secondary)" font-size="11" font-weight="600" text-anchor="end">$${gVal}</text>
+      <text x="${padL - 10}" y="${Number(gy) + 4}" fill="var(--text-secondary)" font-size="11" font-family="Courier Prime, monospace" text-anchor="end">$${gVal}</text>
     `;
   }
   const origY = getY(deal.original || 0).toFixed(1);
   const origLineHtml = deal.original > 0 ? `
     <line x1="${padL}" y1="${origY}" x2="${svgW - padR}" y2="${origY}" stroke="var(--text-secondary)" stroke-width="1" stroke-dasharray="6 4" opacity="0.55" />
-    <text x="${svgW - padR}" y="${Number(origY) - 6}" fill="var(--text-secondary)" font-size="10" font-weight="700" text-anchor="end">MSRP $${escapeHtml(deal.original)}</text>
+    <text x="${svgW - padR}" y="${Number(origY) - 6}" fill="var(--text-secondary)" font-size="10" font-family="Courier Prime, monospace" text-anchor="end">MSRP $${escapeHtml(deal.original)}</text>
   ` : '';
   const coords = pointsData.map((pt, idx) => ({
     x: Number(getX(idx).toFixed(1)),
@@ -982,7 +1022,7 @@ function buildPriceChartSvg(deal, rangeMode = 'all') {
     const showLabel = pointsData.length <= 6 || idx % 2 === 0 || idx === coords.length - 1;
     return `
       <g>
-        ${showLabel ? `<text x="${c.x}" y="${svgH - 10}" fill="var(--text-secondary)" font-size="10.5" font-weight="600" text-anchor="middle">${escapeHtml(c.date)}</text>` : ''}
+        ${showLabel ? `<text x="${c.x}" y="${svgH - 10}" fill="var(--text-secondary)" font-size="10.5" font-family="Courier Prime, monospace" text-anchor="middle">${escapeHtml(c.date)}</text>` : ''}
         <circle 
           class="ph-node-point"
           cx="${c.x}" 
@@ -1001,14 +1041,14 @@ function buildPriceChartSvg(deal, rangeMode = 'all') {
     <svg class="ph-svg-chart" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="none">
       <defs>
         <linearGradient id="phAreaGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="var(--accent-gold)" stop-opacity="0.28" />
+          <stop offset="0%" stop-color="var(--accent-gold)" stop-opacity="0.24" />
           <stop offset="100%" stop-color="var(--accent-gold)" stop-opacity="0.0" />
         </linearGradient>
       </defs>
       ${gridLinesHtml}
       ${origLineHtml}
       <path d="${areaPath}" fill="url(#phAreaGrad)" />
-      <polyline fill="none" stroke="var(--accent-gold)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${polylinePoints}" />
+      <polyline fill="none" stroke="var(--accent-gold)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${polylinePoints}" />
       ${nodesHtml}
     </svg>
   `;
@@ -1026,15 +1066,15 @@ function switchPriceChartRange(dealId, rangeMode, btnEl) {
 function updatePriceChartTooltip(dealId, dateStr, seasonStr, priceVal, offRate) {
   const box = document.getElementById('phInteractiveTooltip');
   if (!box) return;
-  const krwStr = priceVal === 0 ? "0원 (무료)" : `약 ${(priceVal * USD_TO_KRW).toLocaleString()}원`;
-  const rateBadge = offRate > 0 ? `(-${offRate}%)` : '(정가)';
+  const krwStr = priceVal === 0 ? "FREE" : `₩${(priceVal * USD_TO_KRW).toLocaleString()}`;
+  const rateBadge = offRate > 0 ? `(-${offRate}%)` : '(MSRP)';
   box.innerHTML = `
     <div>
       <span class="ph-tooltip-date">[${escapeHtml(dateStr)}]</span>
       <span class="ph-tooltip-season">${escapeHtml(seasonStr)}</span>
     </div>
     <div class="ph-tooltip-price">
-      $${escapeHtml(priceVal)} <span style="color:var(--accent-gold); font-weight:700; margin-left:0.35rem;">${rateBadge} · ${krwStr}</span>
+      $${escapeHtml(priceVal)} <span style="color:var(--accent-gold); margin-left:0.35rem;">${rateBadge} · ${krwStr}</span>
     </div>
   `;
 }
@@ -1043,7 +1083,7 @@ function openDealDetailModal(id) {
   if (!deal) return;
   currentOpenDealId = deal.id;
   const detailContent = document.getElementById('dealDetailContent');
-  const krw = deal.discountPrice === 0 ? "0원 (무료)" : `약 ${(deal.discountPrice * USD_TO_KRW).toLocaleString()}원`;
+  const krw = deal.discountPrice === 0 ? "FREE" : `₩${(deal.discountPrice * USD_TO_KRW).toLocaleString()}`;
   const searchEncoded = encodeURIComponent(deal.ytQuery || `${deal.brand} ${deal.title} official demo`);
   const validVideoId = (deal.youtubeId && deal.youtubeId.length === 11) ? deal.youtubeId : "d9W2j2_y4v8";
   const safeDealId = typeof deal.id === 'string' ? `'${deal.id}'` : deal.id;
@@ -1053,15 +1093,15 @@ function openDealDetailModal(id) {
   const allTimeLow = Math.min(...allPrices);
   const allTimeLowEntry = historyArr.find(h => h.price === allTimeLow) || historyArr[historyArr.length - 1];
   const maxDiscountPct = deal.original > 0 ? Math.round(((deal.original - allTimeLow) / deal.original) * 100) : 100;
-  let timingEvaluation = "평균 프로모션 가격대";
+  let timingEvaluation = "평균 할인가";
   if (deal.discountPrice <= allTimeLow) {
-    timingEvaluation = "역대 최저가 도달 (매수 적합)";
+    timingEvaluation = "역대 최저가 도달";
   } else if (deal.discountPrice <= allTimeLow * 1.1) {
-    timingEvaluation = "최저가 근접 구간 (차이 $" + (deal.discountPrice - allTimeLow) + ")";
+    timingEvaluation = "최저가 근접 (차이 $" + (deal.discountPrice - allTimeLow) + ")";
   }
   const latestPoint = historyArr[historyArr.length - 1];
   const latestOffRate = deal.original > 0 ? Math.round(((deal.original - latestPoint.price) / deal.original) * 100) : 0;
-  const latestKrw = latestPoint.price === 0 ? "0원 (무료)" : `약 ${(latestPoint.price * USD_TO_KRW).toLocaleString()}원`;
+  const latestKrw = latestPoint.price === 0 ? "FREE" : `₩${(latestPoint.price * USD_TO_KRW).toLocaleString()}`;
   const seasonalityList = deal.seasonality || [
     { name: "Spring (3~4월)", avgOff: 20, note: "시즌 프로모션" },
     { name: "Summer (6~7월)", avgOff: deal.discountRateNum, note: "정기 세일" },
@@ -1072,8 +1112,8 @@ function openDealDetailModal(id) {
     <div class="ph-season-item">
       <div>
         <div class="ph-season-name">${escapeHtml(s.name)}</div>
-        <div class="ph-season-rate">${s.avgOff > 0 ? `평균 ${escapeHtml(s.avgOff)}% OFF` : '할인 없음'}</div>
-        <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:0.15rem;">${escapeHtml(s.note)}</div>
+        <div class="ph-season-rate">${s.avgOff > 0 ? `${escapeHtml(s.avgOff)}% OFF` : '정가 유지'}</div>
+        <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:0.15rem;">${escapeHtml(s.note)}</div>
       </div>
       <div class="ph-season-bar-track">
         <div class="ph-season-bar-fill" style="width: ${Math.min(100, Number(s.avgOff) || 0)}%;"></div>
@@ -1081,20 +1121,20 @@ function openDealDetailModal(id) {
     </div>
   `).join('');
   const adminDeleteBtnHtml = isUserAdmin(currentUser)
-    ? `<button type="button" class="nav-btn danger-outline-btn" style="margin-right:0.6rem; padding:0.35rem 0.8rem; font-size:0.78rem;" onclick="deleteDealItem(${safeDealId})">관리자 딜 삭제</button>`
+    ? `<button type="button" class="nav-btn danger-outline-btn" style="margin-right:0.6rem; padding:0.3rem 0.7rem; font-size:0.75rem;" onclick="deleteDealItem(${safeDealId})">딜 삭제</button>`
     : '';
   detailContent.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; padding-right:2rem;">
       <div>
-        <span style="color:var(--accent-gold); font-weight:800; text-transform:uppercase; font-size:0.85rem;">${escapeHtml(deal.brand)}</span>
-        <h2 style="font-size:2rem; font-weight:900; margin-top:0.2rem; color:var(--text-primary);">${escapeHtml(deal.title)}</h2>
+        <span style="color:var(--accent-gold); font-family:var(--font-mono); text-transform:uppercase; font-size:0.8rem; letter-spacing:0.08em;">${escapeHtml(deal.brand)}</span>
+        <h2 style="font-size:1.75rem; font-weight:600; margin-top:0.15rem; color:var(--text-primary); letter-spacing:-0.02em;">${escapeHtml(deal.title)}</h2>
       </div>
       <div style="display:flex; align-items:center;">
         ${adminDeleteBtnHtml}
-        <span class="tag-badge tag-discount" style="font-size:0.95rem; padding:0.4rem 0.8rem;">${escapeHtml(deal.discountRate)}</span>
+        <span class="tag-badge tag-discount" style="font-size:0.85rem; padding:0.35rem 0.75rem;">${escapeHtml(deal.discountRate)}</span>
       </div>
     </div>
-    <div class="plugin-img-wrapper" style="height:280px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem;">
+    <div class="plugin-img-wrapper" style="height:260px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.25rem;">
       <div class="plugin-ui-fallback" style="display:none;">${escapeHtml(deal.brand)}<br><span>${escapeHtml(deal.title)}</span></div>
       <img 
         data-deal-img-id="${escapeHtml(deal.id)}"
@@ -1105,38 +1145,38 @@ function openDealDetailModal(id) {
         onload="verifyImageNotDummy(this, ${safeDealId})"
         onerror="handleImgError(this, ${safeDealId})">
     </div>
-    <p style="font-size:1rem; color:var(--text-primary); line-height:1.7; margin-bottom:1.5rem; font-weight:500;">${escapeHtml(deal.desc)}</p>
+    <p style="font-size:0.94rem; color:var(--text-primary); line-height:1.7; margin-bottom:1.4rem; font-weight:300;">${escapeHtml(deal.desc)}</p>
     <div class="price-history-section">
       <div class="ph-header-bar">
         <div class="ph-title-group">
-          <h4>연도별 · 시즌별 할인 가격 추이 (2023 — 2026)</h4>
-          <p>차트의 각 시즌 변곡점에 마우스를 올리면 당시 할인가와 원화 환산액을 확인할 수 있습니다.</p>
+          <h4>연도별 · 시즌별 가격 추이 (2023 — 2026)</h4>
+          <p>각 시즌 포인트에 마우스를 올리면 당시 할인가를 확인할 수 있습니다.</p>
         </div>
         <div class="ph-range-tabs">
-          <button type="button" class="ph-range-btn active" onclick="switchPriceChartRange(${safeDealId}, 'all', this)">전체 기간 (2023~2026)</button>
+          <button type="button" class="ph-range-btn active" onclick="switchPriceChartRange(${safeDealId}, 'all', this)">2023~2026</button>
           <button type="button" class="ph-range-btn" onclick="switchPriceChartRange(${safeDealId}, '1y', this)">최근 1년</button>
         </div>
       </div>
       <div class="ph-metrics-grid">
         <div class="ph-metric-card">
-          <div class="ph-metric-label">정가 (MSRP)</div>
+          <div class="ph-metric-label">MSRP</div>
           <div class="ph-metric-value">$${escapeHtml(deal.original)}</div>
-          <div class="ph-metric-sub">약 ${(deal.original * USD_TO_KRW).toLocaleString()}원</div>
+          <div class="ph-metric-sub">₩${(deal.original * USD_TO_KRW).toLocaleString()}</div>
         </div>
         <div class="ph-metric-card">
-          <div class="ph-metric-label">역대 최저가 (All-Time Low)</div>
+          <div class="ph-metric-label">All-Time Low</div>
           <div class="ph-metric-value">$${escapeHtml(allTimeLow)}</div>
-          <div class="ph-metric-sub">최대 ${maxDiscountPct}% 할인 (${escapeHtml(allTimeLowEntry.date)})</div>
+          <div class="ph-metric-sub">최대 ${maxDiscountPct}% (${escapeHtml(allTimeLowEntry.date)})</div>
         </div>
         <div class="ph-metric-card">
-          <div class="ph-metric-label">현재 딜 판정 지표</div>
+          <div class="ph-metric-label">Current</div>
           <div class="ph-metric-value">$${escapeHtml(deal.discountPrice)}</div>
           <div class="ph-metric-sub">${escapeHtml(timingEvaluation)}</div>
         </div>
         <div class="ph-metric-card">
-          <div class="ph-metric-label">핵심 세일 시즌</div>
-          <div class="ph-metric-value" style="font-size:0.95rem; line-height:1.35;">${escapeHtml(deal.bestSeasonLabel || 'Black Friday (11월)')}</div>
-          <div class="ph-metric-sub">브랜드 정기 프로모션 기준</div>
+          <div class="ph-metric-label">Best Season</div>
+          <div class="ph-metric-value" style="font-family:var(--font-sans); font-size:0.88rem; font-weight:500; line-height:1.35;">${escapeHtml(deal.bestSeasonLabel || 'Black Friday')}</div>
+          <div class="ph-metric-sub">정기 세일 기준</div>
         </div>
       </div>
       <div class="ph-chart-wrapper">
@@ -1149,20 +1189,17 @@ function openDealDetailModal(id) {
             <span class="ph-tooltip-season">${escapeHtml(latestPoint.season)}</span>
           </div>
           <div class="ph-tooltip-price">
-            $${escapeHtml(latestPoint.price)} <span style="color:var(--accent-gold); font-weight:700; margin-left:0.35rem;">(-${latestOffRate}%) · ${latestKrw}</span>
+            $${escapeHtml(latestPoint.price)} <span style="color:var(--accent-gold); margin-left:0.35rem;">(-${latestOffRate}%) · ${latestKrw}</span>
           </div>
         </div>
-      </div>
-      <div style="font-size:0.8rem; font-weight:800; color:var(--text-secondary); margin-bottom:0.55rem; text-transform:uppercase; letter-spacing:0.04em;">
-        시즌별 평균 할인율 지표 (Seasonality Breakdown)
       </div>
       <div class="ph-seasonality-grid">
         ${seasonalityHtml}
       </div>
     </div>
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
-      <h4 style="font-weight:800; font-size:1.1rem; color:var(--accent-gold);">공식 데모 & 사운드 리뷰 영상</h4>
-      <a href="https://www.youtube.com/results?search_query=${searchEncoded}" target="_blank" rel="noopener noreferrer" style="font-size:0.82rem; color:var(--accent-gold); text-decoration:none; font-weight:700;">YouTube에서 공식 리뷰 더보기</a>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.4rem;">
+      <h4 style="font-weight:600; font-size:0.98rem; color:var(--accent-gold);">공식 데모 & 리뷰 영상</h4>
+      <a href="https://www.youtube.com/results?search_query=${searchEncoded}" target="_blank" rel="noopener noreferrer" style="font-size:0.78rem; color:var(--text-secondary); text-decoration:underline;">YouTube에서 더보기</a>
     </div>
     <div class="youtube-video-container">
       <iframe 
@@ -1173,14 +1210,14 @@ function openDealDetailModal(id) {
         allowfullscreen>
       </iframe>
     </div>
-    <div class="price-box" style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding:1.2rem;">
+    <div class="price-box" style="margin-top:1.2rem; padding:1rem 0;">
       <div>
-        <span class="original-price" style="font-size:1.05rem;">정가 $${escapeHtml(deal.original)}</span>
-        <span class="discount-price" style="font-size:1.8rem; margin-left:0.5rem;">$${escapeHtml(deal.discountPrice)}</span>
+        <span class="original-price" style="font-size:0.95rem;">$${escapeHtml(deal.original)}</span>
+        <span class="discount-price" style="font-size:1.75rem; margin-left:0.4rem;">$${escapeHtml(deal.discountPrice)}</span>
       </div>
-      <div class="krw-price" style="font-size:1.1rem;">한화: ${krw}</div>
+      <div class="krw-price" style="font-size:1rem;">${krw}</div>
     </div>
-    <a href="${escapeHtml(safeStoreUrl)}" target="_blank" rel="noopener noreferrer" class="btn-buy" style="font-size:1.05rem; padding:1rem; text-align:center; margin-top:1.2rem;">공식 스토어 구매 페이지로 이동</a>
+    <a href="${escapeHtml(safeStoreUrl)}" target="_blank" rel="noopener noreferrer" class="btn-buy" style="font-size:0.95rem; padding:0.9rem; text-align:center;">공식 스토어 구매 페이지로 이동</a>
   `;
   openModal('dealDetailModal');
 }
@@ -1270,7 +1307,7 @@ async function fetchCommunityPosts() {
   try {
     const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
     if (error) {
-      listEl.innerHTML = `<div style="text-align: center; padding: 2.5rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">게시글 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</div>`;
+      listEl.innerHTML = `<div style="text-align: center; padding: 2.5rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">게시글 목록을 불러오지 못했습니다.</div>`;
     } else {
       rawCommunityPosts = (data || []).filter(p => !deletedIds.includes(String(p.id)));
       updateScrappedPostCountBadge();
@@ -1330,7 +1367,7 @@ function renderCommunityPosts() {
   if (enriched.length === 0) {
     const emptyMsg = currentCommCat === 'scrapped'
       ? '스크랩한 커뮤니티 게시글이 없습니다.'
-      : '조건에 해당하는 게시글이 없습니다. 첫 번째 글을 작성해 보세요.';
+      : '조건에 해당하는 게시글이 없습니다.';
     listEl.innerHTML = `<div style="text-align: center; padding: 3rem; color: var(--text-secondary); background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">${emptyMsg}</div>`;
     return;
   }
@@ -1338,36 +1375,38 @@ function renderCommunityPosts() {
     const isNotice = p.category === '공지사항';
     const cardClass = isNotice ? 'comm-card notice-card' : 'comm-card';
     const badgeClass = isNotice ? 'comm-category-badge notice' : 'comm-category-badge';
-    const dateStr = new Date(p.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const dateStr = new Date(p.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
     const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
     const plainPreview = String(p.content || '').replace(/\[밑줄\]|\[\/밑줄\]|\*\*/g, '');
     const isScrapped = scrappedIds.includes(String(p.id));
     return `
       <div class="${cardClass}" onclick="openPostDetail(${safeId})">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem; margin-bottom:0.45rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem; margin-bottom:0.4rem;">
           <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.2rem;">
             <span class="${badgeClass}">${escapeHtml(p.category || '자유수다')}</span>
             <span class="comm-author">${escapeHtml(p.author_nickname)}</span>
             ${p._daw ? `<span class="comm-daw-badge">${escapeHtml(p._daw)}</span>` : ''}
-            ${p._pluginTag ? `<span class="comm-plugin-tag"># ${escapeHtml(p._pluginTag)}</span>` : ''}
+            ${p._pluginTag ? `<span class="comm-plugin-tag">#${escapeHtml(p._pluginTag)}</span>` : ''}
           </div>
-          <span style="font-size:0.78rem; color:var(--text-secondary);">${escapeHtml(dateStr)}</span>
+          <span style="font-size:0.75rem; font-family:var(--font-mono); color:var(--text-secondary);">${escapeHtml(dateStr)}</span>
         </div>
-        <h4 style="margin:0.5rem 0 0.4rem 0; font-size:1.12rem; color:var(--text-primary); font-weight:800;">${escapeHtml(p.title)}</h4>
-        <p style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6; white-space: pre-wrap; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${escapeHtml(plainPreview)}</p>
+        <h4 style="margin:0.35rem 0 0.3rem 0; font-size:1.05rem; color:var(--text-primary); font-weight:600;">${escapeHtml(p.title)}</h4>
+        <p style="font-size:0.86rem; color:var(--text-secondary); font-weight:300; line-height:1.55; white-space: pre-wrap; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${escapeHtml(plainPreview)}</p>
         <div class="comm-card-footer">
           <div class="comm-stats-group">
             <span>추천 ${p._likes}</span>
             <span>댓글 ${p._comments}</span>
             <span>조회 ${p._views}</span>
-            ${isScrapped ? `<span style="color:var(--accent-gold);">★ 스크랩됨</span>` : ''}
+            ${isScrapped ? `<span style="color:var(--accent-gold);">★ Saved</span>` : ''}
           </div>
-          <span style="color:var(--accent-gold);">상세 보기</span>
+          <span style="color:var(--accent-gold);">Read →</span>
         </div>
       </div>
     `;
   }).join('');
 }
+
+/* 실시간 WYSIWYG 에디터 연동 */
 function showPostWritePage(editPostObj = null) {
   if (!currentUser && supabaseClient) {
     alert('로그인이 필요한 기능입니다.');
@@ -1379,79 +1418,92 @@ function showPostWritePage(editPostObj = null) {
   document.getElementById('writeOptNotice').style.display = isUserAdmin(currentUser) ? 'block' : 'none';
   const headingEl = document.getElementById('postWriteHeading');
   const submitBtn = document.getElementById('btnSubmitPost');
+  const editorEl = document.getElementById('writeContentEditor');
+
   if (editPostObj) {
     editingPostId = editPostObj.id;
     const stats = getPostStats(editPostObj);
-    if (headingEl) headingEl.innerText = '커뮤니티 게시글 수정';
-    if (submitBtn) submitBtn.innerText = '수정 내용 저장';
+    if (headingEl) headingEl.innerText = '커뮤니티 노트 수정';
+    if (submitBtn) submitBtn.innerText = '수정 저장';
     document.getElementById('writeCategorySelect').value = stats.editedCategory || editPostObj.category || '자유수다';
     if (document.getElementById('writePluginTag')) document.getElementById('writePluginTag').value = stats.pluginTag || '';
     document.getElementById('writeTitle').value = stats.editedTitle || editPostObj.title || '';
-    document.getElementById('writeContent').value = stats.editedContent || editPostObj.content || '';
+    const rawBody = stats.editedContent || editPostObj.content || '';
+    if (editorEl) editorEl.innerHTML = storedTextToWysiwygHtml(rawBody);
     document.getElementById('editorGuideOverlay').style.opacity = '0';
   } else {
     editingPostId = null;
-    if (headingEl) headingEl.innerText = '프로듀서 커뮤니티 글 작성';
-    if (submitBtn) submitBtn.innerText = '작성 완료 및 등록';
-    document.getElementById('editorGuideOverlay').style.opacity = '0.85';
+    if (headingEl) headingEl.innerText = '커뮤니티 노트 작성';
+    if (submitBtn) submitBtn.innerText = '작성 완료';
+    if (editorEl) editorEl.innerHTML = '';
+    document.getElementById('editorGuideOverlay').style.opacity = '0.8';
   }
+  updateToolbarActiveState();
   showPage('postWrite');
 }
+
 function cancelPostWrite() {
   editingPostId = null;
   showPage('community');
 }
+
 function handleEditorTyping() {
-  const content = document.getElementById('writeContent').value;
+  const editorEl = document.getElementById('writeContentEditor');
   const overlay = document.getElementById('editorGuideOverlay');
-  if (content.length > 0) { overlay.style.opacity = '0'; }
-  else { overlay.style.opacity = '0.85'; }
+  if (!editorEl || !overlay) return;
+  const textLen = (editorEl.innerText || '').trim().length;
+  overlay.style.opacity = textLen > 0 ? '0' : '0.8';
+  updateToolbarActiveState();
 }
+
+function updateToolbarActiveState() {
+  try {
+    const boldBtn = document.getElementById('btnToolBold');
+    const underBtn = document.getElementById('btnToolUnderline');
+    if (boldBtn) boldBtn.classList.toggle('active', document.queryCommandState('bold'));
+    if (underBtn) underBtn.classList.toggle('active', document.queryCommandState('underline'));
+  } catch (e) {}
+}
+
 function formatEditorText(command) {
-  const textarea = document.getElementById('writeContent');
-  if (!textarea) return;
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-  const selectedText = textarea.value.substring(start, end);
-  const openTag = command === 'bold' ? '**' : '[밑줄]';
-  const closeTag = command === 'bold' ? '**' : '[/밑줄]';
-  if (selectedText.length > 0) {
-    const replacement = `${openTag}${selectedText}${closeTag}`;
-    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
-    textarea.focus();
-    textarea.setSelectionRange(start + openTag.length, start + openTag.length + selectedText.length);
-  } else {
-    const replacement = `${openTag}${closeTag}`;
-    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
-    textarea.focus();
-    const cursorCenter = start + openTag.length;
-    textarea.setSelectionRange(cursorCenter, cursorCenter);
+  const editorEl = document.getElementById('writeContentEditor');
+  if (!editorEl) return;
+  editorEl.focus();
+  document.execCommand(command, false, null);
+  handleEditorTyping();
+}
+
+function insertTextAtEditorCursor(text) {
+  const editorEl = document.getElementById('writeContentEditor');
+  if (!editorEl) return;
+  editorEl.focus();
+  if (!document.execCommand('insertText', false, text)) {
+    editorEl.innerHTML += escapeHtml(text).replace(/\n/g, '<br>');
   }
   handleEditorTyping();
 }
+
 function insertEditorLink() {
   const url = prompt('삽입할 웹 링크 URL을 입력하세요 (https:// 포함):', 'https://');
   if (!url || !/^https?:\/\//i.test(url.trim())) return;
-  const textarea = document.getElementById('writeContent');
-  textarea.value += ` [링크](${url.trim()}) `;
-  handleEditorTyping();
+  insertTextAtEditorCursor(` [링크](${url.trim()}) `);
 }
+
 function insertEditorMedia(type) {
   let label = '이미지 URL';
   if (type === 'video') label = '유튜브 영상 URL';
   if (type === 'audio') label = 'SoundCloud 링크 또는 오디오(.mp3/.wav) URL';
   const url = prompt(`첨부할 ${label}을 입력하세요 (https:// 포함):`, 'https://');
   if (!url || !/^https?:\/\//i.test(url.trim())) return;
-  const textarea = document.getElementById('writeContent');
   if (type === 'image') {
-    textarea.value += `\n![이미지첨부](${url.trim()})\n`;
+    insertTextAtEditorCursor(`\n![이미지첨부](${url.trim()})\n`);
   } else if (type === 'audio') {
-    textarea.value += `\n[오디오링크](${url.trim()})\n`;
+    insertTextAtEditorCursor(`\n[오디오링크](${url.trim()})\n`);
   } else {
-    textarea.value += `\n[동영상링크](${url.trim()})\n`;
+    insertTextAtEditorCursor(`\n[동영상링크](${url.trim()})\n`);
   }
-  handleEditorTyping();
 }
+
 async function handleStandalonePostSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('btnSubmitPost');
@@ -1459,7 +1511,15 @@ async function handleStandalonePostSubmit(e) {
     const category = document.getElementById('writeCategorySelect').value;
     const pluginTag = document.getElementById('writePluginTag')?.value.trim() || '';
     const title = document.getElementById('writeTitle').value.trim();
-    const content = document.getElementById('writeContent').value.trim();
+    const editorEl = document.getElementById('writeContentEditor');
+    const content = serializeWysiwygEditor(editorEl);
+
+    if (!content) {
+      alert('본문 내용을 입력해 주세요.');
+      editorEl?.focus();
+      return;
+    }
+
     if (category === '공지사항' && !isUserAdmin(currentUser)) {
       alert('공지사항은 관리자만 작성할 수 있습니다.');
       return;
@@ -1576,41 +1636,40 @@ function openPostDetail(id) {
   const displayContent = stats.editedContent || post.content;
   const container = document.getElementById('postDetailContainer');
   const actionBtns = document.getElementById('postDetailActionBtns');
-  const dateStr = new Date(post.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const dateStr = new Date(post.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   const isMyPost = isUserOwnerOfPost(post);
   const safeId = typeof post.id === 'string' ? `'${post.id}'` : post.id;
   const isScrapped = getScrappedPostIds().includes(strId);
 
   actionBtns.innerHTML = `
-    <button type="button" class="nav-btn" onclick="openReportModal('post', ${safeId}, '${escapeHtml(displayTitle)}')">신고하기</button>
-    ${isMyPost ? `<button type="button" class="nav-btn" onclick="triggerEditCurrentPost(${safeId})">수정하기</button>` : ''}
-    ${isMyPost ? `<button type="button" class="nav-btn danger-outline-btn" onclick="deletePost(${safeId})">삭제하기</button>` : ''}
+    <button type="button" class="nav-btn" onclick="openReportModal('post', ${safeId}, '${escapeHtml(displayTitle)}')">신고</button>
+    ${isMyPost ? `<button type="button" class="nav-btn" onclick="triggerEditCurrentPost(${safeId})">수정</button>` : ''}
+    ${isMyPost ? `<button type="button" class="nav-btn danger-outline-btn" onclick="deletePost(${safeId})">삭제</button>` : ''}
   `;
   container.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.2rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
       <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.35rem;">
         <span class="comm-category-badge ${displayCategory === '공지사항' ? 'notice' : ''}">${escapeHtml(displayCategory)}</span>
-        <span class="comm-author" style="font-size:1rem;">${escapeHtml(post.author_nickname)}</span>
+        <span class="comm-author" style="font-size:0.92rem;">${escapeHtml(post.author_nickname)}</span>
         ${stats.daw ? `<span class="comm-daw-badge">${escapeHtml(stats.daw)}</span>` : ''}
-        ${stats.pluginTag ? `<span class="comm-plugin-tag"># ${escapeHtml(stats.pluginTag)}</span>` : ''}
+        ${stats.pluginTag ? `<span class="comm-plugin-tag">#${escapeHtml(stats.pluginTag)}</span>` : ''}
       </div>
-      <div style="font-size:0.82rem; color:var(--text-secondary);">
+      <div style="font-size:0.78rem; font-family:var(--font-mono); color:var(--text-secondary);">
         <span>조회 ${stats.views}</span> · <span>${escapeHtml(dateStr)}</span>
       </div>
     </div>
-    <h2 style="font-size:1.8rem; font-weight:900; margin-bottom:1.2rem; color:var(--text-primary); line-height:1.4;">${escapeHtml(displayTitle)}</h2>
-    <div style="font-size:1.02rem; color:var(--text-primary); line-height:1.85; white-space: pre-wrap; padding: 1.5rem 0; border-top:1px solid var(--border-color);">${renderSafeContent(displayContent)}</div>
+    <h2 style="font-size:1.55rem; font-weight:600; margin-bottom:1.1rem; color:var(--text-primary); line-height:1.4;">${escapeHtml(displayTitle)}</h2>
+    <div style="font-size:0.96rem; color:var(--text-primary); font-weight:300; line-height:1.85; white-space: pre-wrap; padding: 1.4rem 0; border-top:1px solid var(--border-color);">${renderSafeContent(displayContent)}</div>
     <div class="post-upvote-bar">
-      <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+      <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
         <button type="button" id="btnPostUpvote" class="upvote-action-btn ${stats.voted ? 'voted' : ''}" onclick="togglePostUpvote(${safeId})">
-          <span>유익한 글 추천</span>
-          <span id="postUpvoteCountText" style="color:var(--accent-gold);">${stats.likes}</span>
+          <span>추천</span>
+          <span id="postUpvoteCountText" style="color:var(--accent-gold); font-family:var(--font-mono);">${stats.likes}</span>
         </button>
         <button type="button" id="btnPostScrap" class="upvote-action-btn ${isScrapped ? 'voted' : ''}" onclick="toggleScrapPost(${safeId}, event)">
-          ${isScrapped ? '스크랩됨' : '+ 스크랩'}
+          ${isScrapped ? '★ 스크랩됨' : '+ 스크랩'}
         </button>
       </div>
-      <span style="font-size:0.8rem; color:var(--text-secondary);">사운드 팁이나 피드백이 도움이 되었다면 추천 또는 스크랩해 두세요.</span>
     </div>
   `;
   renderPostComments(post.id);
@@ -1673,7 +1732,7 @@ async function renderPostComments(postId) {
   });
   if (badgeEl) badgeEl.innerText = merged.length;
   if (merged.length === 0) {
-    listEl.innerHTML = `<div style="padding:1.5rem; text-align:center; color:var(--text-secondary); font-size:0.86rem; background:var(--bg-color); border:1px solid var(--border-color); border-radius:8px;">아직 등록된 댓글이 없습니다. 첫 번째 피드백을 남겨보세요.</div>`;
+    listEl.innerHTML = `<div style="padding:1.3rem; text-align:center; color:var(--text-secondary); font-size:0.84rem; background:var(--bg-color); border:1px solid var(--border-color); border-radius:8px;">아직 등록된 댓글이 없습니다.</div>`;
     return;
   }
   listEl.innerHTML = merged.map(c => {
@@ -1691,13 +1750,13 @@ async function renderPostComments(postId) {
       <div class="comm-comment-item">
         <div class="comm-comment-top">
           <div>
-            <span class="comm-author" style="font-size:0.88rem;">${escapeHtml(c.author_nickname)}</span>
+            <span class="comm-author" style="font-size:0.84rem;">${escapeHtml(c.author_nickname)}</span>
             ${c.author_daw ? `<span class="comm-daw-badge">${escapeHtml(c.author_daw)}</span>` : ''}
-            <span style="font-size:0.75rem; color:var(--text-secondary);">${escapeHtml(cDate)}</span>
+            <span style="font-size:0.72rem; font-family:var(--font-mono); color:var(--text-secondary);">${escapeHtml(cDate)}</span>
           </div>
-          <div style="display:flex; gap:0.4rem;">
-            <button type="button" class="nav-btn" style="padding:0.2rem 0.6rem; font-size:0.74rem;" onclick="openReportModal('comment', ${safeCommentId}, '${escapeHtml(shortSnippet)}')">신고</button>
-            ${canDelete ? `<button type="button" class="nav-btn danger-outline-btn" style="padding:0.2rem 0.6rem; font-size:0.74rem;" onclick="deleteCommentItem('${escapeHtml(strPostId)}', ${safeCommentId})">삭제</button>` : ''}
+          <div style="display:flex; gap:0.35rem;">
+            <button type="button" class="nav-btn" style="padding:0.18rem 0.55rem; font-size:0.72rem;" onclick="openReportModal('comment', ${safeCommentId}, '${escapeHtml(shortSnippet)}')">신고</button>
+            ${canDelete ? `<button type="button" class="nav-btn danger-outline-btn" style="padding:0.18rem 0.55rem; font-size:0.72rem;" onclick="deleteCommentItem('${escapeHtml(strPostId)}', ${safeCommentId})">삭제</button>` : ''}
           </div>
         </div>
         <div class="comm-comment-body">${renderSafeContent(c.content)}</div>
@@ -1864,7 +1923,7 @@ function onNicknameInputChanged() {
   } else {
     isNicknameVerified = false;
     msgEl.style.color = '#e74c3c';
-    msgEl.innerText = '닉네임 변경 시 [중복 확인] 버튼을 눌러주세요.';
+    msgEl.innerText = '닉네임 변경 시 [중복 확인]을 눌러주세요.';
     saveBtn.disabled = true; saveBtn.style.opacity = '0.5'; saveBtn.style.cursor = 'not-allowed';
   }
 }
@@ -1883,7 +1942,7 @@ async function checkNicknameDuplicate() {
   if (!supabaseClient) {
     isNicknameVerified = true;
     msgEl.style.color = '#8fa874';
-    msgEl.innerText = '사용 가능한 닉네임입니다. (데모 모드)';
+    msgEl.innerText = '사용 가능한 닉네임입니다.';
     saveBtn.disabled = false; saveBtn.style.opacity = '1'; saveBtn.style.cursor = 'pointer';
     return;
   }
@@ -1916,7 +1975,7 @@ async function handleProfileUpdateSubmit(e) {
       id: session.user.id, email: session.user.email, nickname, main_daw, updated_at: new Date()
     });
     if (error) { alert('저장 실패: ' + error.message); }
-    else { alert('프로필 정보가 안전하게 저장되었습니다.'); originalNickname = nickname; }
+    else { alert('프로필 정보가 저장되었습니다.'); originalNickname = nickname; }
   });
 }
 async function handlePasswordChangeSubmit(e) {
@@ -1927,17 +1986,17 @@ async function handlePasswordChangeSubmit(e) {
     const confirmNewPw = document.getElementById('confirmNewPassword').value;
     if (newPassword !== confirmNewPw) { alert('새 비밀번호가 일치하지 않습니다.'); return; }
     if (newPassword.length < 6) { alert('비밀번호는 6자리 이상이어야 합니다.'); return; }
-    if (!supabaseClient) { alert('비밀번호가 변경되었습니다. (데모 모드)'); return; }
+    if (!supabaseClient) { alert('비밀번호가 변경되었습니다.'); return; }
     const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
     if (error) { alert('비밀번호 변경 실패: ' + error.message); }
-    else { alert('비밀번호가 성공적으로 변경되었습니다.'); e.target.reset(); }
+    else { alert('비밀번호가 변경되었습니다.'); e.target.reset(); }
   });
 }
 async function handleAccountDeleteRequest() {
   const confirmed = confirm('정말 회원 탈퇴를 진행하시겠습니까?\n탈퇴 즉시 작성하신 게시글과 프로필 데이터가 파기되며 복구할 수 없습니다.');
   if (!confirmed) return;
   if (!supabaseClient) {
-    alert('회원 탈퇴 및 데이터 파기가 완료되었습니다.');
+    alert('회원 탈퇴 처리가 완료되었습니다.');
     location.reload();
     return;
   }
@@ -1947,11 +2006,11 @@ async function handleAccountDeleteRequest() {
     await supabaseClient.from('posts').delete().eq('user_id', session.user.id);
     await supabaseClient.from('profiles').delete().eq('id', session.user.id);
     await supabaseClient.auth.signOut();
-    alert('회원 탈퇴 및 개인정보 파기 처리가 완료되었습니다. 그동안 이용해 주셔서 감사합니다.');
+    alert('회원 탈퇴 및 개인정보 파기 처리가 완료되었습니다.');
     location.reload();
   } catch (err) {
     console.error(err);
-    alert('탈퇴 처리 중 오류가 발생했습니다. 고객센터(aftrdry@outlook.kr)로 문의해 주세요.');
+    alert('탈퇴 처리 중 오류가 발생했습니다.');
   }
 }
 async function fetchMyActivityPosts() {
@@ -1974,8 +2033,8 @@ async function fetchMyActivityPosts() {
       return `
         <div class="comm-card" onclick="openPostDetail(${safeId})">
           <span class="comm-category-badge">${escapeHtml(stats.editedCategory || p.category)}</span>
-          <h4 style="margin:0.4rem 0; font-size:1.05rem; font-weight:700;">${escapeHtml(stats.editedTitle || p.title)}</h4>
-          <p style="font-size:0.85rem; color:var(--text-secondary);">${escapeHtml(new Date(p.created_at).toLocaleDateString('ko-KR'))} · 추천 ${stats.likes} · 조회 ${stats.views}</p>
+          <h4 style="margin:0.35rem 0; font-size:1rem; font-weight:600;">${escapeHtml(stats.editedTitle || p.title)}</h4>
+          <p style="font-size:0.8rem; font-family:var(--font-mono); color:var(--text-secondary);">${escapeHtml(new Date(p.created_at).toLocaleDateString('ko-KR'))} · 추천 ${stats.likes} · 조회 ${stats.views}</p>
         </div>
       `;
     }).join('');
@@ -1993,7 +2052,7 @@ async function fetchMyActivityPosts() {
           <div class="comm-card" onclick="openPostDetail(${safeId})">
             <span class="comm-category-badge">${escapeHtml(stats.editedCategory || p.category)}</span>
             <span class="comm-author">${escapeHtml(p.author_nickname)}</span>
-            <h4 style="margin:0.4rem 0; font-size:1.05rem; font-weight:700;">${escapeHtml(stats.editedTitle || p.title)}</h4>
+            <h4 style="margin:0.35rem 0; font-size:1rem; font-weight:600;">${escapeHtml(stats.editedTitle || p.title)}</h4>
           </div>
         `;
       }).join('');
@@ -2030,7 +2089,7 @@ async function handleLoginSubmit(e) {
     if (!supabaseClient) { closeModal('loginModal'); updateUIAuthStatus({ email }); alert('환영합니다.'); return; }
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) { alert('로그인 실패: 이메일 또는 비밀번호를 확인해 주세요.'); }
-    else { closeModal('loginModal'); await checkUserSession(); alert('성공적으로 로그인되었습니다.'); }
+    else { closeModal('loginModal'); await checkUserSession(); alert('로그인되었습니다.'); }
   });
 }
 async function handleSignupSubmit(e) {
@@ -2099,7 +2158,7 @@ async function handleDealSubmit(e) {
     if (supabaseClient) {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (!session || !isUserAdmin(session.user)) {
-        alert('관리자 세션이 유효하지 않습니다. 다시 로그인해 주세요.');
+        alert('관리자 세션이 유효하지 않습니다.');
         return;
       }
       const { data, error } = await supabaseClient
@@ -2123,7 +2182,7 @@ async function handleDealSubmit(e) {
         .select()
         .maybeSingle();
       if (error) {
-        alert('Supabase DB 저장 실패 (SQL 설정 여부를 확인해 주세요): ' + error.message);
+        alert('DB 저장 실패: ' + error.message);
         return;
       }
       if (data && data.id) {
@@ -2156,13 +2215,12 @@ async function handleDealSubmit(e) {
     resolveLiveYoutubeAndOfficialImage(newDeal);
     updateSavedDealCountBadge();
     renderDeals();
-    alert('새로운 딜 정보가 데이터베이스에 영구 등록되었습니다.');
+    alert('새로운 딜 정보가 등록되었습니다.');
     e.target.reset();
     showPage('deals');
   });
 }
 
-/* 게시물 및 댓글 신고 처리 */
 function openReportModal(targetType, targetId, targetTitle) {
   if (!currentUser && supabaseClient) {
     alert('신고 기능을 이용하려면 로그인이 필요합니다.');
@@ -2218,11 +2276,10 @@ async function handleReportSubmit(e) {
     saveLocalReportsList(reportList);
 
     closeModal('reportModal');
-    alert('신고가 정상적으로 접수되었습니다. 관리자 검토 후 조치됩니다.');
+    alert('신고가 접수되었습니다.');
   });
 }
 
-/* 관리자 1:1 문의 처리 */
 function openInquiryModal(defaultCategory = '') {
   const form = document.getElementById('inquiryForm');
   if (form) form.reset();
@@ -2270,11 +2327,10 @@ async function handleInquirySubmit(e) {
     saveLocalInquiriesList(list);
 
     closeModal('inquiryModal');
-    alert('관리자에게 1:1 문의가 접수되었습니다. 입력하신 이메일로 회신드리겠습니다.');
+    alert('1:1 문의가 접수되었습니다.');
   });
 }
 
-/* Admin Center 통합 관리 대시보드 (신고/문의 관리 + 전체 게시글·댓글 직접 삭제 권한) */
 async function renderAdminDashboard() {
   if (!isUserAdmin(currentUser) && supabaseClient) return;
 
@@ -2340,7 +2396,7 @@ async function renderAdminDashboard() {
 
   if (reportsEl) {
     if (reports.length === 0) {
-      reportsEl.innerHTML = `<div style="padding:1.2rem; text-align:center; color:var(--text-secondary); font-size:0.84rem;">접수된 신고 내역이 없습니다.</div>`;
+      reportsEl.innerHTML = `<div style="padding:1.2rem; text-align:center; color:var(--text-secondary); font-size:0.82rem;">접수된 신고가 없습니다.</div>`;
     } else {
       reportsEl.innerHTML = reports.map(r => {
         const safeTargetId = typeof r.targetId === 'string' ? `'${r.targetId}'` : r.targetId;
@@ -2348,18 +2404,18 @@ async function renderAdminDashboard() {
         return `
           <div class="admin-ticket-card">
             <div class="admin-ticket-top">
-              <span class="tag-badge" style="background:rgba(231,76,60,0.18); color:#e74c3c;">[${r.targetType === 'comment' ? '댓글' : '게시글'}] ${escapeHtml(r.reason)}</span>
-              <span style="font-size:0.74rem; color:var(--text-secondary);">${escapeHtml(new Date(r.created_at).toLocaleDateString('ko-KR'))}</span>
+              <span class="tag-badge" style="background:rgba(231,76,60,0.15); color:#e74c3c;">[${r.targetType === 'comment' ? '댓글' : '게시글'}] ${escapeHtml(r.reason)}</span>
+              <span style="font-size:0.72rem; color:var(--text-secondary);">${escapeHtml(new Date(r.created_at).toLocaleDateString('ko-KR'))}</span>
             </div>
-            <div style="font-size:0.88rem; font-weight:700; margin:0.35rem 0;">대상: ${escapeHtml(r.targetTitle)}</div>
-            ${r.detail ? `<div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.4rem;">상세: ${escapeHtml(r.detail)}</div>` : ''}
+            <div style="font-size:0.86rem; font-weight:600; margin:0.35rem 0;">대상: ${escapeHtml(r.targetTitle)}</div>
+            ${r.detail ? `<div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:0.4rem;">상세: ${escapeHtml(r.detail)}</div>` : ''}
             <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-top:0.5rem;">
               ${r.targetType === 'post'
-                ? `<button type="button" class="nav-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem;" onclick="openPostDetail(${safeTargetId})">글 보기</button>
-                   <button type="button" class="nav-btn danger-outline-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem;" onclick="adminForceDeletePost(${safeTargetId}, '${escapeHtml(r.id)}')">게시글 즉시 삭제</button>`
-                : `<button type="button" class="nav-btn danger-outline-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem;" onclick="adminForceDeleteComment(${safePostId}, ${safeTargetId}, '${escapeHtml(r.id)}')">댓글 즉시 삭제</button>`
+                ? `<button type="button" class="nav-btn" style="padding:0.22rem 0.6rem; font-size:0.74rem;" onclick="openPostDetail(${safeTargetId})">글 보기</button>
+                   <button type="button" class="nav-btn danger-outline-btn" style="padding:0.22rem 0.6rem; font-size:0.74rem;" onclick="adminForceDeletePost(${safeTargetId}, '${escapeHtml(r.id)}')">즉시 삭제</button>`
+                : `<button type="button" class="nav-btn danger-outline-btn" style="padding:0.22rem 0.6rem; font-size:0.74rem;" onclick="adminForceDeleteComment(${safePostId}, ${safeTargetId}, '${escapeHtml(r.id)}')">댓글 삭제</button>`
               }
-              <button type="button" class="nav-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem;" onclick="resolveAdminReport('${escapeHtml(r.id)}')">처리 완료</button>
+              <button type="button" class="nav-btn" style="padding:0.22rem 0.6rem; font-size:0.74rem;" onclick="resolveAdminReport('${escapeHtml(r.id)}')">처리 완료</button>
             </div>
           </div>
         `;
@@ -2369,21 +2425,21 @@ async function renderAdminDashboard() {
 
   if (inquiriesEl) {
     if (inquiries.length === 0) {
-      inquiriesEl.innerHTML = `<div style="padding:1.2rem; text-align:center; color:var(--text-secondary); font-size:0.84rem;">접수된 문의 내역이 없습니다.</div>`;
+      inquiriesEl.innerHTML = `<div style="padding:1.2rem; text-align:center; color:var(--text-secondary); font-size:0.82rem;">접수된 문의가 없습니다.</div>`;
     } else {
       inquiriesEl.innerHTML = inquiries.map(inq => `
         <div class="admin-ticket-card">
           <div class="admin-ticket-top">
             <span class="tag-badge tag-discount">${escapeHtml(inq.category)}</span>
-            <span style="font-size:0.74rem; color:var(--text-secondary);">${escapeHtml(new Date(inq.created_at).toLocaleDateString('ko-KR'))}</span>
+            <span style="font-size:0.72rem; color:var(--text-secondary);">${escapeHtml(new Date(inq.created_at).toLocaleDateString('ko-KR'))}</span>
           </div>
-          <div style="font-size:0.9rem; font-weight:800; margin:0.35rem 0;">${escapeHtml(inq.title)}</div>
-          <div style="font-size:0.82rem; color:var(--text-primary); white-space:pre-wrap; margin-bottom:0.5rem;">${escapeHtml(inq.content)}</div>
+          <div style="font-size:0.88rem; font-weight:600; margin:0.35rem 0;">${escapeHtml(inq.title)}</div>
+          <div style="font-size:0.8rem; color:var(--text-primary); font-weight:300; white-space:pre-wrap; margin-bottom:0.5rem;">${escapeHtml(inq.content)}</div>
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem;">
-            <span style="font-size:0.75rem; color:var(--accent-gold); font-weight:700;">${escapeHtml(inq.replyEmail)} (${escapeHtml(inq.userNickname)})</span>
+            <span style="font-size:0.74rem; font-family:var(--font-mono); color:var(--accent-gold);">${escapeHtml(inq.replyEmail)} (${escapeHtml(inq.userNickname)})</span>
             <div style="display:flex; gap:0.4rem;">
-              <a href="mailto:${escapeHtml(inq.replyEmail)}?subject=${encodeURIComponent('[PlugAzit 답변] ' + inq.title)}" class="nav-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem; text-decoration:none;">메일 답장</a>
-              <button type="button" class="nav-btn" style="padding:0.25rem 0.65rem; font-size:0.75rem;" onclick="resolveAdminInquiry('${escapeHtml(inq.id)}')">답변 완료</button>
+              <a href="mailto:${escapeHtml(inq.replyEmail)}?subject=${encodeURIComponent('[PlugAzit 답변] ' + inq.title)}" class="nav-btn" style="padding:0.22rem 0.6rem; font-size:0.74rem; text-decoration:none;">답장</a>
+              <button type="button" class="nav-btn" style="padding:0.22rem 0.6rem; font-size:0.74rem;" onclick="resolveAdminInquiry('${escapeHtml(inq.id)}')">완료</button>
             </div>
           </div>
         </div>
@@ -2391,7 +2447,6 @@ async function renderAdminDashboard() {
     }
   }
 
-  /* 전체 게시글 목록 및 즉시 삭제 */
   const deletedPostIds = getDeletedIds(DELETED_POSTS_STORAGE_KEY);
   const activePosts = rawCommunityPosts.filter(p => !deletedPostIds.includes(String(p.id)));
   const allPostsCountEl = document.getElementById('adminAllPostsCount');
@@ -2399,7 +2454,7 @@ async function renderAdminDashboard() {
 
   if (allPostsEl) {
     if (activePosts.length === 0) {
-      allPostsEl.innerHTML = `<div style="padding:1.2rem; text-align:center; color:var(--text-secondary); font-size:0.84rem;">등록된 게시글이 없습니다.</div>`;
+      allPostsEl.innerHTML = `<div style="padding:1.2rem; text-align:center; color:var(--text-secondary); font-size:0.82rem;">게시글이 없습니다.</div>`;
     } else {
       allPostsEl.innerHTML = activePosts.map(p => {
         const stats = getPostStats(p);
@@ -2407,12 +2462,12 @@ async function renderAdminDashboard() {
         return `
           <div class="admin-ticket-card" style="display:flex; justify-content:space-between; align-items:center; gap:0.6rem;">
             <div style="overflow:hidden;">
-              <div style="font-size:0.75rem; color:var(--accent-gold); font-weight:700;">[${escapeHtml(stats.editedCategory || p.category)}] ${escapeHtml(p.author_nickname)}</div>
-              <div style="font-size:0.88rem; font-weight:700; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(stats.editedTitle || p.title)}</div>
+              <div style="font-size:0.72rem; font-family:var(--font-mono); color:var(--accent-gold);">[${escapeHtml(stats.editedCategory || p.category)}] ${escapeHtml(p.author_nickname)}</div>
+              <div style="font-size:0.85rem; font-weight:500; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(stats.editedTitle || p.title)}</div>
             </div>
             <div style="display:flex; gap:0.35rem; flex-shrink:0;">
-              <button type="button" class="nav-btn" style="padding:0.25rem 0.6rem; font-size:0.74rem;" onclick="openPostDetail(${safeId})">열람</button>
-              <button type="button" class="nav-btn danger-outline-btn" style="padding:0.25rem 0.6rem; font-size:0.74rem;" onclick="adminForceDeletePost(${safeId})">삭제</button>
+              <button type="button" class="nav-btn" style="padding:0.22rem 0.55rem; font-size:0.72rem;" onclick="openPostDetail(${safeId})">열람</button>
+              <button type="button" class="nav-btn danger-outline-btn" style="padding:0.22rem 0.55rem; font-size:0.72rem;" onclick="adminForceDeletePost(${safeId})">삭제</button>
             </div>
           </div>
         `;
@@ -2420,7 +2475,6 @@ async function renderAdminDashboard() {
     }
   }
 
-  /* 전체 댓글 목록 및 즉시 삭제 */
   const allComments = [];
   const seenCommentKeys = new Set();
   const localMap = getLocalCommentsMap();
@@ -2449,7 +2503,7 @@ async function renderAdminDashboard() {
 
   if (allCommentsEl) {
     if (allComments.length === 0) {
-      allCommentsEl.innerHTML = `<div style="padding:1.2rem; text-align:center; color:var(--text-secondary); font-size:0.84rem;">등록된 댓글이 없습니다.</div>`;
+      allCommentsEl.innerHTML = `<div style="padding:1.2rem; text-align:center; color:var(--text-secondary); font-size:0.82rem;">댓글이 없습니다.</div>`;
     } else {
       allCommentsEl.innerHTML = allComments.map(c => {
         const safeCid = typeof c.id === 'string' ? `'${c.id}'` : c.id;
@@ -2457,12 +2511,12 @@ async function renderAdminDashboard() {
         return `
           <div class="admin-ticket-card" style="display:flex; justify-content:space-between; align-items:center; gap:0.6rem;">
             <div style="overflow:hidden;">
-              <div style="font-size:0.75rem; color:var(--accent-gold); font-weight:700;">${escapeHtml(c.author_nickname)}</div>
-              <div style="font-size:0.84rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(c.content)}</div>
+              <div style="font-size:0.72rem; font-family:var(--font-mono); color:var(--accent-gold);">${escapeHtml(c.author_nickname)}</div>
+              <div style="font-size:0.82rem; font-weight:300; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(c.content)}</div>
             </div>
             <div style="display:flex; gap:0.35rem; flex-shrink:0;">
-              <button type="button" class="nav-btn" style="padding:0.25rem 0.6rem; font-size:0.74rem;" onclick="openPostDetail(${safePid})">원문</button>
-              <button type="button" class="nav-btn danger-outline-btn" style="padding:0.25rem 0.6rem; font-size:0.74rem;" onclick="adminForceDeleteComment(${safePid}, ${safeCid})">삭제</button>
+              <button type="button" class="nav-btn" style="padding:0.22rem 0.55rem; font-size:0.72rem;" onclick="openPostDetail(${safePid})">원문</button>
+              <button type="button" class="nav-btn danger-outline-btn" style="padding:0.22rem 0.55rem; font-size:0.72rem;" onclick="adminForceDeleteComment(${safePid}, ${safeCid})">삭제</button>
             </div>
           </div>
         `;
