@@ -136,6 +136,7 @@ nav {
 [data-theme="light"] .toggle-knob { transform: translateX(20px); }
 
 #authNav, #userNav { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; }
+#authNav[style*="none"], #userNav[style*="none"] { display: none !important; }
 
 .nav-btn {
   background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);
@@ -723,8 +724,6 @@ footer a:hover { color: var(--accent-gold); }
 
 /* =========================================================
    MOBILE RESPONSIVE PATCH
-   (1층 우측 상단: Discord · Twitter · 마이페이지/로그인 고정,
-    2층: VST Vault · Community · Admin Center · 테마 토글 고정)
    ========================================================= */
 @media (max-width: 768px) {
   body {
@@ -738,7 +737,7 @@ footer a:hover { color: var(--accent-gold); }
     width: 100% !important;
     height: auto !important;
     min-height: unset !important;
-    padding: 0.68rem 0.9rem !important;
+    padding: 0.68rem 0.85rem !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
@@ -748,37 +747,40 @@ footer a:hover { color: var(--accent-gold); }
 
   /* 1층 좌측: 로고 */
   .logo-container {
-    height: 34px !important;
+    height: 32px !important;
     width: fit-content !important;
   }
 
   .brand-logo-img {
-    height: 30px !important;
+    height: 28px !important;
   }
 
-  /* 1층 우측 상단 고정: Discord, Twitter + 로그인/회원가입(마이페이지/로그아웃) */
+  /* 1층 우측 상단 고정: Discord, Twitter + 로그인/회원가입(또는 마이페이지/로그아웃) */
   .header-top-right {
     position: absolute !important;
     top: 0.68rem !important;
-    right: 0.9rem !important;
+    right: 0.85rem !important;
     display: flex !important;
     align-items: center !important;
-    gap: 0.28rem !important;
+    gap: 0.25rem !important;
     z-index: 20 !important;
   }
 
   .header-top-right .social-link-btn {
-    padding: 0.32rem 0.45rem !important;
+    padding: 0.3rem 0.42rem !important;
     font-size: 0.74rem !important;
     white-space: nowrap !important;
   }
 
+  /* 중요: !important로 display를 덮어쓰지 않아야 로그인/비로그인 중 하나만 정확히 표시됨 */
   #authNav, #userNav {
     position: static !important;
-    display: flex !important;
     align-items: center !important;
-    gap: 0.28rem !important;
+    gap: 0.25rem !important;
     margin: 0 !important;
+  }
+  #authNav[style*="none"], #userNav[style*="none"] {
+    display: none !important;
   }
 
   #authNav .nav-btn,
