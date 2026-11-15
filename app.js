@@ -1325,7 +1325,7 @@ function setupEnhancedEditorAndEffects() {
   });
 
   // 휴대폰 가로모드 물리적 우측 끝 스크롤바(right: 3px)에 100% 일치하도록 보정된 반딧불이 파티클 엔진
-  let lastFireflyAt = 0;
+let lastFireflyAt = 0;
   function spawnFireflyParticlesAt(originX, originY, isHorizontal = false, burst = false, pinWindowRight = false) {
     const count = burst ? 3 : (Math.random() > 0.38 ? 1 : 2);
     for (let i = 0; i < count; i++) {
@@ -1366,7 +1366,7 @@ function setupEnhancedEditorAndEffects() {
     if (!burst && now - lastFireflyAt < 75) return;
     lastFireflyAt = now;
 
-    // 1) 전체 윈도우 세로 스크롤: CSS right: 2~5px에 직접 고정하여 휴대폰 가로모드 노치 여백 오차 원천 해결
+    // 1) 전체 윈도우 세로 스크롤: viewport-fit=cover와 결합하여 물리적 액정 맨 우측 끝(right: 2~5px)에 고정
     if (!target || target === document || target === document.documentElement || target === document.body || target === window) {
       const docEl = document.documentElement;
       const viewH = window.innerHeight;

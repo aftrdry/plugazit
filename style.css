@@ -728,6 +728,17 @@ footer a:hover { color: var(--accent-gold); }
 
 /* 휴대폰 가로모드(Landscape)에서 상세모달 X 버튼과 좌측 배지 간격 조정 */
 @media (max-width: 960px) and (orientation: landscape) {
+  header {
+    padding-left: max(1rem, env(safe-area-inset-left)) !important;
+    padding-right: max(1rem, env(safe-area-inset-right)) !important;
+  }
+  .header-top-right {
+    right: max(0.85rem, env(safe-area-inset-right)) !important;
+  }
+  .container {
+    padding-left: max(1rem, env(safe-area-inset-left)) !important;
+    padding-right: max(1rem, env(safe-area-inset-right)) !important;
+  }
   .modal-box.large-detail-modal {
     padding: 1.5rem 1.4rem !important;
   }
