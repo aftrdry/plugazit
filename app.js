@@ -64,7 +64,6 @@ function renderSafeContent(rawText) {
   safe = safe.replace(/\*{4}/g, '').replace(/\[밑줄\]\[\/밑줄\]/g, '');
   safe = safe.replace(/\[색상[^\]]*\]|\[\/색상\]|\[형광펜[^\]]*\]|\[\/형광펜\]/g, '');
 
-  safe = safe.replace(/!\[이미지첨부\]\((https?:\/\/[^\s)]+)\)/, '<img src="$1" alt="첨부 이미지" referrerpolicy="no-referrer" style="max-width:100%; border-radius:8px; margin:0.8rem 0; display:block;">');
   safe = safe.replace(/!\[이미지첨부\]\((https?:\/\/[^\s)]+)\)/g, '<img src="$1" alt="첨부 이미지" referrerpolicy="no-referrer" style="max-width:100%; border-radius:8px; margin:0.8rem 0; display:block;">');
   safe = safe.replace(/\[(동영상링크|오디오링크|링크)\]\((https?:\/\/[^\s)]+)\)/g, function(match, label, url) {
     const ytId = extractYoutubeId(url);
@@ -1325,9 +1324,9 @@ function setupEnhancedEditorAndEffects() {
     });
   });
 
-  // 휴대폰 가로모드 노치(Safe Area) 여백까지 정확히 계산하여 스크롤바 바로 위에 반딧불이 파티클을 생성하는 엔진
+  // 휴대폰 가로모드 물리적 우측 끝 스크롤바(right: 3px)에 100% 일치하도록 보정된 반딧불이 파티클 엔진
   let lastFireflyAt = 0;
-  function spawnFireflyParticlesAt(originX, originY, isHorizontal = false, burst = false) {
+  function spawnFireflyParticlesAt(originX, originY, isHorizontal = false, burst = false, pinWindowRight = false) {
     const count = burst ? 3 : (Math.random() > 0.38 ? 1 : 2);
     for (let i = 0; i < count; i++) {
       const dot = document.createElement('div');
@@ -1335,16 +1334,22 @@ function setupEnhancedEditorAndEffects() {
       const size = (1.6 + Math.random() * 1.6).toFixed(1);
       const dx = isHorizontal
         ? ((Math.random() - 0.5) * 24).toFixed(1) + 'px'
-        : (-2 - Math.random() * 11).toFixed(1) + 'px';
+        : (-2 - Math.random() * 10).toFixed(1) + 'px';
       const dy = isHorizontal
-        ? (-2 - Math.random() * 11).toFixed(1) + 'px'
+        ? (-2 - Math.random() * 10).toFixed(1) + 'px'
         : ((Math.random() - 0.5) * 24).toFixed(1) + 'px';
       const dur = (1.85 + Math.random() * 0.85).toFixed(2) + 's';
       const maxOp = (0.35 + Math.random() * 0.28).toFixed(2);
 
       dot.style.width = `${size}px`;
       dot.style.height = `${size}px`;
-      dot.style.left = `${originX + (isHorizontal ? (Math.random() - 0.5) * 14 : 0)}px`;
+      if (pinWindowRight) {
+        dot.style.left = 'auto';
+        dot.style.right = `${(2 + Math.random() * 3).toFixed(1)}px`;
+      } else {
+        dot.style.right = 'auto';
+        dot.style.left = `${originX + (isHorizontal ? (Math.random() - 0.5) * 14 : 0)}px`;
+      }
       dot.style.top = `${originY + (isHorizontal ? 0 : (Math.random() - 0.5) * 14)}px`;
       dot.style.setProperty('--dx', dx);
       dot.style.setProperty('--dy', dy);
@@ -1361,17 +1366,14 @@ function setupEnhancedEditorAndEffects() {
     if (!burst && now - lastFireflyAt < 75) return;
     lastFireflyAt = now;
 
-    // 1) 전체 윈도우 세로 스크롤: visualViewport로 휴대폰 가로모드 실제 스크롤바 우측 끝점을 정확히 추적
+    // 1) 전체 윈도우 세로 스크롤: CSS right: 2~5px에 직접 고정하여 휴대폰 가로모드 노치 여백 오차 원천 해결
     if (!target || target === document || target === document.documentElement || target === document.body || target === window) {
       const docEl = document.documentElement;
-      const vv = window.visualViewport;
-      const viewH = vv ? vv.height : window.innerHeight;
-      const viewTop = vv ? vv.offsetTop : 0;
-      const rightEdge = vv ? (vv.offsetLeft + vv.width) : docEl.clientWidth;
+      const viewH = window.innerHeight;
       const maxScrollY = Math.max(1, docEl.scrollHeight - viewH);
       const ratioY = Math.min(1, Math.max(0, window.scrollY / maxScrollY));
-      const thumbY = viewTop + 28 + ratioY * Math.max(20, viewH - 56);
-      spawnFireflyParticlesAt(rightEdge - 3, thumbY, false, burst);
+      const thumbY = 24 + ratioY * Math.max(20, viewH - 48);
+      spawnFireflyParticlesAt(0, thumbY, false, burst, true);
       return;
     }
 
@@ -1386,14 +1388,14 @@ function setupEnhancedEditorAndEffects() {
         const ratioX = Math.min(1, Math.max(0, target.scrollLeft / maxScrollLeft));
         const thumbX = rect.left + 16 + ratioX * Math.max(10, rect.width - 32);
         const barY = rect.bottom - 3;
-        spawnFireflyParticlesAt(thumbX, barY, true, burst);
+        spawnFireflyParticlesAt(thumbX, barY, true, burst, false);
       }
       if (canScrollY) {
         const maxScrollTop = Math.max(1, target.scrollHeight - target.clientHeight);
         const ratioY = Math.min(1, Math.max(0, target.scrollTop / maxScrollTop));
         const thumbY = rect.top + 16 + ratioY * Math.max(10, rect.height - 32);
         const barX = rect.right - 3;
-        spawnFireflyParticlesAt(barX, thumbY, false, burst);
+        spawnFireflyParticlesAt(barX, thumbY, false, burst, false);
       }
     }
   }
