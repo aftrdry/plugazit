@@ -35,6 +35,47 @@
       letter-spacing: -0.01em;
       word-break: keep-all;
     }
+    .scroll-to-top-fab {
+      position: fixed;
+      right: max(1.5rem, env(safe-area-inset-right));
+      bottom: max(1.6rem, env(safe-area-inset-bottom));
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(22, 25, 23, 0.62);
+      border: 1px solid rgba(198, 174, 130, 0.35);
+      color: var(--accent-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1500;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+      transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+      padding: 0;
+    }
+    .scroll-to-top-fab:hover {
+      background: rgba(198, 174, 130, 0.2);
+      border-color: var(--accent-gold);
+      color: #fff;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+    }
+    .scroll-to-top-fab:active {
+      transform: translateY(0) scale(0.94);
+    }
+    [data-theme="light"] .scroll-to-top-fab {
+      background: rgba(251, 249, 245, 0.72);
+      border-color: rgba(120, 97, 55, 0.32);
+      color: var(--accent-gold);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+    }
+    [data-theme="light"] .scroll-to-top-fab:hover {
+      background: rgba(125, 104, 64, 0.16);
+      color: var(--text-primary);
+    }
     @media (max-width: 768px) {
       .hero-slogan-section .hero-title {
         font-size: 1.8rem !important;
@@ -42,6 +83,12 @@
       .hero-sub-desc {
         font-size: 0.8rem;
         margin-top: 0.35rem;
+      }
+      .scroll-to-top-fab {
+        right: max(1rem, env(safe-area-inset-right));
+        bottom: max(1.2rem, env(safe-area-inset-bottom));
+        width: 40px;
+        height: 40px;
       }
     }
   </style>
@@ -639,6 +686,13 @@
       <button type="button" class="btn-buy" style="margin-top:1.3rem;" onclick="closeModal('termsModal')">확인</button>
     </div>
   </div>
+
+  <!-- 우측 하단 상시 고정: 페이지 최상단 이동 반투명 버튼 -->
+  <button type="button" class="scroll-to-top-fab" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); document.querySelectorAll('.modal-box').forEach(el => el.scrollTo({top: 0, behavior: 'smooth'}));" title="맨 위로 이동" aria-label="페이지 맨 위로 이동">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
 
   <canvas id="ambientDragCanvas" aria-hidden="true"></canvas>
 
