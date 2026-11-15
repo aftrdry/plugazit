@@ -755,7 +755,7 @@ footer a:hover { color: var(--accent-gold); }
 }
 
 /* =========================================================
-   MOBILE RESPONSIVE PATCH (로그인/로그아웃 상태 헤더 정렬 교정)
+   MOBILE RESPONSIVE PATCH
    ========================================================= */
 @media (max-width: 768px) {
   body {
@@ -769,28 +769,28 @@ footer a:hover { color: var(--accent-gold); }
     width: 100% !important;
     height: auto !important;
     min-height: unset !important;
-    padding: 0.6rem 0.85rem !important;
+    padding: 0.68rem 0.85rem !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 0.5rem !important;
+    gap: 0.55rem !important;
     z-index: 1000 !important;
   }
 
-  /* 1층 좌측: 로고와 우측 로그인 버튼 사이 공간 완전 분리 및 정렬 보장 */
+  /* 1층 좌측: 로고 */
   .logo-container {
-    height: 30px !important;
+    height: 32px !important;
     width: fit-content !important;
   }
 
   .brand-logo-img {
-    height: 26px !important;
+    height: 28px !important;
   }
 
-  /* 1층 우측 상단 고정: 로그인/회원가입 버튼 그룹 */
+  /* 1층 우측 상단 고정: Discord, Twitter + 로그인/회원가입(또는 마이페이지/로그아웃) */
   .header-top-right {
     position: absolute !important;
-    top: 0.6rem !important;
+    top: 0.68rem !important;
     right: 0.85rem !important;
     display: flex !important;
     align-items: center !important;
@@ -798,9 +798,14 @@ footer a:hover { color: var(--accent-gold); }
     z-index: 20 !important;
   }
 
+  .header-top-right .social-link-btn {
+    padding: 0.3rem 0.42rem !important;
+    font-size: 0.74rem !important;
+    white-space: nowrap !important;
+  }
+
   #authNav, #userNav {
     position: static !important;
-    display: flex !important;
     align-items: center !important;
     gap: 0.25rem !important;
     margin: 0 !important;
@@ -812,11 +817,11 @@ footer a:hover { color: var(--accent-gold); }
   #authNav .nav-btn,
   #userNav .nav-btn {
     white-space: nowrap !important;
-    padding: 0.3rem 0.55rem !important;
+    padding: 0.32rem 0.58rem !important;
     font-size: 0.74rem !important;
   }
 
-  /* 2층 상단: VST Vault, Community, Admin Center, 소셜, 토글 (항상 전체 폭 고정 및 우측 여백 확보) */
+  /* 2층 상단 고정: VST Vault, Community, Admin Center + 다크/라이트 토글 */
   nav {
     width: 100% !important;
     margin: 0 !important;
@@ -824,43 +829,22 @@ footer a:hover { color: var(--accent-gold); }
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
+    overflow: visible !important;
     gap: 0.35rem !important;
-    padding-bottom: 0.1rem !important;
-    padding-right: 5rem !important; /* 로그인 버튼 영역과 절대 겹치지 않도록 우측 여백 강제 확보 */
-    scrollbar-width: none;
-  }
-  nav::-webkit-scrollbar {
-    display: none;
+    padding-bottom: 0 !important;
   }
 
   .nav-tab-link {
     white-space: nowrap !important;
     flex-shrink: 0 !important;
-    padding: 0.35rem 0.65rem !important;
-    font-size: 0.78rem !important;
-  }
-
-  .social-link-btn {
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-    padding: 0.35rem 0.55rem !important;
-    font-size: 0.76rem !important;
+    padding: 0.36rem 0.68rem !important;
+    font-size: 0.8rem !important;
   }
 
   .toggle-switch {
     flex-shrink: 0 !important;
-    width: 40px !important;
-    height: 22px !important;
-    margin: 0 0 0 0.2rem !important;
+    margin: 0 0 0 auto !important;
   }
-  .toggle-knob {
-    width: 14px !important;
-    height: 14px !important;
-  }
-  [data-theme="light"] .toggle-knob { transform: translateX(18px) !important; }
 
   .container {
     padding: 1.15rem 1rem 3rem 1rem !important;
