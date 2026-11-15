@@ -55,21 +55,21 @@
       <img src="PlugAzit.png" alt="PlugAzit" class="brand-logo-img" />
     </a>
 
-    <!-- 2층(PC에서는 중앙): 주요 메뉴 탭 & 다크/라이트 테마 스위치 -->
+    <!-- 2층(PC에서는 우측 메뉴 옆): 주요 메뉴 탭 -->
     <nav role="navigation" aria-label="주요 메뉴">
       <button type="button" class="nav-tab-link active" id="navDealsBtn" onclick="showPage('deals')">VST Vault</button>
       <button type="button" class="nav-tab-link" id="navCommBtn" onclick="showPage('community')">Community</button>
       <button type="button" class="nav-tab-link" id="navAdminBtn" style="display:none; color: var(--accent-gold);" onclick="showPage('admin')">Admin Center</button>
+    </nav>
+
+    <!-- 1층 우측 상단 고정 그룹: Discord, Twitter + 다크/라이트 토글 + 로그인/회원가입(마이페이지/로그아웃) -->
+    <div class="header-top-right">
+      <a href="https://discord.gg/DWXe2pH9m" target="_blank" rel="noopener noreferrer" class="social-link-btn" title="공식 디스코드 커뮤니티">Discord</a>
+      <a href="https://x.com/plugazit" target="_blank" rel="noopener noreferrer" class="social-link-btn" title="공식 트위터(X)">Twitter</a>
 
       <button type="button" class="toggle-switch" onclick="toggleTheme()" title="다크/라이트 테마 변경" aria-label="다크 모드 및 라이트 모드 전환">
         <span class="toggle-knob"></span>
       </button>
-    </nav>
-
-    <!-- 1층 우측 상단 고정 그룹: Discord, Twitter + 로그인/회원가입(마이페이지/로그아웃) -->
-    <div class="header-top-right">
-      <a href="https://discord.gg/DWXe2pH9m" target="_blank" rel="noopener noreferrer" class="social-link-btn" title="공식 디스코드 커뮤니티">Discord</a>
-      <a href="https://x.com/plugazit" target="_blank" rel="noopener noreferrer" class="social-link-btn" title="공식 트위터(X)">Twitter</a>
 
       <div id="authNav">
         <button type="button" class="nav-btn" onclick="openModal('loginModal')">로그인</button>
