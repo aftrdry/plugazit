@@ -726,7 +726,7 @@ footer a:hover { color: var(--accent-gold); }
 .ph-season-bar-track { width: 100%; height: 2px; background: var(--border-color); border-radius: 2px; margin-top: 0.38rem; overflow: hidden; }
 .ph-season-bar-fill { height: 100%; background: var(--accent-gold); border-radius: 2px; }
 
-/* 휴대폰 가로모드(Landscape)에서 상세모달 X 버튼과 좌측 배지 간격 조정 */
+/* 휴대폰 가로모드(Landscape)에서 상세모달 X 버튼과 좌측 배지 간격 조정 및 안전영역 확보 */
 @media (max-width: 960px) and (orientation: landscape) {
   header {
     padding-left: max(1rem, env(safe-area-inset-left)) !important;
@@ -871,38 +871,80 @@ footer a:hover { color: var(--accent-gold); }
     gap: 1.15rem !important;
   }
 
+  /* 모바일 리스트 뷰 전용: 썸네일 숨김 및 컴팩트 리스트 컴포넌트 구성 */
+  .deals-grid.list-mode {
+    gap: 0.65rem !important;
+  }
+
   .deals-grid.list-mode .deal-card {
     flex-direction: column !important;
     align-items: stretch !important;
-    padding: 0 !important;
+    padding: 1rem 1.05rem !important;
     gap: 0 !important;
   }
 
   .deals-grid.list-mode .plugin-img-wrapper {
-    width: 100% !important;
-    height: 190px !important;
-    border-radius: 0 !important;
-    border-bottom: 1px solid var(--border-color) !important;
+    display: none !important;
+  }
+
+  .deals-grid.list-mode .bookmark-toggle-btn {
+    top: 0.95rem !important;
+    right: 1rem !important;
+    padding: 0.22rem 0.55rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .deals-grid.list-mode .card-header {
+    padding-right: 5.2rem !important;
+    margin-bottom: 0.25rem !important;
   }
 
   .deals-grid.list-mode .deal-card-body {
     flex-direction: column !important;
     align-items: stretch !important;
-    padding: 1.3rem !important;
-    gap: 0.85rem !important;
+    padding: 0 !important;
+    gap: 0.55rem !important;
+  }
+
+  .deals-grid.list-mode .deal-title {
+    font-size: 1.06rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .deals-grid.list-mode .sub-cat-tag {
+    margin-bottom: 0.25rem !important;
+  }
+
+  .deals-grid.list-mode .description-text {
+    font-size: 0.82rem !important;
+    -webkit-line-clamp: 1 !important;
+    line-clamp: 1 !important;
+    margin-bottom: 0 !important;
   }
 
   .deals-grid.list-mode .deal-action-col {
     width: 100% !important;
     align-items: stretch !important;
     padding-top: 0 !important;
+    gap: 0.5rem !important;
   }
 
   .deals-grid.list-mode .price-box {
     flex-direction: row !important;
     align-items: baseline !important;
+    justify-content: space-between !important;
     border-top: 1px solid var(--border-color) !important;
-    padding-top: 0.75rem !important;
+    padding-top: 0.55rem !important;
+    margin: 0 !important;
+  }
+
+  .deals-grid.list-mode .discount-price {
+    font-size: 1.25rem !important;
+  }
+
+  .deals-grid.list-mode .btn-buy {
+    padding: 0.62rem 0.85rem !important;
+    font-size: 0.82rem !important;
   }
 
   .filter-control-bar {
