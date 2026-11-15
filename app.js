@@ -12,6 +12,8 @@ let editingPostId = null;
 let originalNickname = "";
 let isNicknameVerified = true;
 let currentReportTarget = null;
+let currentActivePage = 'deals';
+let isHandlingPopState = false;
 
 if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -36,6 +38,20 @@ function extractYoutubeId(input) {
   if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
   const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
   return match ? match[1] : "";
+}
+
+function getDealPeriodInfo(deal) {
+  const days = Number(deal.daysLeft) || 0;
+  if (deal.discountPrice === 0 || days >= 90) {
+    return { label: "상시 무료 배포", badge: "상시 진행", urgent: false };
+  }
+  if (days <= 1) {
+    return { label: "오늘 자정 마감 (D-1)", badge: "오늘 마감 (D-1)", urgent: true };
+  }
+  if (days <= 3) {
+    return { label: `마감 임박 (D-${days})`, badge: `마감 D-${days}`, urgent: true };
+  }
+  return { label: `세일 마감까지 D-${days}`, badge: `마감 D-${days}`, urgent: false };
 }
 
 function renderSafeContent(rawText) {
@@ -130,6 +146,40 @@ function markIdAsDeleted(storageKey, id) {
     if (!list.includes(strId)) { list.push(strId); localStorage.setItem(storageKey, JSON.stringify(list)); }
   } catch (e) {}
 }
+
+/* 기기 간(노트북 <-> 아이패드/아이폰) 관심 딜 & 스크랩 클라우드 양방향 동기화 */
+async function syncUserPreferencesToCloud() {
+  if (!supabaseClient || !currentUser) return;
+  try {
+    const savedDeals = getSavedDealIds();
+    const scrappedPosts = getScrappedPostIds();
+    await supabaseClient.auth.updateUser({
+      data: {
+        saved_deals: savedDeals,
+        scrapped_posts: scrappedPosts
+      }
+    });
+  } catch (e) {}
+}
+
+function mergeCloudPreferencesFromUser(user) {
+  if (!user || !user.user_metadata) return;
+  try {
+    const cloudDeals = user.user_metadata.saved_deals;
+    if (Array.isArray(cloudDeals)) {
+      const localDeals = getSavedDealIds();
+      const mergedDeals = Array.from(new Set([...localDeals, ...cloudDeals.map(String)]));
+      localStorage.setItem(SAVED_DEALS_STORAGE_KEY, JSON.stringify(mergedDeals));
+    }
+    const cloudScraps = user.user_metadata.scrapped_posts;
+    if (Array.isArray(cloudScraps)) {
+      const localScraps = getScrappedPostIds();
+      const mergedScraps = Array.from(new Set([...localScraps, ...cloudScraps.map(String)]));
+      localStorage.setItem(SCRAPPED_POSTS_STORAGE_KEY, JSON.stringify(mergedScraps));
+    }
+  } catch (e) {}
+}
+
 function getSavedDealIds() { return getDeletedIds(SAVED_DEALS_STORAGE_KEY); }
 function toggleSaveDeal(dealId, event) {
   if (event) event.stopPropagation();
@@ -141,6 +191,8 @@ function toggleSaveDeal(dealId, event) {
     localStorage.setItem(SAVED_DEALS_STORAGE_KEY, JSON.stringify(list));
     updateSavedDealCountBadge();
     renderDeals();
+    if (currentActivePage === 'mypage') fetchMyActivityPosts();
+    syncUserPreferencesToCloud();
   } catch (e) {}
 }
 function updateSavedDealCountBadge() {
@@ -150,6 +202,7 @@ function updateSavedDealCountBadge() {
   const validSaved = getSavedDealIds().filter(id => !deletedDealIds.includes(String(id)) && dealsData.some(d => String(d.id) === String(id)));
   el.innerText = validSaved.length;
 }
+
 function getScrappedPostIds() { return getDeletedIds(SCRAPPED_POSTS_STORAGE_KEY); }
 function toggleScrapPost(postId, event) {
   if (event) event.stopPropagation();
@@ -167,6 +220,7 @@ function toggleScrapPost(postId, event) {
       btn.innerText = nowScrapped ? '스크랩됨' : '+ 스크랩';
     }
     if (currentCommCat === 'scrapped') renderCommunityPosts();
+    syncUserPreferencesToCloud();
   } catch (e) {}
 }
 function updateScrappedPostCountBadge() {
@@ -240,11 +294,21 @@ function resetToHome() {
 function isUserAdmin(user) {
   return Boolean(user && user.email && ADMIN_EMAILS.includes(user.email.toLowerCase()));
 }
-function showPage(page) {
+
+/* 브라우저 '뒤로 가기' 버튼 연동 지원 (History API) */
+function pushAppHistoryState(stateObj) {
+  if (isHandlingPopState) return;
+  try {
+    window.history.pushState(stateObj, '', window.location.pathname);
+  } catch (e) {}
+}
+
+function showPage(page, skipHistory = false) {
   if (page === 'admin' && !isUserAdmin(currentUser)) {
     alert('관리자 권한이 필요한 페이지입니다.');
     return;
   }
+  currentActivePage = page;
   document.getElementById('dealsView').style.display = page === 'deals' ? 'block' : 'none';
   document.getElementById('communityView').style.display = page === 'community' ? 'block' : 'none';
   document.getElementById('adminView').style.display = page === 'admin' ? 'block' : 'none';
@@ -255,11 +319,25 @@ function showPage(page) {
   document.getElementById('navCommBtn').classList.toggle('active', page === 'community' || page === 'postWrite' || page === 'postDetail');
   const adminBtn = document.getElementById('navAdminBtn');
   if (adminBtn) adminBtn.classList.toggle('active', page === 'admin');
+
+  if (!skipHistory) {
+    pushAppHistoryState({ page, postId: page === 'postDetail' ? currentOpenPostId : null, modalId: null });
+  }
+
   if (page === 'community') fetchCommunityPosts();
   else if (page === 'mypage') initMyPageData();
   else if (page === 'admin') renderAdminDashboard();
 }
-function openModal(id) { document.getElementById(id)?.classList.add('active'); }
+
+function openModal(id, skipHistory = false) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.add('active');
+  if (!skipHistory) {
+    pushAppHistoryState({ page: currentActivePage, postId: currentOpenPostId, modalId: id, dealId: currentOpenDealId });
+  }
+}
+
 function closeModal(id) {
   const modal = document.getElementById(id);
   if (!modal) return;
@@ -270,11 +348,44 @@ function closeModal(id) {
     if (iframe) iframe.src = '';
   }
 }
+
 function checkModalBackdropClose(event, modalId) {
   if (event.target.id === modalId || event.target.classList.contains('modal-overlay')) {
     closeModal(modalId);
   }
 }
+
+window.addEventListener('popstate', (event) => {
+  isHandlingPopState = true;
+  try {
+    const activeModals = document.querySelectorAll('.modal-overlay.active');
+    if (activeModals.length > 0) {
+      activeModals.forEach(m => closeModal(m.id));
+      isHandlingPopState = false;
+      return;
+    }
+    const st = event.state;
+    if (st && st.page) {
+      if (st.page === 'postDetail' && st.postId) {
+        openPostDetail(st.postId, true);
+      } else {
+        showPage(st.page, true);
+      }
+      if (st.modalId) {
+        if (st.modalId === 'dealDetailModal' && st.dealId) {
+          openDealDetailModal(st.dealId, true);
+        } else {
+          openModal(st.modalId, true);
+        }
+      }
+    } else {
+      showPage('deals', true);
+    }
+  } finally {
+    isHandlingPopState = false;
+  }
+});
+
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     document.querySelectorAll('.modal-overlay.active').forEach(modal => closeModal(modal.id));
@@ -671,7 +782,7 @@ function renderDeals() {
   else if (sortOption === 'endingSoon') filtered.sort((a, b) => a.daysLeft - b.daysLeft);
 
   if (filtered.length === 0) {
-    const emptyMsg = currentMainCat === 'saved' ? '관심 딜로 저장한 플러그인이 없습니다.' : '검색 조건에 해당되는 VST 딜 정보가 없습니다.';
+    const emptyMsg = currentMainCat === 'saved' ? '관심 딜로 저장한 플러그인이 없습니다. 각 카드 우측 상단의 [+ 관심 등록] 버튼을 눌러 추가해 보세요.' : '검색 조건에 해당되는 VST 딜 정보가 없습니다.';
     container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">${emptyMsg}</div>`;
     return;
   }
@@ -683,6 +794,8 @@ function renderDeals() {
     const safeDealId = typeof d.id === 'string' ? `'${d.id}'` : d.id;
     const safeStoreUrl = sanitizeUrl(d.storeUrl);
     const isSaved = savedDealIds.includes(String(d.id));
+    const periodInfo = getDealPeriodInfo(d);
+
     return `
       <div class="deal-card" onclick="openDealDetailModal(${safeDealId})">
         <button type="button" class="bookmark-toggle-btn ${isSaved ? 'saved' : ''}" onclick="toggleSaveDeal(${safeDealId}, event)">
@@ -693,16 +806,19 @@ function renderDeals() {
           <img data-deal-img-id="${escapeHtml(d.id)}" src="${escapeHtml(d.imgUrl)}" alt="${escapeHtml(d.title)}" referrerpolicy="no-referrer" loading="lazy" onload="verifyImageNotDummy(this, ${safeDealId})" onerror="handleImgError(this, ${safeDealId})">
         </div>
         <div class="deal-card-body">
-          <div>
+          <div class="deal-info-col">
             <div class="card-header">
-              <span class="brand-name">${escapeHtml(d.brand)}</span>
+              <div style="display:flex; align-items:center; gap:0.45rem; flex-wrap:wrap;">
+                <span class="brand-name">${escapeHtml(d.brand)}</span>
+                <span class="deal-period-badge ${periodInfo.urgent ? 'urgent' : ''}">${escapeHtml(periodInfo.badge)}</span>
+              </div>
               <span class="tag-badge ${tagClass}">${escapeHtml(d.discountRate)}</span>
             </div>
             <div class="deal-title">${escapeHtml(d.title)}</div>
             <div class="sub-cat-tag"># ${escapeHtml(d.sub)}</div>
             <div class="description-text">${escapeHtml(d.desc)}</div>
           </div>
-          <div>
+          <div class="deal-action-col">
             <div class="price-box">
               <div>
                 <span class="original-price">${origKrw}</span>
@@ -754,7 +870,7 @@ function buildPriceChartSvg(deal, rangeMode = 'all') {
     const dotColor = isCurrent ? 'var(--accent-gold)' : (isLowest ? '#8fa874' : 'var(--text-primary)');
     const offRate = deal.original > 0 ? Math.round(((deal.original - c.price) / deal.original) * 100) : 0;
     const showLabel = pointsData.length <= 6 || idx % 2 === 0 || isCurrent;
-    return `<g>${showLabel ? `<text x="${c.x}" y="${svgH - 8}" fill="var(--text-secondary)" font-size="10" text-anchor="middle">${escapeHtml(c.date)}</text>` : ''}<circle class="ph-node-point" cx="${c.x}" cy="${c.y}" r="${isCurrent ? 5 : 4}" fill="${dotColor}" stroke="var(--card-bg)" stroke-width="2" onmouseenter="updatePriceChartTooltip(${safeDealId}, '${escapeHtml(c.date)}', '${escapeHtml(c.season)}', ${Number(c.price)}, ${offRate})" onclick="updatePriceChartTooltip(${safeDealId}, '${escapeHtml(c.date)}', '${escapeHtml(c.season)}', ${Number(c.price)}, ${offRate})" /></g>`;
+    return `<g>${showLabel ? `<text x="${c.x}" y="${svgH - 8}" fill="var(--text-secondary)" font-size="10" text-anchor="middle">${escapeHtml(c.date)}</text>` : ''}<circle class="ph-node-point" cx="${c.x}" cy="${c.y}" r="${isCurrent ? 5.5 : 4.5}" fill="${dotColor}" stroke="var(--card-bg)" stroke-width="2" onmouseenter="updatePriceChartTooltip(${safeDealId}, '${escapeHtml(c.date)}', '${escapeHtml(c.season)}', ${Number(c.price)}, ${offRate})" onclick="updatePriceChartTooltip(${safeDealId}, '${escapeHtml(c.date)}', '${escapeHtml(c.season)}', ${Number(c.price)}, ${offRate})" /></g>`;
   }).join('');
 
   return `<svg class="ph-svg-chart" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="none"><defs><linearGradient id="phAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent-gold)" stop-opacity="0.2" /><stop offset="100%" stop-color="var(--accent-gold)" stop-opacity="0.0" /></linearGradient></defs>${gridLinesHtml}<path d="${areaPath}" fill="url(#phAreaGrad)" /><polyline fill="none" stroke="var(--accent-gold)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${polylinePoints}" />${nodesHtml}</svg>`;
@@ -777,7 +893,7 @@ function updatePriceChartTooltip(dealId, dateStr, seasonStr, priceVal, offRate) 
   box.innerHTML = `<div><span class="ph-tooltip-date">${escapeHtml(dateStr)}</span><span class="ph-tooltip-season">${escapeHtml(seasonStr)}</span></div><div class="ph-tooltip-price">$${escapeHtml(priceVal)} <span style="color:var(--accent-gold); margin-left:0.35rem;">(${rateBadge} · ${krwStr})</span></div>`;
 }
 
-function openDealDetailModal(id) {
+function openDealDetailModal(id, skipHistory = false) {
   const deal = dealsData.find(d => String(d.id) === String(id));
   if (!deal) return;
   currentOpenDealId = deal.id;
@@ -787,6 +903,7 @@ function openDealDetailModal(id) {
   const validVideoId = (deal.youtubeId && deal.youtubeId.length === 11) ? deal.youtubeId : "d9W2j2_y4v8";
   const safeDealId = typeof deal.id === 'string' ? `'${deal.id}'` : deal.id;
   const safeStoreUrl = sanitizeUrl(deal.storeUrl);
+  const periodInfo = getDealPeriodInfo(deal);
 
   const historyArr = deal.priceHistory || [{ date: "2026.11", season: "Current Deal", price: deal.discountPrice }];
   const allTimeLow = Math.min(...historyArr.map(h => h.price));
@@ -807,7 +924,7 @@ function openDealDetailModal(id) {
   `).join('');
 
   const adminDeleteBtnHtml = isUserAdmin(currentUser)
-    ? `<button type="button" class="nav-btn danger-outline-btn" style="padding:0.32rem 0.7rem; font-size:0.76rem;" onclick="deleteDealItem(${safeDealId})">딜 삭제</button>`
+    ? `<button type="button" class="nav-btn danger-outline-btn" style="padding:0.32rem 0.7rem; font-size:0.76rem; white-space:nowrap;" onclick="deleteDealItem(${safeDealId})">딜 삭제</button>`
     : '';
 
   detailContent.innerHTML = `
@@ -816,9 +933,10 @@ function openDealDetailModal(id) {
         <div class="detail-brand-tag">${escapeHtml(deal.brand)} · ${escapeHtml(deal.sub)}</div>
         <h2 class="detail-main-title">${escapeHtml(deal.title)}</h2>
       </div>
-      <div style="display:flex; align-items:center; gap:0.5rem;">
+      <div style="display:flex; align-items:center; gap:0.45rem; flex-shrink:0;">
         ${adminDeleteBtnHtml}
-        <span class="tag-badge tag-discount" style="font-size:0.84rem; padding:0.35rem 0.75rem;">${escapeHtml(deal.discountRate)}</span>
+        <span class="deal-period-badge ${periodInfo.urgent ? 'urgent' : ''}" style="font-size:0.76rem; padding:0.3rem 0.6rem;">${escapeHtml(periodInfo.label)}</span>
+        <span class="tag-badge tag-discount" style="font-size:0.82rem; padding:0.34rem 0.72rem;">${escapeHtml(deal.discountRate)}</span>
       </div>
     </div>
 
@@ -845,8 +963,8 @@ function openDealDetailModal(id) {
     <div class="price-history-section">
       <div class="ph-header-bar">
         <div class="ph-title-group">
-          <h4>Price Intelligence (2023 — 2026)</h4>
-          <p>시즌별 가격 변곡점 및 최저가 지표</p>
+          <h4>연도별 · 시즌별 할인 가격 추이 (2023 — 2026)</h4>
+          <p>차트의 각 시즌 포인트를 터치(또는 마우스 오버)하면 당시 할인가를 확인할 수 있으며, 모바일에서는 좌우로 스크롤할 수 있습니다.</p>
         </div>
         <div class="ph-range-tabs">
           <button type="button" class="ph-range-btn active" onclick="switchPriceChartRange(${safeDealId}, 'all', this)">전체 기간</button>
@@ -871,14 +989,14 @@ function openDealDetailModal(id) {
           <div class="ph-metric-sub">${escapeHtml(timingEvaluation)}</div>
         </div>
         <div class="ph-metric-card">
-          <div class="ph-metric-label">주요 세일 시즌</div>
-          <div class="ph-metric-value" style="font-size:0.88rem; line-height:1.35;">${escapeHtml(deal.bestSeasonLabel || 'Black Friday')}</div>
-          <div class="ph-metric-sub">정기 프로모션 기준</div>
+          <div class="ph-metric-label">세일 마감 / 주요 시즌</div>
+          <div class="ph-metric-value" style="font-size:0.86rem; line-height:1.35;">${escapeHtml(periodInfo.label)}</div>
+          <div class="ph-metric-sub">${escapeHtml(deal.bestSeasonLabel || 'Black Friday')}</div>
         </div>
       </div>
 
       <div class="ph-chart-wrapper">
-        <div id="phSvgChartContainer">${buildPriceChartSvg(deal, 'all')}</div>
+        <div class="ph-chart-scroll-box" id="phSvgChartContainer">${buildPriceChartSvg(deal, 'all')}</div>
         <div class="ph-tooltip-box" id="phInteractiveTooltip">
           <div><span class="ph-tooltip-date">${escapeHtml(latestPoint.date)}</span><span class="ph-tooltip-season">${escapeHtml(latestPoint.season)}</span></div>
           <div class="ph-tooltip-price">$${escapeHtml(latestPoint.price)} <span style="color:var(--accent-gold); margin-left:0.35rem;">(-${latestOffRate}% · ${latestKrw})</span></div>
@@ -890,13 +1008,13 @@ function openDealDetailModal(id) {
 
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.45rem;">
       <h4 style="font-weight:600; font-size:0.95rem; color:var(--text-primary);">공식 데모 & 사운드 리뷰</h4>
-      <a href="https://www.youtube.com/results?search_query=${searchEncoded}" target="_blank" rel="noopener noreferrer" style="font-size:0.78rem; color:var(--accent-gold); text-decoration:none;">YouTube 더보기 →</a>
+      <a href="https://www.youtube.com/results?search_query=${searchEncoded}" target="_blank" rel="noopener noreferrer" style="font-size:0.78rem; color:var(--accent-gold); text-decoration:none;">YouTube에서 더보기 →</a>
     </div>
     <div class="youtube-video-container" style="margin-bottom:0.4rem;">
       <iframe id="dealModalYoutubeIframe" src="https://www.youtube.com/embed/${escapeHtml(validVideoId)}?rel=0&modestbranding=1" title="${escapeHtml(deal.title)} Official Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
     </div>
   `;
-  openModal('dealDetailModal');
+  openModal('dealDetailModal', skipHistory);
 }
 
 async function deleteDealItem(dealId) {
@@ -1066,52 +1184,25 @@ function setupEnhancedEditorAndEffects() {
     const st = document.createElement('style');
     st.id = 'plugazitDynamicEnhanceStyle';
     st.textContent = `
-      ::-webkit-scrollbar { width: 6px; height: 6px; }
-      ::-webkit-scrollbar-track { background: var(--bg-color); }
-      ::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, rgba(198,174,130,0.28), rgba(74,90,58,0.42));
-        border-radius: 999px;
-        box-shadow: 0 0 6px rgba(198,174,130,0.18);
-      }
-      ::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb:active {
-        background: linear-gradient(180deg, rgba(198,174,130,0.52), rgba(92,112,72,0.62));
-        box-shadow: 0 0 10px rgba(198,174,130,0.32);
-      }
-      /* 반딧불이처럼 아주 작은 점(1.5px~3px)들이 천천히 은은하게 퍼지는 효과 */
       .scroll-firefly-dot {
         position: fixed;
-        right: 5px;
+        right: 4px;
         border-radius: 50%;
         pointer-events: none;
         z-index: 9999;
-        background: rgba(212, 190, 148, 0.65);
-        box-shadow: 0 0 5px 1px rgba(198, 174, 130, 0.38);
+        background: rgba(212, 190, 148, 0.62);
+        box-shadow: 0 0 5px 1px rgba(198, 174, 130, 0.35);
         animation: plugazitFireflyFloat var(--dur, 2.3s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
       }
       @keyframes plugazitFireflyFloat {
         0% { opacity: 0; transform: translate(0, 0) scale(0.5); }
-        22% { opacity: var(--max-op, 0.52); transform: translate(calc(var(--dx) * 0.28), calc(var(--dy) * 0.28)) scale(1); }
+        22% { opacity: var(--max-op, 0.5); transform: translate(calc(var(--dx) * 0.28), calc(var(--dy) * 0.28)) scale(1); }
         100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.25); }
-      }
-      .detail-top-header { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; padding-right:2.2rem; margin-bottom:1.2rem; }
-      .detail-brand-tag { font-size:0.75rem; font-weight:600; color:var(--accent-gold); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.2rem; }
-      .detail-main-title { font-size:1.65rem; font-weight:700; color:var(--text-primary); letter-spacing:-0.02em; line-height:1.3; }
-      .detail-hero-grid { display:grid; grid-template-columns:1.15fr 1fr; gap:1.4rem; align-items:stretch; margin-bottom:1.5rem; }
-      .detail-hero-img { height:230px !important; border-radius:10px; border:1px solid var(--border-color); background:#0b0d0c; }
-      .detail-summary-panel { background:var(--bg-color); border:1px solid var(--border-color); border-radius:10px; padding:1.3rem; display:flex; flex-direction:column; justify-content:space-between; }
-      .detail-desc-body { font-size:0.9rem; color:var(--text-secondary); line-height:1.65; margin-bottom:1rem; }
-      .detail-price-strip { display:flex; justify-content:space-between; align-items:baseline; padding-top:0.9rem; border-top:1px solid var(--border-color); }
-      @media (max-width: 768px) {
-        .modal-overlay { padding: 1.2rem 7vw !important; }
-        .modal-box, .modal-box.large-detail-modal { width: 86vw !important; max-width: 86vw !important; max-height: 82vh !important; padding: 1.25rem 1rem !important; margin: 0 auto !important; }
-        .detail-hero-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
-        .detail-hero-img { height: 185px !important; }
       }
     `;
     document.head.appendChild(st);
   }
 
-  // 글자색 및 형광펜 옵션 요소 완전 제거 (HTML에 남아있더라도 자동 삭제)
   ['btnToolColor', 'btnToolHighlight', 'editorTextColorSelect', 'editorHighlightSelect'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.remove();
@@ -1169,37 +1260,39 @@ function setupEnhancedEditorAndEffects() {
     });
   });
 
-  // 반딧불이처럼 아주 작은 원형 빛 점들이 천천히 퍼지는 스크롤 파티클
+  // 데스크탑 스크롤바 위치에 정확히 맞춘 반딧불이 파티클 (모바일/태블릿 가로모드 어긋남 원천 방지)
   let lastFireflyAt = 0;
   function emitFireflyScrollDots(burst = false) {
+    if (window.innerWidth <= 1024) return;
     const now = Date.now();
     if (!burst && now - lastFireflyAt < 95) return;
     lastFireflyAt = now;
 
-    const docH = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-    const ratio = Math.min(1, Math.max(0, window.scrollY / docH));
-    const thumbY = 60 + ratio * (window.innerHeight - 120);
+    const docEl = document.documentElement;
+    const maxScroll = Math.max(1, docEl.scrollHeight - window.innerHeight);
+    const ratio = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+    const thumbY = 30 + ratio * (window.innerHeight - 60);
 
-    const count = burst ? 3 : (Math.random() > 0.35 ? 1 : 2);
+    const count = burst ? 3 : (Math.random() > 0.4 ? 1 : 2);
     for (let i = 0; i < count; i++) {
       const dot = document.createElement('div');
       dot.className = 'scroll-firefly-dot';
-      const size = (1.5 + Math.random() * 1.6).toFixed(1);
-      const dx = (-6 - Math.random() * 20).toFixed(1) + 'px';
-      const dy = ((Math.random() - 0.5) * 32).toFixed(1) + 'px';
-      const dur = (1.9 + Math.random() * 0.9).toFixed(2) + 's';
-      const maxOp = (0.32 + Math.random() * 0.26).toFixed(2);
+      const size = (1.5 + Math.random() * 1.5).toFixed(1);
+      const dx = (-5 - Math.random() * 18).toFixed(1) + 'px';
+      const dy = ((Math.random() - 0.5) * 28).toFixed(1) + 'px';
+      const dur = (1.9 + Math.random() * 0.8).toFixed(2) + 's';
+      const maxOp = (0.3 + Math.random() * 0.25).toFixed(2);
 
       dot.style.width = `${size}px`;
       dot.style.height = `${size}px`;
-      dot.style.top = `${thumbY + (Math.random() - 0.5) * 30}px`;
+      dot.style.top = `${thumbY + (Math.random() - 0.5) * 20}px`;
       dot.style.setProperty('--dx', dx);
       dot.style.setProperty('--dy', dy);
       dot.style.setProperty('--dur', dur);
       dot.style.setProperty('--max-op', maxOp);
 
       document.body.appendChild(dot);
-      setTimeout(() => dot.remove(), 2900);
+      setTimeout(() => dot.remove(), 2800);
     }
   }
 
@@ -1379,7 +1472,7 @@ function isUserOwnerOfPost(post) {
   return false;
 }
 
-function openPostDetail(id) {
+function openPostDetail(id, skipHistory = false) {
   const post = rawCommunityPosts.find(p => String(p.id) === String(id));
   if (!post) return;
   currentOpenPostId = post.id;
@@ -1432,7 +1525,7 @@ function openPostDetail(id) {
     </div>
   `;
   renderPostComments(post.id);
-  showPage('postDetail');
+  showPage('postDetail', skipHistory);
 }
 
 function triggerEditCurrentPost(id) {
@@ -1708,20 +1801,47 @@ async function handleAccountDeleteRequest() {
 }
 
 async function fetchMyActivityPosts() {
+  const savedDealsEl = document.getElementById('mySavedDealsList');
   const listEl = document.getElementById('myActivityList');
   const scrapEl = document.getElementById('myScrappedList');
   const deletedIds = getDeletedIds(DELETED_POSTS_STORAGE_KEY);
+  const deletedDealIds = getDeletedIds(DELETED_DEALS_STORAGE_KEY);
   const scrappedIds = getScrappedPostIds();
+  const savedDealIds = getSavedDealIds();
+
+  if (savedDealsEl) {
+    const mySavedDeals = dealsData.filter(d => savedDealIds.includes(String(d.id)) && !deletedDealIds.includes(String(d.id)));
+    savedDealsEl.innerHTML = mySavedDeals.length === 0
+      ? `<p style="color:var(--text-secondary); text-align:center; padding: 1.5rem;">관심 등록한 딜 상품이 없습니다.</p>`
+      : mySavedDeals.map(d => {
+          const safeDealId = typeof d.id === 'string' ? `'${d.id}'` : d.id;
+          const krw = d.discountPrice === 0 ? "0원 (무료)" : `약 ${(d.discountPrice * USD_TO_KRW).toLocaleString()}원`;
+          return `
+            <div class="comm-card" style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;" onclick="openDealDetailModal(${safeDealId})">
+              <div>
+                <span class="brand-name">${escapeHtml(d.brand)}</span>
+                <span class="tag-badge tag-discount" style="margin-left:0.4rem;">${escapeHtml(d.discountRate)}</span>
+                <h4 style="margin:0.3rem 0 0.15rem 0; font-size:1.05rem; font-weight:700;">${escapeHtml(d.title)}</h4>
+                <p style="font-size:0.84rem; color:var(--accent-gold); font-weight:600;">$${escapeHtml(d.discountPrice)} (${krw})</p>
+              </div>
+              <button type="button" class="nav-btn danger-outline-btn" style="padding:0.35rem 0.75rem; font-size:0.76rem;" onclick="toggleSaveDeal(${safeDealId}, event)">관심 해제</button>
+            </div>
+          `;
+        }).join('');
+  }
+
   if (rawCommunityPosts.length === 0) await fetchCommunityPosts();
 
   const myPosts = rawCommunityPosts.filter(p => isUserOwnerOfPost(p) && !deletedIds.includes(String(p.id)));
-  listEl.innerHTML = myPosts.length === 0
-    ? `<p style="color:var(--text-secondary); text-align:center; padding: 1.5rem;">작성한 게시글이 없습니다.</p>`
-    : myPosts.map(p => {
-        const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
-        const stats = getPostStats(p);
-        return `<div class="comm-card" onclick="openPostDetail(${safeId})"><span class="comm-category-badge">${escapeHtml(stats.editedCategory || p.category)}</span><h4 style="margin:0.35rem 0; font-size:1rem; font-weight:600;">${escapeHtml(stats.editedTitle || p.title)}</h4><p style="font-size:0.8rem; color:var(--text-secondary);">${escapeHtml(new Date(p.created_at).toLocaleDateString('ko-KR'))} · 추천 ${stats.likes} · 조회 ${stats.views}</p></div>`;
-      }).join('');
+  if (listEl) {
+    listEl.innerHTML = myPosts.length === 0
+      ? `<p style="color:var(--text-secondary); text-align:center; padding: 1.5rem;">작성한 게시글이 없습니다.</p>`
+      : myPosts.map(p => {
+          const safeId = typeof p.id === 'string' ? `'${p.id}'` : p.id;
+          const stats = getPostStats(p);
+          return `<div class="comm-card" onclick="openPostDetail(${safeId})"><span class="comm-category-badge">${escapeHtml(stats.editedCategory || p.category)}</span><h4 style="margin:0.35rem 0; font-size:1rem; font-weight:600;">${escapeHtml(stats.editedTitle || p.title)}</h4><p style="font-size:0.8rem; color:var(--text-secondary);">${escapeHtml(new Date(p.created_at).toLocaleDateString('ko-KR'))} · 추천 ${stats.likes} · 조회 ${stats.views}</p></div>`;
+        }).join('');
+  }
 
   if (scrapEl) {
     const myScrapped = rawCommunityPosts.filter(p => scrappedIds.includes(String(p.id)) && !deletedIds.includes(String(p.id)));
@@ -1741,6 +1861,11 @@ async function checkUserSession() {
   currentUser = session?.user || null;
   updateUIAuthStatus(currentUser);
   if (currentUser) {
+    mergeCloudPreferencesFromUser(currentUser);
+    updateSavedDealCountBadge();
+    updateScrappedPostCountBadge();
+    renderDeals();
+    syncUserPreferencesToCloud();
     try {
       const { data } = await supabaseClient.from('profiles').select('nickname, main_daw').eq('id', currentUser.id).maybeSingle();
       if (data?.nickname) originalNickname = data.nickname;
@@ -1770,17 +1895,46 @@ async function handleLoginSubmit(e) {
   });
 }
 
+/* 중복 이메일 가입 사전 차단 및 안내 보강 */
 async function handleSignupSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('btnSignupSubmit');
   await withSubmitLock('signup', btn, async () => {
     const nickname = document.getElementById('signupNickname').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
+    const email = document.getElementById('signupEmail').value.trim().toLowerCase();
     const password = document.getElementById('signupPassword').value;
     if (!supabaseClient) { closeModal('signupModal'); alert('회원가입 완료.'); return; }
-    const { error } = await supabaseClient.auth.signUp({ email, password, options: { data: { nickname } } });
-    if (error) alert('회원가입 실패: ' + error.message);
-    else { closeModal('signupModal'); alert('가입 완료. 이메일 인증 확인 후 로그인해 주세요.'); }
+
+    try {
+      const { data: existingEmail } = await supabaseClient.from('profiles').select('id').ilike('email', email).maybeSingle();
+      if (existingEmail) {
+        alert('이미 가입된 이메일 계정입니다. 로그인 창에서 로그인해 주세요.');
+        return;
+      }
+      const { data: existingNick } = await supabaseClient.from('profiles').select('id').eq('nickname', nickname).maybeSingle();
+      if (existingNick) {
+        alert('이미 사용 중인 프로듀서 닉네임입니다. 다른 닉네임을 입력해 주세요.');
+        return;
+      }
+    } catch (err) {}
+
+    const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { nickname } } });
+    if (error) {
+      if (/already registered|already exists/i.test(error.message)) {
+        alert('이미 가입된 이메일 계정입니다. 로그인해 주세요.');
+      } else {
+        alert('회원가입 실패: ' + error.message);
+      }
+      return;
+    }
+
+    if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      alert('이미 가입된 이메일 계정입니다. 로그인하거나 비밀번호 재설정을 이용해 주세요.');
+      return;
+    }
+
+    closeModal('signupModal');
+    alert('가입 완료. 이메일 인증 확인 후 로그인해 주세요.');
   });
 }
 
@@ -2064,6 +2218,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (savedTheme === 'light' || savedTheme === 'dark') document.documentElement.setAttribute('data-theme', savedTheme);
     const savedDaw = localStorage.getItem('plugazit_user_daw');
     if (savedDaw) currentUserDaw = savedDaw;
+    window.history.replaceState({ page: 'deals', postId: null, modalId: null }, '', window.location.pathname);
   } catch (e) {}
 
   setupEnhancedEditorAndEffects();
