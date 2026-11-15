@@ -13,17 +13,16 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <link rel="stylesheet" href="style.css">
   <style>
     .hero-slogan-section .hero-title {
-      font-family: 'Cormorant Garamond', Georgia, serif !important;
-      font-weight: 500 !important;
-      font-size: 2.6rem !important;
-      letter-spacing: 0.02em !important;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
+      font-weight: 700 !important;
+      font-size: 2.35rem !important;
+      letter-spacing: -0.025em !important;
       color: #f3efe6 !important;
-      line-height: 1.2 !important;
+      line-height: 1.25 !important;
     }
     [data-theme="light"] .hero-slogan-section .hero-title {
       color: #1c1e1c !important;
@@ -32,13 +31,13 @@
       margin-top: 0.45rem;
       font-size: 0.88rem;
       color: var(--text-secondary);
-      font-weight: 400;
+      font-weight: 500;
       letter-spacing: -0.01em;
       word-break: keep-all;
     }
     @media (max-width: 768px) {
       .hero-slogan-section .hero-title {
-        font-size: 1.95rem !important;
+        font-size: 1.8rem !important;
       }
       .hero-sub-desc {
         font-size: 0.8rem;
@@ -55,21 +54,21 @@
       <img src="PlugAzit.png" alt="PlugAzit" class="brand-logo-img" />
     </a>
 
-    <!-- 2층(PC에서는 우측 메뉴 옆): 주요 메뉴 탭 + Discord, Twitter -->
+    <!-- 2층(PC에서는 우측 메뉴 옆): 주요 메뉴 탭 + Discord, Twitter + 다크/라이트 토글 -->
     <nav role="navigation" aria-label="주요 메뉴">
       <button type="button" class="nav-tab-link active" id="navDealsBtn" onclick="showPage('deals')">VST Vault</button>
       <button type="button" class="nav-tab-link" id="navCommBtn" onclick="showPage('community')">Community</button>
       <button type="button" class="nav-tab-link" id="navAdminBtn" style="display:none; color: var(--accent-gold);" onclick="showPage('admin')">Admin Center</button>
       <a href="https://discord.gg/DWXe2pH9m" target="_blank" rel="noopener noreferrer" class="social-link-btn" title="공식 디스코드 커뮤니티">Discord</a>
       <a href="https://x.com/plugazit" target="_blank" rel="noopener noreferrer" class="social-link-btn" title="공식 트위터(X)">Twitter</a>
-    </nav>
 
-    <!-- 1층 우측 상단 고정 그룹: 다크/라이트 토글 + 로그인/회원가입(마이페이지/로그아웃) -->
-    <div class="header-top-right">
       <button type="button" class="toggle-switch" onclick="toggleTheme()" title="다크/라이트 테마 변경" aria-label="다크 모드 및 라이트 모드 전환">
         <span class="toggle-knob"></span>
       </button>
+    </nav>
 
+    <!-- 1층 우측 상단 고정 그룹: 로그인/회원가입(마이페이지/로그아웃) -->
+    <div class="header-top-right">
       <div id="authNav">
         <button type="button" class="nav-btn" onclick="openModal('loginModal')">로그인</button>
         <button type="button" class="nav-btn" onclick="openModal('signupModal')">회원가입</button>
