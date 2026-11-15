@@ -614,9 +614,10 @@ footer a:hover { color: var(--accent-gold); }
 }
 .youtube-video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
 
+/* 상품 상세 모달 상단 헤더: X 버튼과 우측 배지(마감기한/할인율) 간격 여유 확보 (가로모드 포함) */
 .detail-top-header {
   display: flex; justify-content: space-between; align-items: flex-start;
-  gap: 0.8rem; padding-right: 2.8rem; margin-bottom: 1.2rem;
+  gap: 0.8rem; padding-right: 3.4rem; margin-bottom: 1.2rem;
 }
 .detail-brand-tag {
   font-size: 0.75rem; font-weight: 600; color: var(--accent-gold);
@@ -685,20 +686,23 @@ footer a:hover { color: var(--accent-gold); }
 .ph-metric-value { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); }
 .ph-metric-sub { font-size: 0.72rem; color: var(--accent-gold); font-weight: 500; margin-top: 0.12rem; }
 
+/* 가격변동 추이 그래프 눌림 방지: 세로모드에서도 가로폭 640px 이상을 유지하며 매끄럽게 가로 스크롤 */
 .ph-chart-wrapper {
   position: relative; width: 100%; background: rgba(0, 0, 0, 0.18);
   border: 1px solid var(--border-color); border-radius: 10px; padding: 1.1rem 0.9rem 0.7rem; margin-bottom: 1.2rem;
 }
 [data-theme="light"] .ph-chart-wrapper { background: rgba(0, 0, 0, 0.02); }
 .ph-chart-scroll-box {
-  width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.45rem;
+  width: 100%; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; padding-bottom: 0.55rem;
   scrollbar-width: thin;
 }
 .ph-chart-scroll-box::-webkit-scrollbar {
   height: 5px;
   display: block;
 }
-.ph-svg-chart { width: 100%; min-width: 520px; height: 205px; display: block; overflow: visible; }
+.ph-svg-chart {
+  width: 100%; min-width: 640px; height: 210px; display: block; overflow: visible; flex-shrink: 0;
+}
 .ph-node-point { cursor: pointer; transition: r 0.15s ease; }
 .ph-node-point:hover { r: 6.5px; }
 
@@ -721,6 +725,23 @@ footer a:hover { color: var(--accent-gold); }
 .ph-season-rate { font-size: 0.86rem; font-weight: 600; color: var(--text-primary); margin-top: 0.15rem; }
 .ph-season-bar-track { width: 100%; height: 2px; background: var(--border-color); border-radius: 2px; margin-top: 0.38rem; overflow: hidden; }
 .ph-season-bar-fill { height: 100%; background: var(--accent-gold); border-radius: 2px; }
+
+/* 휴대폰 가로모드(Landscape)에서 상세모달 X 버튼과 좌측 배지 간격 조정 */
+@media (max-width: 960px) and (orientation: landscape) {
+  .modal-box.large-detail-modal {
+    padding: 1.5rem 1.4rem !important;
+  }
+  .modal-close {
+    top: 1.1rem !important;
+    right: 1.1rem !important;
+  }
+  .detail-top-header {
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    padding-right: 3.4rem !important;
+    gap: 1rem !important;
+  }
+}
 
 /* =========================================================
    MOBILE RESPONSIVE PATCH
@@ -772,7 +793,6 @@ footer a:hover { color: var(--accent-gold); }
     white-space: nowrap !important;
   }
 
-  /* 중요: !important로 display를 덮어쓰지 않아야 로그인/비로그인 중 하나만 정확히 표시됨 */
   #authNav, #userNav {
     position: static !important;
     align-items: center !important;
@@ -944,8 +964,17 @@ footer a:hover { color: var(--accent-gold); }
     border-radius: 14px !important;
   }
 
+  .modal-close {
+    top: 1.05rem !important;
+    right: 1.05rem !important;
+  }
+
+  /* 휴대폰 세로모드에서 상세페이지 X 버튼과 배지 겹침 원천 차단 */
   .detail-top-header {
-    padding-right: 2.3rem !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.6rem !important;
+    padding-right: 2.8rem !important;
   }
 
   .detail-main-title {

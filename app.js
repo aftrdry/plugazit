@@ -14,6 +14,7 @@ let isNicknameVerified = true;
 let currentReportTarget = null;
 let currentActivePage = 'deals';
 let isHandlingPopState = false;
+let realtimePrefSyncTimer = null;
 
 if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -63,6 +64,7 @@ function renderSafeContent(rawText) {
   safe = safe.replace(/\*{4}/g, '').replace(/\[밑줄\]\[\/밑줄\]/g, '');
   safe = safe.replace(/\[색상[^\]]*\]|\[\/색상\]|\[형광펜[^\]]*\]|\[\/형광펜\]/g, '');
 
+  safe = safe.replace(/!\[이미지첨부\]\((https?:\/\/[^\s)]+)\)/, '<img src="$1" alt="첨부 이미지" referrerpolicy="no-referrer" style="max-width:100%; border-radius:8px; margin:0.8rem 0; display:block;">');
   safe = safe.replace(/!\[이미지첨부\]\((https?:\/\/[^\s)]+)\)/g, '<img src="$1" alt="첨부 이미지" referrerpolicy="no-referrer" style="max-width:100%; border-radius:8px; margin:0.8rem 0; display:block;">');
   safe = safe.replace(/\[(동영상링크|오디오링크|링크)\]\((https?:\/\/[^\s)]+)\)/g, function(match, label, url) {
     const ytId = extractYoutubeId(url);
@@ -131,6 +133,7 @@ const DELETED_POSTS_STORAGE_KEY = 'plugazit_deleted_post_ids_v1';
 const DELETED_DEALS_STORAGE_KEY = 'plugazit_deleted_deal_ids_v1';
 const SAVED_DEALS_STORAGE_KEY = 'plugazit_saved_deal_ids_v1';
 const SCRAPPED_POSTS_STORAGE_KEY = 'plugazit_scrapped_post_ids_v1';
+const PREFS_UPDATED_AT_KEY = 'plugazit_prefs_updated_at_v1';
 const POST_META_STORAGE_KEY = 'plugazit_post_meta_v1';
 const LOCAL_COMMENTS_STORAGE_KEY = 'plugazit_local_comments_v1';
 const LOCAL_REPORTS_STORAGE_KEY = 'plugazit_local_reports_v1';
@@ -147,37 +150,94 @@ function markIdAsDeleted(storageKey, id) {
   } catch (e) {}
 }
 
-/* 기기 간(노트북 <-> 아이패드/아이폰) 관심 딜 & 스크랩 클라우드 양방향 동기화 */
+/* 동시 접속 기기 간(노트북 <-> 아이패드 <-> 휴대폰) 관심 딜 & 스크랩 실시간 양방향 동기화 */
 async function syncUserPreferencesToCloud() {
   if (!supabaseClient || !currentUser) return;
   try {
     const savedDeals = getSavedDealIds();
     const scrappedPosts = getScrappedPostIds();
+    const nowTs = Date.now();
+    localStorage.setItem(PREFS_UPDATED_AT_KEY, String(nowTs));
     await supabaseClient.auth.updateUser({
       data: {
         saved_deals: savedDeals,
-        scrapped_posts: scrappedPosts
+        scrapped_posts: scrappedPosts,
+        prefs_updated_at: nowTs
       }
     });
   } catch (e) {}
 }
 
-function mergeCloudPreferencesFromUser(user) {
-  if (!user || !user.user_metadata) return;
+function applyCloudPreferencesFromUser(user) {
+  if (!user || !user.user_metadata) return false;
+  let changed = false;
   try {
+    const cloudTs = Number(user.user_metadata.prefs_updated_at) || 0;
+    const localTs = Number(localStorage.getItem(PREFS_UPDATED_AT_KEY)) || 0;
     const cloudDeals = user.user_metadata.saved_deals;
-    if (Array.isArray(cloudDeals)) {
-      const localDeals = getSavedDealIds();
-      const mergedDeals = Array.from(new Set([...localDeals, ...cloudDeals.map(String)]));
-      localStorage.setItem(SAVED_DEALS_STORAGE_KEY, JSON.stringify(mergedDeals));
-    }
     const cloudScraps = user.user_metadata.scrapped_posts;
-    if (Array.isArray(cloudScraps)) {
-      const localScraps = getScrappedPostIds();
-      const mergedScraps = Array.from(new Set([...localScraps, ...cloudScraps.map(String)]));
-      localStorage.setItem(SCRAPPED_POSTS_STORAGE_KEY, JSON.stringify(mergedScraps));
+
+    if (cloudTs > 0 && cloudTs >= localTs) {
+      if (Array.isArray(cloudDeals)) {
+        const nextDeals = JSON.stringify(cloudDeals.map(String));
+        if (localStorage.getItem(SAVED_DEALS_STORAGE_KEY) !== nextDeals) {
+          localStorage.setItem(SAVED_DEALS_STORAGE_KEY, nextDeals);
+          changed = true;
+        }
+      }
+      if (Array.isArray(cloudScraps)) {
+        const nextScraps = JSON.stringify(cloudScraps.map(String));
+        if (localStorage.getItem(SCRAPPED_POSTS_STORAGE_KEY) !== nextScraps) {
+          localStorage.setItem(SCRAPPED_POSTS_STORAGE_KEY, nextScraps);
+          changed = true;
+        }
+      }
+      localStorage.setItem(PREFS_UPDATED_AT_KEY, String(cloudTs));
+    } else if (cloudTs === 0) {
+      if (Array.isArray(cloudDeals)) {
+        const mergedDeals = Array.from(new Set([...getSavedDealIds(), ...cloudDeals.map(String)]));
+        localStorage.setItem(SAVED_DEALS_STORAGE_KEY, JSON.stringify(mergedDeals));
+        changed = true;
+      }
+      if (Array.isArray(cloudScraps)) {
+        const mergedScraps = Array.from(new Set([...getScrappedPostIds(), ...cloudScraps.map(String)]));
+        localStorage.setItem(SCRAPPED_POSTS_STORAGE_KEY, JSON.stringify(mergedScraps));
+        changed = true;
+      }
     }
   } catch (e) {}
+  return changed;
+}
+
+async function pullLatestCloudPreferences() {
+  if (!supabaseClient || !currentUser) return;
+  try {
+    const { data, error } = await supabaseClient.auth.getUser();
+    if (!error && data?.user) {
+      currentUser = data.user;
+      const changed = applyCloudPreferencesFromUser(data.user);
+      if (changed) {
+        updateSavedDealCountBadge();
+        updateScrappedPostCountBadge();
+        if (currentActivePage === 'deals') renderDeals();
+        if (currentActivePage === 'community') renderCommunityPosts();
+        if (currentActivePage === 'mypage') fetchMyActivityPosts();
+      }
+    }
+  } catch (e) {}
+}
+
+function startRealtimePreferenceSync() {
+  if (realtimePrefSyncTimer) clearInterval(realtimePrefSyncTimer);
+  window.addEventListener('focus', pullLatestCloudPreferences);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') pullLatestCloudPreferences();
+  });
+  realtimePrefSyncTimer = setInterval(() => {
+    if (document.visibilityState === 'visible' && currentUser) {
+      pullLatestCloudPreferences();
+    }
+  }, 4000);
 }
 
 function getSavedDealIds() { return getDeletedIds(SAVED_DEALS_STORAGE_KEY); }
@@ -189,6 +249,7 @@ function toggleSaveDeal(dealId, event) {
     const idx = list.indexOf(strId);
     if (idx >= 0) list.splice(idx, 1); else list.push(strId);
     localStorage.setItem(SAVED_DEALS_STORAGE_KEY, JSON.stringify(list));
+    localStorage.setItem(PREFS_UPDATED_AT_KEY, String(Date.now()));
     updateSavedDealCountBadge();
     renderDeals();
     if (currentActivePage === 'mypage') fetchMyActivityPosts();
@@ -212,6 +273,7 @@ function toggleScrapPost(postId, event) {
     const idx = list.indexOf(strId);
     if (idx >= 0) list.splice(idx, 1); else list.push(strId);
     localStorage.setItem(SCRAPPED_POSTS_STORAGE_KEY, JSON.stringify(list));
+    localStorage.setItem(PREFS_UPDATED_AT_KEY, String(Date.now()));
     updateScrappedPostCountBadge();
     const btn = document.getElementById('btnPostScrap');
     if (btn) {
@@ -220,6 +282,7 @@ function toggleScrapPost(postId, event) {
       btn.innerText = nowScrapped ? '스크랩됨' : '+ 스크랩';
     }
     if (currentCommCat === 'scrapped') renderCommunityPosts();
+    if (currentActivePage === 'mypage') fetchMyActivityPosts();
     syncUserPreferencesToCloud();
   } catch (e) {}
 }
@@ -324,6 +387,7 @@ function showPage(page, skipHistory = false) {
     pushAppHistoryState({ page, postId: page === 'postDetail' ? currentOpenPostId : null, modalId: null });
   }
 
+  pullLatestCloudPreferences();
   if (page === 'community') fetchCommunityPosts();
   else if (page === 'mypage') initMyPageData();
   else if (page === 'admin') renderAdminDashboard();
@@ -834,6 +898,7 @@ function renderDeals() {
   }).join('');
 }
 
+/* 가격 추이 SVG: preserveAspectRatio="none" 제거로 휴대폰 세로모드 눌림/찌그러짐 원천 차단 */
 function buildPriceChartSvg(deal, rangeMode = 'all') {
   const fullHistory = deal.priceHistory || [
     { date: "2024.11", season: "Black Friday", price: deal.discountPrice },
@@ -842,7 +907,8 @@ function buildPriceChartSvg(deal, rangeMode = 'all') {
     { date: "2026.11", season: "Current Deal", price: deal.discountPrice }
   ];
   const pointsData = rangeMode === '1y' ? fullHistory.slice(-5) : fullHistory;
-  const svgW = 740, svgH = 200, padL = 46, padR = 22, padT = 20, padB = 34;
+  const svgW = Math.max(660, pointsData.length * 76);
+  const svgH = 210, padL = 48, padR = 26, padT = 22, padB = 36;
   const plotW = svgW - padL - padR, plotH = svgH - padT - padB;
   const prices = pointsData.map(p => p.price);
   const maxVal = Math.max(deal.original || 100, ...prices);
@@ -855,7 +921,7 @@ function buildPriceChartSvg(deal, rangeMode = 'all') {
   for (let i = 0; i <= 3; i++) {
     const gVal = Math.round((valSpan * i) / 3);
     const gy = getY(gVal).toFixed(1);
-    gridLinesHtml += `<line x1="${padL}" y1="${gy}" x2="${svgW - padR}" y2="${gy}" stroke="var(--border-color)" stroke-width="1" /><text x="${padL - 8}" y="${Number(gy) + 4}" fill="var(--text-secondary)" font-size="10.5" text-anchor="end">$${gVal}</text>`;
+    gridLinesHtml += `<line x1="${padL}" y1="${gy}" x2="${svgW - padR}" y2="${gy}" stroke="var(--border-color)" stroke-width="1" /><text x="${padL - 8}" y="${Number(gy) + 4}" fill="var(--text-secondary)" font-size="11" text-anchor="end">$${gVal}</text>`;
   }
 
   const coords = pointsData.map((pt, idx) => ({ x: Number(getX(idx).toFixed(1)), y: Number(getY(pt.price).toFixed(1)), ...pt }));
@@ -869,11 +935,11 @@ function buildPriceChartSvg(deal, rangeMode = 'all') {
     const isLowest = c.price === minPriceVal;
     const dotColor = isCurrent ? 'var(--accent-gold)' : (isLowest ? '#8fa874' : 'var(--text-primary)');
     const offRate = deal.original > 0 ? Math.round(((deal.original - c.price) / deal.original) * 100) : 0;
-    const showLabel = pointsData.length <= 6 || idx % 2 === 0 || isCurrent;
-    return `<g>${showLabel ? `<text x="${c.x}" y="${svgH - 8}" fill="var(--text-secondary)" font-size="10" text-anchor="middle">${escapeHtml(c.date)}</text>` : ''}<circle class="ph-node-point" cx="${c.x}" cy="${c.y}" r="${isCurrent ? 5.5 : 4.5}" fill="${dotColor}" stroke="var(--card-bg)" stroke-width="2" onmouseenter="updatePriceChartTooltip(${safeDealId}, '${escapeHtml(c.date)}', '${escapeHtml(c.season)}', ${Number(c.price)}, ${offRate})" onclick="updatePriceChartTooltip(${safeDealId}, '${escapeHtml(c.date)}', '${escapeHtml(c.season)}', ${Number(c.price)}, ${offRate})" /></g>`;
+    const showLabel = pointsData.length <= 7 || idx % 2 === 0 || isCurrent;
+    return `<g>${showLabel ? `<text x="${c.x}" y="${svgH - 8}" fill="var(--text-secondary)" font-size="10.5" text-anchor="middle">${escapeHtml(c.date)}</text>` : ''}<circle class="ph-node-point" cx="${c.x}" cy="${c.y}" r="${isCurrent ? 5.5 : 4.5}" fill="${dotColor}" stroke="var(--card-bg)" stroke-width="2" onmouseenter="updatePriceChartTooltip(${safeDealId}, '${escapeHtml(c.date)}', '${escapeHtml(c.season)}', ${Number(c.price)}, ${offRate})" onclick="updatePriceChartTooltip(${safeDealId}, '${escapeHtml(c.date)}', '${escapeHtml(c.season)}', ${Number(c.price)}, ${offRate})" /></g>`;
   }).join('');
 
-  return `<svg class="ph-svg-chart" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="none"><defs><linearGradient id="phAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent-gold)" stop-opacity="0.2" /><stop offset="100%" stop-color="var(--accent-gold)" stop-opacity="0.0" /></linearGradient></defs>${gridLinesHtml}<path d="${areaPath}" fill="url(#phAreaGrad)" /><polyline fill="none" stroke="var(--accent-gold)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${polylinePoints}" />${nodesHtml}</svg>`;
+  return `<svg class="ph-svg-chart" style="min-width:${svgW}px;" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="xMidYMid meet"><defs><linearGradient id="phAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent-gold)" stop-opacity="0.2" /><stop offset="100%" stop-color="var(--accent-gold)" stop-opacity="0.0" /></linearGradient></defs>${gridLinesHtml}<path d="${areaPath}" fill="url(#phAreaGrad)" /><polyline fill="none" stroke="var(--accent-gold)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${polylinePoints}" />${nodesHtml}</svg>`;
 }
 
 function switchPriceChartRange(dealId, rangeMode, btnEl) {
@@ -933,7 +999,7 @@ function openDealDetailModal(id, skipHistory = false) {
         <div class="detail-brand-tag">${escapeHtml(deal.brand)} · ${escapeHtml(deal.sub)}</div>
         <h2 class="detail-main-title">${escapeHtml(deal.title)}</h2>
       </div>
-      <div style="display:flex; align-items:center; gap:0.45rem; flex-shrink:0;">
+      <div style="display:flex; align-items:center; gap:0.45rem; flex-shrink:0; flex-wrap:wrap;">
         ${adminDeleteBtnHtml}
         <span class="deal-period-badge ${periodInfo.urgent ? 'urgent' : ''}" style="font-size:0.76rem; padding:0.3rem 0.6rem;">${escapeHtml(periodInfo.label)}</span>
         <span class="tag-badge tag-discount" style="font-size:0.82rem; padding:0.34rem 0.72rem;">${escapeHtml(deal.discountRate)}</span>
@@ -1259,7 +1325,7 @@ function setupEnhancedEditorAndEffects() {
     });
   });
 
-  // PC 및 모바일 모든 세로/가로 드래그바(스크롤바) 전 영역 반딧불이 파티클 엔진
+  // 휴대폰 가로모드 노치(Safe Area) 여백까지 정확히 계산하여 스크롤바 바로 위에 반딧불이 파티클을 생성하는 엔진
   let lastFireflyAt = 0;
   function spawnFireflyParticlesAt(originX, originY, isHorizontal = false, burst = false) {
     const count = burst ? 3 : (Math.random() > 0.38 ? 1 : 2);
@@ -1268,18 +1334,18 @@ function setupEnhancedEditorAndEffects() {
       dot.className = 'scroll-firefly-dot';
       const size = (1.6 + Math.random() * 1.6).toFixed(1);
       const dx = isHorizontal
-        ? ((Math.random() - 0.5) * 28).toFixed(1) + 'px'
-        : (-5 - Math.random() * 18).toFixed(1) + 'px';
+        ? ((Math.random() - 0.5) * 24).toFixed(1) + 'px'
+        : (-2 - Math.random() * 11).toFixed(1) + 'px';
       const dy = isHorizontal
-        ? (-5 - Math.random() * 16).toFixed(1) + 'px'
-        : ((Math.random() - 0.5) * 28).toFixed(1) + 'px';
+        ? (-2 - Math.random() * 11).toFixed(1) + 'px'
+        : ((Math.random() - 0.5) * 24).toFixed(1) + 'px';
       const dur = (1.85 + Math.random() * 0.85).toFixed(2) + 's';
       const maxOp = (0.35 + Math.random() * 0.28).toFixed(2);
 
       dot.style.width = `${size}px`;
       dot.style.height = `${size}px`;
-      dot.style.left = `${originX + (isHorizontal ? (Math.random() - 0.5) * 18 : 0)}px`;
-      dot.style.top = `${originY + (isHorizontal ? 0 : (Math.random() - 0.5) * 18)}px`;
+      dot.style.left = `${originX + (isHorizontal ? (Math.random() - 0.5) * 14 : 0)}px`;
+      dot.style.top = `${originY + (isHorizontal ? 0 : (Math.random() - 0.5) * 14)}px`;
       dot.style.setProperty('--dx', dx);
       dot.style.setProperty('--dy', dy);
       dot.style.setProperty('--dur', dur);
@@ -1295,17 +1361,21 @@ function setupEnhancedEditorAndEffects() {
     if (!burst && now - lastFireflyAt < 75) return;
     lastFireflyAt = now;
 
-    // 1) 전체 윈도우 세로/가로 스크롤인 경우
+    // 1) 전체 윈도우 세로 스크롤: visualViewport로 휴대폰 가로모드 실제 스크롤바 우측 끝점을 정확히 추적
     if (!target || target === document || target === document.documentElement || target === document.body || target === window) {
       const docEl = document.documentElement;
-      const maxScrollY = Math.max(1, docEl.scrollHeight - window.innerHeight);
+      const vv = window.visualViewport;
+      const viewH = vv ? vv.height : window.innerHeight;
+      const viewTop = vv ? vv.offsetTop : 0;
+      const rightEdge = vv ? (vv.offsetLeft + vv.width) : docEl.clientWidth;
+      const maxScrollY = Math.max(1, docEl.scrollHeight - viewH);
       const ratioY = Math.min(1, Math.max(0, window.scrollY / maxScrollY));
-      const thumbY = 30 + ratioY * (window.innerHeight - 60);
-      spawnFireflyParticlesAt(window.innerWidth - 6, thumbY, false, burst);
+      const thumbY = viewTop + 28 + ratioY * Math.max(20, viewH - 56);
+      spawnFireflyParticlesAt(rightEdge - 3, thumbY, false, burst);
       return;
     }
 
-    // 2) 개별 스크롤 컨테이너(카테고리 바, 가격 차트 가로 스크롤, 모달 내부 스크롤 등)인 경우
+    // 2) 개별 스크롤 컨테이너(카테고리 바, 가격 차트 가로 스크롤, 모달 내부 스크롤 등)
     if (target.getBoundingClientRect) {
       const rect = target.getBoundingClientRect();
       const canScrollX = target.scrollWidth > target.clientWidth + 4;
@@ -1315,20 +1385,19 @@ function setupEnhancedEditorAndEffects() {
         const maxScrollLeft = Math.max(1, target.scrollWidth - target.clientWidth);
         const ratioX = Math.min(1, Math.max(0, target.scrollLeft / maxScrollLeft));
         const thumbX = rect.left + 16 + ratioX * Math.max(10, rect.width - 32);
-        const barY = rect.bottom - 4;
+        const barY = rect.bottom - 3;
         spawnFireflyParticlesAt(thumbX, barY, true, burst);
       }
       if (canScrollY) {
         const maxScrollTop = Math.max(1, target.scrollHeight - target.clientHeight);
         const ratioY = Math.min(1, Math.max(0, target.scrollTop / maxScrollTop));
         const thumbY = rect.top + 16 + ratioY * Math.max(10, rect.height - 32);
-        const barX = rect.right - 5;
+        const barX = rect.right - 3;
         spawnFireflyParticlesAt(barX, thumbY, false, burst);
       }
     }
   }
 
-  // 캡처링(true)으로 페이지 내 모든 가로·세로 드래그바 스크롤 이벤트를 감지
   document.addEventListener('scroll', (e) => {
     handleUniversalScrollParticle(e.target, false);
   }, { capture: true, passive: true });
@@ -1723,7 +1792,9 @@ function switchMyPageTab(tabName, el) {
   document.getElementById('mpTabProfile').style.display = tabName === 'profile' ? 'block' : 'none';
   document.getElementById('mpTabSecurity').style.display = tabName === 'security' ? 'block' : 'none';
   document.getElementById('mpTabActivity').style.display = tabName === 'activity' ? 'block' : 'none';
-  if (tabName === 'activity') fetchMyActivityPosts();
+  if (tabName === 'activity') {
+    pullLatestCloudPreferences().then(() => fetchMyActivityPosts());
+  }
 }
 
 async function initMyPageData() {
@@ -1750,6 +1821,9 @@ async function initMyPageData() {
       document.getElementById('myPageNickname').value = originalNickname;
     }
     onNicknameInputChanged();
+    if (document.getElementById('mpTabActivity')?.style.display !== 'none') {
+      fetchMyActivityPosts();
+    }
   } catch (err) {}
 }
 
@@ -1908,11 +1982,11 @@ async function checkUserSession() {
   currentUser = session?.user || null;
   updateUIAuthStatus(currentUser);
   if (currentUser) {
-    mergeCloudPreferencesFromUser(currentUser);
+    await pullLatestCloudPreferences();
     updateSavedDealCountBadge();
     updateScrappedPostCountBadge();
     renderDeals();
-    syncUserPreferencesToCloud();
+    startRealtimePreferenceSync();
     try {
       const { data } = await supabaseClient.from('profiles').select('nickname, main_daw').eq('id', currentUser.id).maybeSingle();
       if (data?.nickname) originalNickname = data.nickname;
