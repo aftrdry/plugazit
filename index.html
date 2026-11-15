@@ -4,18 +4,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PlugAzit — Right Near, Your Azit.</title>
-  <meta name="description" content="기다림의 끝, 회심의 무대를 준비하는 곳. 글로벌 프로듀서들을 위한 VST 플러그인 딜 큐레이션 및 사운드 아지트.">
+  <meta name="description" content="글로벌 프로듀서들을 위한 VST 플러그인 딜 큐레이션 및 사운드 아지트.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="PlugAzit — Right Near, Your Azit.">
-  <meta property="og:description" content="기다림의 끝, 회심의 무대를 준비하는 곳. 프로듀서들을 위한 VST 딜 큐레이션 및 가격 추이 아카이브.">
+  <meta property="og:description" content="프로듀서들을 위한 VST 딜 큐레이션 및 가격 추이 아카이브.">
   <meta property="og:url" content="https://plugazit.com">
   <meta name="theme-color" content="#101211">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <link rel="stylesheet" href="style.css">
+  <style>
+    .hero-slogan-section .hero-title {
+      font-family: 'Cormorant Garamond', Georgia, serif !important;
+      font-weight: 300 !important;
+      font-size: 2.6rem !important;
+      letter-spacing: 0.02em !important;
+      color: #f3efe6 !important;
+      line-height: 1.2 !important;
+    }
+    [data-theme="light"] .hero-slogan-section .hero-title {
+      color: #1c1e1c !important;
+    }
+    @media (max-width: 768px) {
+      .hero-slogan-section .hero-title {
+        font-size: 1.95rem !important;
+      }
+    }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -50,7 +68,6 @@
 
   <main class="container" role="main">
     <div class="hero-slogan-section">
-      <span class="hero-eyebrow">ARCHIVE & SOUND CURATION</span>
       <h1 class="hero-title">Right Near, Your Azit.</h1>
     </div>
 
