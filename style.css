@@ -721,39 +721,44 @@ footer a:hover { color: var(--accent-gold); }
 .ph-season-bar-fill { height: 100%; background: var(--accent-gold); border-radius: 2px; }
 
 /* =========================================================
-   MOBILE RESPONSIVE PATCH
+   MOBILE RESPONSIVE PATCH (상단 헤더 및 메뉴 고정 보장)
    ========================================================= */
 @media (max-width: 768px) {
   body {
-    padding-top: 0 !important;
+    padding-top: 104px !important;
   }
 
   header {
-    position: sticky !important;
-    top: 0;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
     height: auto !important;
     min-height: unset !important;
-    padding: 0.75rem 1rem !important;
+    padding: 0.7rem 0.9rem !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 0.65rem !important;
+    gap: 0.55rem !important;
+    z-index: 1000 !important;
   }
 
+  /* 1층 좌측: 로고 고정 */
   .logo-container {
-    height: 38px !important;
+    height: 36px !important;
     width: fit-content !important;
   }
 
   .brand-logo-img {
-    height: 34px !important;
+    height: 32px !important;
   }
 
+  /* 1층 우측 상단: 로그인/회원가입 또는 마이페이지/로그아웃 고정 */
   #authNav, #userNav {
     position: absolute !important;
-    top: 0.75rem !important;
-    right: 1rem !important;
-    gap: 0.38rem !important;
+    top: 0.7rem !important;
+    right: 0.9rem !important;
+    gap: 0.35rem !important;
     margin: 0 !important;
     z-index: 20 !important;
   }
@@ -761,10 +766,11 @@ footer a:hover { color: var(--accent-gold); }
   #authNav .nav-btn,
   #userNav .nav-btn {
     white-space: nowrap !important;
-    padding: 0.38rem 0.72rem !important;
-    font-size: 0.78rem !important;
+    padding: 0.35rem 0.68rem !important;
+    font-size: 0.76rem !important;
   }
 
+  /* 2층 상단 메뉴: 가로 스크롤 없이 한 줄에 꽉 차도록 고정 배치 */
   nav {
     width: 100% !important;
     margin: 0 !important;
@@ -772,23 +778,21 @@ footer a:hover { color: var(--accent-gold); }
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: space-between !important;
-    overflow-x: auto !important;
-    gap: 0.25rem !important;
-    padding-bottom: 0.25rem;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
+    overflow: hidden !important;
+    gap: 0.15rem !important;
+    padding-bottom: 0 !important;
+    scrollbar-width: none !important;
   }
   nav::-webkit-scrollbar {
-    height: 3px;
-    display: block;
+    display: none !important;
   }
 
   .nav-tab-link,
   .social-link-btn {
     white-space: nowrap !important;
-    flex-shrink: 0 !important;
-    padding: 0.38rem 0.6rem !important;
-    font-size: 0.82rem !important;
+    flex-shrink: 1 !important;
+    padding: 0.34rem 0.45rem !important;
+    font-size: 0.76rem !important;
   }
 
   .toggle-switch {
@@ -810,7 +814,6 @@ footer a:hover { color: var(--accent-gold); }
     line-height: 1.25 !important;
   }
 
-  /* 모바일에서 2열/4열 그리드가 좁게 찌그러지지 않도록 1열(100% 폭)로 전환 */
   .admin-grid-2,
   .admin-grid-4 {
     grid-template-columns: 1fr !important;
@@ -880,7 +883,6 @@ footer a:hover { color: var(--accent-gold); }
     width: 100% !important;
   }
 
-  /* 마이페이지 및 단독 패널 모바일 여백/줄바꿈 최적화 */
   .standalone-panel-box {
     padding: 1.35rem 1.1rem !important;
   }
