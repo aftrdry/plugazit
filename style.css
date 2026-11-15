@@ -755,7 +755,7 @@ footer a:hover { color: var(--accent-gold); }
 }
 
 /* =========================================================
-   MOBILE RESPONSIVE PATCH
+   MOBILE RESPONSIVE PATCH (로그인/로그아웃 상태 헤더 정렬 교정)
    ========================================================= */
 @media (max-width: 768px) {
   body {
@@ -787,7 +787,7 @@ footer a:hover { color: var(--accent-gold); }
     height: 26px !important;
   }
 
-  /* 1층 우측 상단 고정: 로그인/회원가입(마이페이지/로그아웃) */
+  /* 1층 우측 상단 고정: 로그인/회원가입 또는 마이페이지/로그아웃 (절대좌표 및 플렉스 고정으로 밀림 방지) */
   .header-top-right {
     position: absolute !important;
     top: 0.55rem !important;
@@ -796,13 +796,18 @@ footer a:hover { color: var(--accent-gold); }
     align-items: center !important;
     gap: 0.2rem !important;
     z-index: 20 !important;
+    width: auto !important;
+    max-width: 55% !important;
+    justify-content: flex-end !important;
   }
 
   #authNav, #userNav {
     position: static !important;
+    display: flex !important;
     align-items: center !important;
     gap: 0.2rem !important;
     margin: 0 !important;
+    flex-shrink: 0 !important;
   }
   #authNav[style*="none"], #userNav[style*="none"] {
     display: none !important;
@@ -815,7 +820,7 @@ footer a:hover { color: var(--accent-gold); }
     font-size: 0.72rem !important;
   }
 
-  /* 2층 상단: VST Vault, Community, Admin Center, 소셜, 토글 (모바일 가로 스크롤 및 콤팩트 정렬) */
+  /* 2층 상단: VST Vault, Community, Admin Center, 소셜, 토글 (모바일 가로 스크롤 및 우측 여백 확보) */
   nav {
     width: 100% !important;
     margin: 0 !important;
@@ -828,6 +833,7 @@ footer a:hover { color: var(--accent-gold); }
     -webkit-overflow-scrolling: touch !important;
     gap: 0.28rem !important;
     padding-bottom: 0.15rem !important;
+    padding-right: 4.2rem !important; /* 우측 로그인 버튼 영역과 겹치지 않게 여백 확보 */
     scrollbar-width: none;
   }
   nav::-webkit-scrollbar {
