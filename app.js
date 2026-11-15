@@ -1186,17 +1186,16 @@ function setupEnhancedEditorAndEffects() {
     st.textContent = `
       .scroll-firefly-dot {
         position: fixed;
-        right: 4px;
         border-radius: 50%;
         pointer-events: none;
         z-index: 9999;
-        background: rgba(212, 190, 148, 0.62);
-        box-shadow: 0 0 5px 1px rgba(198, 174, 130, 0.35);
+        background: rgba(212, 190, 148, 0.65);
+        box-shadow: 0 0 5px 1px rgba(198, 174, 130, 0.38);
         animation: plugazitFireflyFloat var(--dur, 2.3s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
       }
       @keyframes plugazitFireflyFloat {
         0% { opacity: 0; transform: translate(0, 0) scale(0.5); }
-        22% { opacity: var(--max-op, 0.5); transform: translate(calc(var(--dx) * 0.28), calc(var(--dy) * 0.28)) scale(1); }
+        22% { opacity: var(--max-op, 0.55); transform: translate(calc(var(--dx) * 0.28), calc(var(--dy) * 0.28)) scale(1); }
         100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.25); }
       }
     `;
@@ -1260,32 +1259,27 @@ function setupEnhancedEditorAndEffects() {
     });
   });
 
-  // 데스크탑 스크롤바 위치에 정확히 맞춘 반딧불이 파티클 (모바일/태블릿 가로모드 어긋남 원천 방지)
+  // PC 및 모바일 모든 세로/가로 드래그바(스크롤바) 전 영역 반딧불이 파티클 엔진
   let lastFireflyAt = 0;
-  function emitFireflyScrollDots(burst = false) {
-    if (window.innerWidth <= 1024) return;
-    const now = Date.now();
-    if (!burst && now - lastFireflyAt < 95) return;
-    lastFireflyAt = now;
-
-    const docEl = document.documentElement;
-    const maxScroll = Math.max(1, docEl.scrollHeight - window.innerHeight);
-    const ratio = Math.min(1, Math.max(0, window.scrollY / maxScroll));
-    const thumbY = 30 + ratio * (window.innerHeight - 60);
-
-    const count = burst ? 3 : (Math.random() > 0.4 ? 1 : 2);
+  function spawnFireflyParticlesAt(originX, originY, isHorizontal = false, burst = false) {
+    const count = burst ? 3 : (Math.random() > 0.38 ? 1 : 2);
     for (let i = 0; i < count; i++) {
       const dot = document.createElement('div');
       dot.className = 'scroll-firefly-dot';
-      const size = (1.5 + Math.random() * 1.5).toFixed(1);
-      const dx = (-5 - Math.random() * 18).toFixed(1) + 'px';
-      const dy = ((Math.random() - 0.5) * 28).toFixed(1) + 'px';
-      const dur = (1.9 + Math.random() * 0.8).toFixed(2) + 's';
-      const maxOp = (0.3 + Math.random() * 0.25).toFixed(2);
+      const size = (1.6 + Math.random() * 1.6).toFixed(1);
+      const dx = isHorizontal
+        ? ((Math.random() - 0.5) * 28).toFixed(1) + 'px'
+        : (-5 - Math.random() * 18).toFixed(1) + 'px';
+      const dy = isHorizontal
+        ? (-5 - Math.random() * 16).toFixed(1) + 'px'
+        : ((Math.random() - 0.5) * 28).toFixed(1) + 'px';
+      const dur = (1.85 + Math.random() * 0.85).toFixed(2) + 's';
+      const maxOp = (0.35 + Math.random() * 0.28).toFixed(2);
 
       dot.style.width = `${size}px`;
       dot.style.height = `${size}px`;
-      dot.style.top = `${thumbY + (Math.random() - 0.5) * 20}px`;
+      dot.style.left = `${originX + (isHorizontal ? (Math.random() - 0.5) * 18 : 0)}px`;
+      dot.style.top = `${originY + (isHorizontal ? 0 : (Math.random() - 0.5) * 18)}px`;
       dot.style.setProperty('--dx', dx);
       dot.style.setProperty('--dy', dy);
       dot.style.setProperty('--dur', dur);
@@ -1296,10 +1290,61 @@ function setupEnhancedEditorAndEffects() {
     }
   }
 
-  window.addEventListener('scroll', () => emitFireflyScrollDots(false), { passive: true });
+  function handleUniversalScrollParticle(target, burst = false) {
+    const now = Date.now();
+    if (!burst && now - lastFireflyAt < 75) return;
+    lastFireflyAt = now;
+
+    // 1) 전체 윈도우 세로/가로 스크롤인 경우
+    if (!target || target === document || target === document.documentElement || target === document.body || target === window) {
+      const docEl = document.documentElement;
+      const maxScrollY = Math.max(1, docEl.scrollHeight - window.innerHeight);
+      const ratioY = Math.min(1, Math.max(0, window.scrollY / maxScrollY));
+      const thumbY = 30 + ratioY * (window.innerHeight - 60);
+      spawnFireflyParticlesAt(window.innerWidth - 6, thumbY, false, burst);
+      return;
+    }
+
+    // 2) 개별 스크롤 컨테이너(카테고리 바, 가격 차트 가로 스크롤, 모달 내부 스크롤 등)인 경우
+    if (target.getBoundingClientRect) {
+      const rect = target.getBoundingClientRect();
+      const canScrollX = target.scrollWidth > target.clientWidth + 4;
+      const canScrollY = target.scrollHeight > target.clientHeight + 4;
+
+      if (canScrollX) {
+        const maxScrollLeft = Math.max(1, target.scrollWidth - target.clientWidth);
+        const ratioX = Math.min(1, Math.max(0, target.scrollLeft / maxScrollLeft));
+        const thumbX = rect.left + 16 + ratioX * Math.max(10, rect.width - 32);
+        const barY = rect.bottom - 4;
+        spawnFireflyParticlesAt(thumbX, barY, true, burst);
+      }
+      if (canScrollY) {
+        const maxScrollTop = Math.max(1, target.scrollHeight - target.clientHeight);
+        const ratioY = Math.min(1, Math.max(0, target.scrollTop / maxScrollTop));
+        const thumbY = rect.top + 16 + ratioY * Math.max(10, rect.height - 32);
+        const barX = rect.right - 5;
+        spawnFireflyParticlesAt(barX, thumbY, false, burst);
+      }
+    }
+  }
+
+  // 캡처링(true)으로 페이지 내 모든 가로·세로 드래그바 스크롤 이벤트를 감지
+  document.addEventListener('scroll', (e) => {
+    handleUniversalScrollParticle(e.target, false);
+  }, { capture: true, passive: true });
+
   window.addEventListener('mouseup', (e) => {
-    if (window.innerWidth - e.clientX <= 24) emitFireflyScrollDots(true);
+    if (window.innerWidth - e.clientX <= 24) {
+      handleUniversalScrollParticle(document, true);
+    }
   });
+
+  window.addEventListener('touchend', (e) => {
+    const scrollable = e.target?.closest?.('.main-cat-bar, .ph-chart-scroll-box, nav, .modal-box, .admin-ticket-list');
+    if (scrollable) {
+      handleUniversalScrollParticle(scrollable, true);
+    }
+  }, { passive: true });
 }
 
 function showPostWritePage(editPostObj = null) {
@@ -1817,14 +1862,16 @@ async function fetchMyActivityPosts() {
           const safeDealId = typeof d.id === 'string' ? `'${d.id}'` : d.id;
           const krw = d.discountPrice === 0 ? "0원 (무료)" : `약 ${(d.discountPrice * USD_TO_KRW).toLocaleString()}원`;
           return `
-            <div class="comm-card" style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;" onclick="openDealDetailModal(${safeDealId})">
-              <div>
-                <span class="brand-name">${escapeHtml(d.brand)}</span>
-                <span class="tag-badge tag-discount" style="margin-left:0.4rem;">${escapeHtml(d.discountRate)}</span>
-                <h4 style="margin:0.3rem 0 0.15rem 0; font-size:1.05rem; font-weight:700;">${escapeHtml(d.title)}</h4>
+            <div class="comm-card" style="display:flex; justify-content:space-between; align-items:center; gap:0.85rem; flex-wrap:nowrap;" onclick="openDealDetailModal(${safeDealId})">
+              <div style="min-width:0; flex:1;">
+                <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
+                  <span class="brand-name">${escapeHtml(d.brand)}</span>
+                  <span class="tag-badge tag-discount">${escapeHtml(d.discountRate)}</span>
+                </div>
+                <h4 style="margin:0.3rem 0 0.15rem 0; font-size:1.02rem; font-weight:700; word-break:keep-all;">${escapeHtml(d.title)}</h4>
                 <p style="font-size:0.84rem; color:var(--accent-gold); font-weight:600;">$${escapeHtml(d.discountPrice)} (${krw})</p>
               </div>
-              <button type="button" class="nav-btn danger-outline-btn" style="padding:0.35rem 0.75rem; font-size:0.76rem;" onclick="toggleSaveDeal(${safeDealId}, event)">관심 해제</button>
+              <button type="button" class="nav-btn danger-outline-btn" style="padding:0.38rem 0.72rem; font-size:0.76rem; white-space:nowrap; flex-shrink:0;" onclick="toggleSaveDeal(${safeDealId}, event)">관심 해제</button>
             </div>
           `;
         }).join('');

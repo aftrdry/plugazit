@@ -30,30 +30,32 @@
   --modal-bg: #fbf9f5;
 }
 
+/* 사이트 전체 세로 및 가로 드래그바(스크롤바) 은은한 발광 디자인 적용 */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   scrollbar-width: thin;
-  scrollbar-color: rgba(198, 174, 130, 0.32) transparent;
+  scrollbar-color: rgba(198, 174, 130, 0.38) rgba(17, 19, 18, 0.25);
 }
 ::-webkit-scrollbar {
   width: 6px;
-  height: 6px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(17, 19, 18, 0.4);
+  background: rgba(17, 19, 18, 0.35);
+  border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(198, 174, 130, 0.22), rgba(198, 174, 130, 0.48), rgba(198, 174, 130, 0.22));
+  background: linear-gradient(90deg, rgba(198, 174, 130, 0.28), rgba(198, 174, 130, 0.55), rgba(198, 174, 130, 0.28));
   border-radius: 999px;
-  box-shadow: 0 0 8px rgba(198, 174, 130, 0.28);
+  box-shadow: 0 0 8px rgba(198, 174, 130, 0.32);
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 ::-webkit-scrollbar-thumb:hover,
 ::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(180deg, rgba(198, 174, 130, 0.45), rgba(218, 195, 150, 0.78), rgba(198, 174, 130, 0.45));
-  box-shadow: 0 0 14px rgba(198, 174, 130, 0.55);
+  background: linear-gradient(90deg, rgba(198, 174, 130, 0.5), rgba(218, 195, 150, 0.85), rgba(198, 174, 130, 0.5));
+  box-shadow: 0 0 14px rgba(198, 174, 130, 0.6);
 }
 
 #ambientDragCanvas {
@@ -118,7 +120,6 @@ nav {
 }
 .social-link-btn:hover { color: var(--accent-gold); background: var(--card-bg); }
 
-/* 다크/라이트 토글 스위치 좌우 여백 완벽 대칭 교정 */
 .toggle-switch {
   position: relative; width: 44px; height: 24px;
   background: var(--border-color); border: 1px solid var(--border-color); border-radius: 999px;
@@ -135,7 +136,7 @@ nav {
 .nav-btn {
   background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);
   font-family: var(--font-sans); font-size: 0.84rem; font-weight: 500; cursor: pointer; padding: 0.5rem 1.05rem;
-  border-radius: 6px; transition: all 0.2s ease;
+  border-radius: 6px; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0;
 }
 .nav-btn:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
 
@@ -151,6 +152,12 @@ nav {
 
 .admin-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .admin-grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; }
+
+/* 1:1 문의 모달 내에서는 PC/모바일 모두 문의 유형과 회신받을 이메일 칸을 넉넉하게 100% 전체 폭으로 배치 */
+#inquiryModal .admin-grid-2 {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
 
 .hero-slogan-section {
   padding: 0.8rem 0 1.6rem 0;
@@ -177,12 +184,18 @@ nav {
 }
 
 .category-section { margin-bottom: 1.8rem; }
+
+/* 가로로 넘길 때도 은은하게 빛나는 드래그바가 보이도록 활성화 */
 .main-cat-bar {
-  display: flex; gap: 0.55rem; overflow-x: auto; padding-bottom: 0.8rem;
+  display: flex; gap: 0.55rem; overflow-x: auto; padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; align-items: center;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
-.main-cat-bar::-webkit-scrollbar { display: none; }
+.main-cat-bar::-webkit-scrollbar {
+  height: 4px;
+  display: block;
+}
 
 .cat-chip {
   background: var(--card-bg); border: 1px solid var(--border-color);
@@ -278,7 +291,6 @@ select:hover, select:focus { border-color: var(--accent-gold) !important; }
 }
 .plugin-ui-fallback span { font-size: 0.76rem; color: var(--text-secondary); margin-top: 0.25rem; font-weight: 400; }
 
-/* 관심 등록 버튼 시인성 강화 (저장 시 선명한 포인트 컬러 및 보더 부여) */
 .bookmark-toggle-btn {
   position: absolute; top: 0.8rem; right: 0.8rem; z-index: 5;
   background: rgba(17, 19, 18, 0.86); border: 1px solid rgba(198, 174, 130, 0.32);
@@ -302,7 +314,6 @@ select:hover, select:focus { border-color: var(--accent-gold) !important; }
   min-width: 205px; flex-shrink: 0; gap: 0.65rem; padding-top: 1.2rem;
 }
 
-/* 리스트형 뷰에서 할인율 배지가 허공에 뜨지 않고 좌측 브랜드/기간 정보 옆에 정렬되도록 교정 */
 .card-header {
   display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.45rem; flex-wrap: wrap;
 }
@@ -374,7 +385,7 @@ select:hover, select:focus { border-color: var(--accent-gold) !important; }
 .btn-buy {
   width: 100%; padding: 0.78rem 1rem; background: var(--accent-color); border: none; border-radius: 8px;
   color: #fff; font-family: var(--font-sans); font-weight: 600; font-size: 0.88rem; cursor: pointer; text-align: center; text-decoration: none; display: block;
-  transition: background 0.2s ease, opacity 0.2s ease;
+  transition: background 0.2s ease, opacity 0.2s ease; white-space: nowrap;
 }
 .btn-buy:hover { background: var(--accent-hover); }
 .btn-buy:disabled { opacity: 0.55; cursor: not-allowed; }
@@ -522,7 +533,7 @@ footer a:hover { color: var(--accent-gold); }
 .footer-links button { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-family: var(--font-sans); font-size: 0.78rem; font-weight: 500; }
 .footer-links button:hover { color: var(--accent-gold); text-decoration: underline; }
 
-/* 모달 및 닫기(X) 버튼 정중앙 정렬 교정 */
+/* 모달 및 닫기(X) 버튼 정중앙 정렬 & 타이틀 겹침 방지 */
 .modal-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(5, 7, 6, 0.76); display: none; justify-content: center; align-items: center; z-index: 2000;
@@ -532,8 +543,17 @@ footer a:hover { color: var(--accent-gold); }
 .modal-overlay.active { display: flex; }
 .modal-box {
   background: var(--modal-bg); border: 1px solid var(--border-color); width: 100%; max-width: 460px;
-  border-radius: 14px; padding: 2.2rem; position: relative; color: var(--text-primary); max-height: 86vh; overflow-y: auto;
+  border-radius: 14px; padding: 2rem; position: relative; color: var(--text-primary); max-height: 86vh; overflow-y: auto;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+.modal-box > h3 {
+  padding-right: 2.4rem;
+  word-break: keep-all;
+  line-height: 1.35;
+}
+.modal-box > p {
+  word-break: keep-all;
+  line-height: 1.55;
 }
 .modal-box.large-detail-modal {
   max-width: 780px;
@@ -549,7 +569,6 @@ footer a:hover { color: var(--accent-gold); }
 }
 .modal-close:hover { color: var(--text-primary); border-color: var(--accent-gold); }
 
-/* 텍스트박스 우측 하단 삼각형 리사이즈 손잡이 숨김 (깔끔한 외관 유지) */
 .form-group { margin-bottom: 1.15rem; }
 .form-group label { display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.38rem; font-weight: 500; }
 .form-group input, .form-group textarea {
@@ -593,7 +612,6 @@ footer a:hover { color: var(--accent-gold); }
 }
 .youtube-video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
 
-/* 상세 모달 상단 헤더 및 히어로 그리드 */
 .detail-top-header {
   display: flex; justify-content: space-between; align-items: flex-start;
   gap: 0.8rem; padding-right: 2.8rem; margin-bottom: 1.2rem;
@@ -671,7 +689,12 @@ footer a:hover { color: var(--accent-gold); }
 }
 [data-theme="light"] .ph-chart-wrapper { background: rgba(0, 0, 0, 0.02); }
 .ph-chart-scroll-box {
-  width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.25rem;
+  width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.45rem;
+  scrollbar-width: thin;
+}
+.ph-chart-scroll-box::-webkit-scrollbar {
+  height: 5px;
+  display: block;
 }
 .ph-svg-chart { width: 100%; min-width: 520px; height: 205px; display: block; overflow: visible; }
 .ph-node-point { cursor: pointer; transition: r 0.15s ease; }
@@ -751,12 +774,13 @@ footer a:hover { color: var(--accent-gold); }
     justify-content: space-between !important;
     overflow-x: auto !important;
     gap: 0.25rem !important;
-    padding-bottom: 0.1rem;
+    padding-bottom: 0.25rem;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    scrollbar-width: thin;
   }
   nav::-webkit-scrollbar {
-    display: none;
+    height: 3px;
+    display: block;
   }
 
   .nav-tab-link,
@@ -784,6 +808,13 @@ footer a:hover { color: var(--accent-gold); }
   .hero-title {
     font-size: 1.7rem !important;
     line-height: 1.25 !important;
+  }
+
+  /* 모바일에서 2열/4열 그리드가 좁게 찌그러지지 않도록 1열(100% 폭)로 전환 */
+  .admin-grid-2,
+  .admin-grid-4 {
+    grid-template-columns: 1fr !important;
+    gap: 0.2rem !important;
   }
 
   .deals-grid {
@@ -849,20 +880,50 @@ footer a:hover { color: var(--accent-gold); }
     width: 100% !important;
   }
 
+  /* 마이페이지 및 단독 패널 모바일 여백/줄바꿈 최적화 */
   .standalone-panel-box {
-    padding: 1.3rem 1rem !important;
+    padding: 1.35rem 1.1rem !important;
+  }
+
+  #myPageView .standalone-panel-box > div:first-child,
+  #postWriteView .standalone-panel-box > div:first-child {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+  }
+
+  #myPageView h2,
+  #postWriteView h2 {
+    font-size: 1.18rem !important;
+    line-height: 1.35 !important;
+    word-break: keep-all !important;
+  }
+
+  #myPageView .nav-btn,
+  #postWriteView .nav-btn {
+    white-space: nowrap !important;
+    padding: 0.42rem 0.8rem !important;
+    font-size: 0.78rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  #mySavedDealsList .comm-card {
+    padding: 1.1rem 1.15rem !important;
+    gap: 0.75rem !important;
   }
 
   .modal-overlay {
-    padding: 1.2rem 7vw !important;
+    padding: 1rem 5vw !important;
   }
 
   .modal-box,
   .modal-box.large-detail-modal {
-    width: 86vw !important;
-    max-width: 86vw !important;
-    padding: 1.25rem 1.05rem !important;
-    max-height: 82vh !important;
+    width: 90vw !important;
+    max-width: 90vw !important;
+    padding: 1.4rem 1.15rem !important;
+    max-height: 84vh !important;
     border-radius: 14px !important;
   }
 
