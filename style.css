@@ -143,7 +143,8 @@ nav {
   font-family: var(--font-sans); font-size: 0.84rem; font-weight: 500; cursor: pointer; padding: 0.5rem 1.05rem;
   border-radius: 6px; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0;
 }
-.nav-btn:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+.nav-btn:hover,
+.nav-btn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
 
 .container { max-width: 1240px; margin: 0 auto; padding: 2.2rem 2.5rem; flex: 1; width: 100%; }
 
@@ -787,14 +788,14 @@ footer a:hover { color: var(--accent-gold); }
     height: 28px !important;
   }
 
-  /* 1층 우측 상단 고정: Discord, Twitter + 로그인/회원가입(또는 마이페이지/로그아웃) */
+  /* 1층 우측 상단 고정: 로그인/회원가입 (또는 Admin Center/마이페이지/로그아웃) */
   .header-top-right {
     position: absolute !important;
     top: 0.68rem !important;
     right: 0.85rem !important;
     display: flex !important;
     align-items: center !important;
-    gap: 0.25rem !important;
+    gap: 0.22rem !important;
     z-index: 20 !important;
   }
 
@@ -807,7 +808,7 @@ footer a:hover { color: var(--accent-gold); }
   #authNav, #userNav {
     position: static !important;
     align-items: center !important;
-    gap: 0.25rem !important;
+    gap: 0.22rem !important;
     margin: 0 !important;
   }
   #authNav[style*="none"], #userNav[style*="none"] {
@@ -817,11 +818,11 @@ footer a:hover { color: var(--accent-gold); }
   #authNav .nav-btn,
   #userNav .nav-btn {
     white-space: nowrap !important;
-    padding: 0.32rem 0.58rem !important;
-    font-size: 0.74rem !important;
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.72rem !important;
   }
 
-  /* 2층 상단 고정: VST Vault, Community, Admin Center + 다크/라이트 토글 */
+  /* 2층 상단 고정: VST Vault, Community, Discord, Twitter + 다크/라이트 토글 */
   nav {
     width: 100% !important;
     margin: 0 !important;
