@@ -769,45 +769,39 @@ footer a:hover { color: var(--accent-gold); }
     width: 100% !important;
     height: auto !important;
     min-height: unset !important;
-    padding: 0.68rem 0.85rem !important;
+    padding: 0.55rem 0.75rem !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 0.55rem !important;
+    gap: 0.45rem !important;
     z-index: 1000 !important;
   }
 
   /* 1층 좌측: 로고 */
   .logo-container {
-    height: 32px !important;
+    height: 30px !important;
     width: fit-content !important;
   }
 
   .brand-logo-img {
-    height: 28px !important;
+    height: 26px !important;
   }
 
-  /* 1층 우측 상단 고정: Discord, Twitter + 로그인/회원가입(또는 마이페이지/로그아웃) */
+  /* 1층 우측 상단 고정: 로그인/회원가입(마이페이지/로그아웃) */
   .header-top-right {
     position: absolute !important;
-    top: 0.68rem !important;
-    right: 0.85rem !important;
+    top: 0.55rem !important;
+    right: 0.75rem !important;
     display: flex !important;
     align-items: center !important;
-    gap: 0.25rem !important;
+    gap: 0.2rem !important;
     z-index: 20 !important;
-  }
-
-  .header-top-right .social-link-btn {
-    padding: 0.3rem 0.42rem !important;
-    font-size: 0.74rem !important;
-    white-space: nowrap !important;
   }
 
   #authNav, #userNav {
     position: static !important;
     align-items: center !important;
-    gap: 0.25rem !important;
+    gap: 0.2rem !important;
     margin: 0 !important;
   }
   #authNav[style*="none"], #userNav[style*="none"] {
@@ -817,11 +811,11 @@ footer a:hover { color: var(--accent-gold); }
   #authNav .nav-btn,
   #userNav .nav-btn {
     white-space: nowrap !important;
-    padding: 0.32rem 0.58rem !important;
-    font-size: 0.74rem !important;
+    padding: 0.28rem 0.5rem !important;
+    font-size: 0.72rem !important;
   }
 
-  /* 2층 상단 고정: VST Vault, Community, Admin Center + 다크/라이트 토글 */
+  /* 2층 상단: VST Vault, Community, Admin Center, 소셜, 토글 (모바일 가로 스크롤 및 콤팩트 정렬) */
   nav {
     width: 100% !important;
     margin: 0 !important;
@@ -829,22 +823,42 @@ footer a:hover { color: var(--accent-gold); }
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    overflow: visible !important;
-    gap: 0.35rem !important;
-    padding-bottom: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 0.28rem !important;
+    padding-bottom: 0.15rem !important;
+    scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar {
+    display: none;
   }
 
   .nav-tab-link {
     white-space: nowrap !important;
     flex-shrink: 0 !important;
-    padding: 0.36rem 0.68rem !important;
-    font-size: 0.8rem !important;
+    padding: 0.32rem 0.55rem !important;
+    font-size: 0.76rem !important;
+  }
+
+  .social-link-btn {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    padding: 0.32rem 0.5rem !important;
+    font-size: 0.74rem !important;
   }
 
   .toggle-switch {
     flex-shrink: 0 !important;
-    margin: 0 0 0 auto !important;
+    width: 38px !important;
+    height: 22px !important;
+    margin: 0 0 0 0.15rem !important;
   }
+  .toggle-knob {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  [data-theme="light"] .toggle-knob { transform: translateX(16px) !important; }
 
   .container {
     padding: 1.15rem 1rem 3rem 1rem !important;
