@@ -166,6 +166,35 @@ nav {
 .nav-btn:hover,
 .nav-btn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
 
+/* Admin Center 버튼 라이트모드/다크모드 가독성 및 글자 표시 교정 */
+#navAdminBtn {
+  border-color: var(--border-strong);
+  color: var(--accent-gold);
+  transition: all 0.2s ease;
+}
+
+[data-theme="light"] #navAdminBtn {
+  background-color: rgba(120, 97, 55, 0.08);
+  border-color: rgba(120, 97, 55, 0.35);
+  color: #786137;
+  font-weight: 600;
+}
+
+[data-theme="light"] #navAdminBtn:hover {
+  background-color: #786137;
+  color: #fbf9f5;
+}
+
+[data-theme="dark"] #navAdminBtn {
+  background-color: rgba(198, 174, 130, 0.1);
+  color: var(--accent-gold);
+}
+
+[data-theme="dark"] #navAdminBtn:hover {
+  background-color: var(--accent-gold);
+  color: var(--bg-color);
+}
+
 /* =========================================================
    [SECTION 03] Hero Slogan, Category Chips & Filter Controls
    ========================================================= */
