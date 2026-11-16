@@ -166,7 +166,7 @@ nav {
 .nav-btn:hover,
 .nav-btn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
 
-/* Admin Center 버튼 가독성 및 호버 시 글자 숨김 현상 완벽 교정 */
+/* Admin Center 버튼 가독성 및 강제 홀드(액티브 고정) 제거 교정 */
 #navAdminBtn {
   border-color: var(--border-strong);
   color: var(--accent-gold);
@@ -175,25 +175,26 @@ nav {
 
 [data-theme="light"] #navAdminBtn {
   background: transparent;
-  border-color: rgba(120, 97, 55, 0.4);
-  color: #5c4826;
-  font-weight: 700;
+  border-color: rgba(120, 97, 55, 0.35);
+  color: #786137;
+  font-weight: 600;
 }
 
-[data-theme="light"] #navAdminBtn:hover {
-  background: #5c4826;
-  color: #ffffff;
+[data-theme="light"] #navAdminBtn:hover,
+[data-theme="light"] #navAdminBtn.active {
+  background: #786137;
+  color: #fbf9f5;
 }
 
 [data-theme="dark"] #navAdminBtn {
   background: transparent;
-  color: #f1dfbc;
-  font-weight: 600;
+  color: var(--accent-gold);
 }
 
-[data-theme="dark"] #navAdminBtn:hover {
-  background: #f1dfbc;
-  color: #111312;
+[data-theme="dark"] #navAdminBtn:hover,
+[data-theme="dark"] #navAdminBtn.active {
+  background: var(--accent-gold);
+  color: var(--bg-color);
 }
 
 /* =========================================================
@@ -1164,7 +1165,7 @@ footer a:hover { color: var(--accent-gold); }
   .detail-top-header {
     flex-direction: column !important;
     align-items: flex-start !important;
-    gap: 0.65rem !important;
+    gap: 0.6rem !important;
     padding-right: 2.8rem !important;
   }
 
