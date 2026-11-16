@@ -1,3 +1,19 @@
+/* ==========================================================================
+   PlugAzit Stylesheet Index (Cmd + F로 섹션 번호를 검색해 즉시 이동하세요)
+   --------------------------------------------------------------------------
+   [SECTION 01] Theme Variables & Global Reset / Scrollbars
+   [SECTION 02] Header, Brand Logo & Navigation Bar
+   [SECTION 03] Hero Slogan, Category Chips & Filter Controls
+   [SECTION 04] Deals Grid, Cards & List Mode Layout
+   [SECTION 05] Community, WYSIWYG Editor, Comments & Admin Panels
+   [SECTION 06] Modals, Forms & Footer
+   [SECTION 07] Deal Detail Modal, SVG Price Chart & Floating Top Button
+   [SECTION 08] Responsive Media Queries (Landscape & Mobile 768px)
+   ========================================================================== */
+
+/* =========================================================
+   [SECTION 01] Theme Variables & Global Reset / Scrollbars
+   ========================================================= */
 :root {
   --bg-color: #111312;
   --header-bg: rgba(17, 19, 18, 0.9);
@@ -30,7 +46,6 @@
   --modal-bg: #fbf9f5;
 }
 
-/* 사이트 전체 세로 및 가로 드래그바(스크롤바) 은은한 발광 디자인 적용 */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -82,6 +97,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* =========================================================
+   [SECTION 02] Header, Brand Logo & Navigation Bar
+   ========================================================= */
 header {
   position: fixed; top: 0; left: 0; width: 100%; height: 86px;
   background: var(--header-bg);
@@ -148,6 +166,9 @@ nav {
 .nav-btn:hover,
 .nav-btn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
 
+/* =========================================================
+   [SECTION 03] Hero Slogan, Category Chips & Filter Controls
+   ========================================================= */
 .container { max-width: 1240px; margin: 0 auto; padding: 2.2rem 2.5rem; flex: 1; width: 100%; }
 
 .standalone-panel-box {
@@ -181,13 +202,25 @@ nav {
   text-transform: uppercase;
   margin-bottom: 0.4rem;
 }
-.hero-title {
-  font-family: var(--font-typewriter);
-  font-size: 2.3rem;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  color: var(--text-primary);
-  line-height: 1.25;
+.hero-title,
+.hero-slogan-section .hero-title {
+  font-family: var(--font-sans) !important;
+  font-weight: 700 !important;
+  font-size: 2.35rem !important;
+  letter-spacing: -0.025em !important;
+  color: #f3efe6 !important;
+  line-height: 1.25 !important;
+}
+[data-theme="light"] .hero-slogan-section .hero-title {
+  color: #1c1e1c !important;
+}
+.hero-sub-desc {
+  margin-top: 0.45rem;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
 }
 
 .category-section { margin-bottom: 1.8rem; }
@@ -263,6 +296,9 @@ select:hover, select:focus { border-color: var(--accent-gold) !important; }
 }
 .view-btn.active { background: var(--accent-color); color: #fff; }
 
+/* =========================================================
+   [SECTION 04] Deals Grid, Cards & List Mode Layout
+   ========================================================= */
 .deals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.75rem; margin-bottom: 4rem; }
 .deals-grid.list-mode { display: flex; flex-direction: column; gap: 0.95rem; }
 
@@ -396,6 +432,9 @@ select:hover, select:focus { border-color: var(--accent-gold) !important; }
 .btn-buy:hover { background: var(--accent-hover); }
 .btn-buy:disabled { opacity: 0.55; cursor: not-allowed; }
 
+/* =========================================================
+   [SECTION 05] Community, WYSIWYG Editor, Comments & Admin Panels
+   ========================================================= */
 #dealsView { display: block; }
 #communityView, #adminView, #myPageView, #postWriteView, #postDetailView { display: none; }
 
@@ -529,6 +568,9 @@ select:hover, select:focus { border-color: var(--accent-gold) !important; }
 .danger-outline-btn { color: #e74c3c !important; border-color: rgba(231, 76, 60, 0.5) !important; }
 .danger-outline-btn:hover { background: #e74c3c !important; color: #fff !important; }
 
+/* =========================================================
+   [SECTION 06] Modals, Forms & Footer
+   ========================================================= */
 footer {
   border-top: 1px solid var(--border-color); padding: 2.2rem 2rem; text-align: center;
   color: var(--text-secondary); font-size: 0.82rem; margin-top: auto; background: var(--card-bg);
@@ -611,13 +653,15 @@ footer a:hover { color: var(--accent-gold); }
 .terms-popup-content h4 { color: var(--text-primary); font-size: 0.88rem; font-weight: 700; margin: 0.85rem 0 0.25rem 0; }
 .terms-popup-content h4:first-child { margin-top: 0; }
 
+/* =========================================================
+   [SECTION 07] Deal Detail Modal, SVG Price Chart & Floating Top Button
+   ========================================================= */
 .youtube-video-container {
   position: relative; width: 100%; padding-bottom: 56.25%; height: 0; margin: 0.65rem 0 1.5rem 0; border-radius: 10px; overflow: hidden; background: #000;
   border: 1px solid var(--border-color);
 }
 .youtube-video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
 
-/* 상품 상세 모달 상단 헤더: X 버튼과 우측 배지(마감기한/할인율) 간격 여유 확보 (가로모드 포함) */
 .detail-top-header {
   display: flex; justify-content: space-between; align-items: flex-start;
   gap: 0.8rem; padding-right: 3.4rem; margin-bottom: 1.2rem;
@@ -689,7 +733,6 @@ footer a:hover { color: var(--accent-gold); }
 .ph-metric-value { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); }
 .ph-metric-sub { font-size: 0.72rem; color: var(--accent-gold); font-weight: 500; margin-top: 0.12rem; }
 
-/* 가격변동 추이 그래프 눌림 방지: 세로모드에서도 가로폭 640px 이상을 유지하며 매끄럽게 가로 스크롤 */
 .ph-chart-wrapper {
   position: relative; width: 100%; background: rgba(0, 0, 0, 0.18);
   border: 1px solid var(--border-color); border-radius: 10px; padding: 1.1rem 0.9rem 0.7rem; margin-bottom: 1.2rem;
@@ -729,7 +772,55 @@ footer a:hover { color: var(--accent-gold); }
 .ph-season-bar-track { width: 100%; height: 2px; background: var(--border-color); border-radius: 2px; margin-top: 0.38rem; overflow: hidden; }
 .ph-season-bar-fill { height: 100%; background: var(--accent-gold); border-radius: 2px; }
 
-/* 휴대폰 가로모드(Landscape)에서 상세모달 X 버튼과 좌측 배지 간격 조정 및 안전영역 확보 */
+/* 우측 하단 상시 고정: 페이지 최상단 이동 반투명 플로팅 버튼 */
+.scroll-to-top-fab {
+  position: fixed;
+  right: max(1.5rem, env(safe-area-inset-right));
+  bottom: max(1.6rem, env(safe-area-inset-bottom));
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(22, 25, 23, 0.28);
+  border: 1px solid rgba(198, 174, 130, 0.22);
+  color: rgba(198, 174, 130, 0.78);
+  opacity: 0.75;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1500;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  padding: 0;
+}
+.scroll-to-top-fab:hover {
+  background: rgba(22, 25, 23, 0.72);
+  border-color: var(--accent-gold);
+  color: #fff;
+  opacity: 1;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+.scroll-to-top-fab:active {
+  transform: translateY(0) scale(0.94);
+}
+[data-theme="light"] .scroll-to-top-fab {
+  background: rgba(251, 249, 245, 0.32);
+  border-color: rgba(120, 97, 55, 0.2);
+  color: rgba(120, 97, 55, 0.78);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+[data-theme="light"] .scroll-to-top-fab:hover {
+  background: rgba(251, 249, 245, 0.85);
+  color: var(--text-primary);
+  opacity: 1;
+}
+
+/* =========================================================
+   [SECTION 08] Responsive Media Queries (Landscape & Mobile 768px)
+   ========================================================= */
 @media (max-width: 960px) and (orientation: landscape) {
   header {
     padding-left: max(1rem, env(safe-area-inset-left)) !important;
@@ -757,9 +848,6 @@ footer a:hover { color: var(--accent-gold); }
   }
 }
 
-/* =========================================================
-   MOBILE RESPONSIVE PATCH
-   ========================================================= */
 @media (max-width: 768px) {
   body {
     padding-top: 102px !important;
@@ -862,9 +950,22 @@ footer a:hover { color: var(--accent-gold); }
     margin-bottom: 1.25rem !important;
   }
 
-  .hero-title {
-    font-size: 1.7rem !important;
+  .hero-title,
+  .hero-slogan-section .hero-title {
+    font-size: 1.8rem !important;
     line-height: 1.25 !important;
+  }
+
+  .hero-sub-desc {
+    font-size: 0.8rem !important;
+    margin-top: 0.35rem !important;
+  }
+
+  .scroll-to-top-fab {
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1.2rem, env(safe-area-inset-bottom));
+    width: 40px;
+    height: 40px;
   }
 
   .admin-grid-2,

@@ -1,3 +1,21 @@
+/* ============================================================================
+   PlugAzit Application Logic (app.js)
+   ----------------------------------------------------------------------------
+   [목차 — Cmd+F로 섹션 번호를 검색해 빠르게 이동하세요]
+   - [SECTION 01] 전역 설정, 상수 및 상태 변수 (Config & State)
+   - [SECTION 02] 보안, 텍스트 파싱 및 에디터 직렬화 유틸리티 (Security & Utils)
+   - [SECTION 03] 로컬 스토리지 & 멀티 디바이스 실시간 동기화 (Storage & Cloud Sync)
+   - [SECTION 04] 페이지 라우팅, 히스토리(뒤로가기) & 모달 제어 (Navigation & Modals)
+   - [SECTION 05] VST 딜 데이터, 스토어 렌더링 & 가격 차트 엔진 (Deals & Price Chart)
+   - [SECTION 06] 프로듀서 커뮤니티, WYSIWYG 에디터 & 댓글 시스템 (Community & Comments)
+   - [SECTION 07] 반딧불이 스크롤 파티클 & 키보드 연속 입력 엔진 (Visual & UX Effects)
+   - [SECTION 08] 마이페이지, 회원 인증(로그인/가입) & 어드민 대시보드 (Auth, MyPage & Admin)
+   - [SECTION 09] 앱 초기화 부트스트랩 (App Bootstrap)
+   ============================================================================ */
+
+/* ============================================================================
+   [SECTION 01] 전역 설정, 상수 및 상태 변수 (Config & State)
+   ============================================================================ */
 const SUPABASE_URL = "https://pxmkzyhayxsvbbftncwy.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_J0LQJ-qjr5ISX1jRKaQ7-A_GwABw8XP";
 let supabaseClient = null;
@@ -20,6 +38,9 @@ if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
+/* ============================================================================
+   [SECTION 02] 보안, 텍스트 파싱 및 에디터 직렬화 유틸리티 (Security & Utils)
+   ============================================================================ */
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
   const div = document.createElement('div');
@@ -128,6 +149,9 @@ async function withSubmitLock(lockKey, btnEl, asyncFn) {
   }
 }
 
+/* ============================================================================
+   [SECTION 03] 로컬 스토리지 & 멀티 디바이스 실시간 동기화 (Storage & Cloud Sync)
+   ============================================================================ */
 const DELETED_POSTS_STORAGE_KEY = 'plugazit_deleted_post_ids_v1';
 const DELETED_DEALS_STORAGE_KEY = 'plugazit_deleted_deal_ids_v1';
 const SAVED_DEALS_STORAGE_KEY = 'plugazit_saved_deal_ids_v1';
@@ -149,7 +173,6 @@ function markIdAsDeleted(storageKey, id) {
   } catch (e) {}
 }
 
-/* 동시 접속 기기 간(노트북 <-> 아이패드 <-> 휴대폰) 관심 딜 & 스크랩 실시간 양방향 동기화 */
 async function syncUserPreferencesToCloud() {
   if (!supabaseClient || !currentUser) return;
   try {
@@ -327,6 +350,9 @@ function saveLocalCommentsMap(map) {
   try { localStorage.setItem(LOCAL_COMMENTS_STORAGE_KEY, JSON.stringify(map)); } catch (e) {}
 }
 
+/* ============================================================================
+   [SECTION 04] 페이지 라우팅, 히스토리(뒤로가기) & 모달 제어 (Navigation & Modals)
+   ============================================================================ */
 function togglePasswordVisibility(inputId, btnEl) {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -357,7 +383,6 @@ function isUserAdmin(user) {
   return Boolean(user && user.email && ADMIN_EMAILS.includes(user.email.toLowerCase()));
 }
 
-/* 브라우저 '뒤로 가기' 버튼 연동 지원 (History API) */
 function pushAppHistoryState(stateObj) {
   if (isHandlingPopState) return;
   try {
@@ -474,6 +499,9 @@ function setDealViewMode(mode) {
   renderDeals();
 }
 
+/* ============================================================================
+   [SECTION 05] VST 딜 데이터, 스토어 렌더링 & 가격 차트 엔진 (Deals & Price Chart)
+   ============================================================================ */
 const USD_TO_KRW = 1380;
 const subCategories = {
   all: ["전체 보기"],
@@ -897,7 +925,6 @@ function renderDeals() {
   }).join('');
 }
 
-/* 가격 추이 SVG: preserveAspectRatio="none" 제거로 휴대폰 세로모드 눌림/찌그러짐 원천 차단 */
 function buildPriceChartSvg(deal, rangeMode = 'all') {
   const fullHistory = deal.priceHistory || [
     { date: "2024.11", season: "Black Friday", price: deal.discountPrice },
@@ -1100,6 +1127,9 @@ function filterCategory(cat) {
   if (cat === 'affiliate') openInquiryModal('브랜드 제휴 및 광고 문의');
 }
 
+/* ============================================================================
+   [SECTION 06] 프로듀서 커뮤니티, WYSIWYG 에디터 & 댓글 시스템 (Community & Comments)
+   ============================================================================ */
 let currentCommCat = 'all';
 let postCommentsCache = {};
 
@@ -1244,6 +1274,9 @@ function renderCommunityPosts() {
   }).join('');
 }
 
+/* ============================================================================
+   [SECTION 07] 반딧불이 스크롤 파티클 & 키보드 연속 입력 엔진 (Visual & UX Effects)
+   ============================================================================ */
 function setupEnhancedEditorAndEffects() {
   if (!document.getElementById('plugazitDynamicEnhanceStyle')) {
     const st = document.createElement('style');
@@ -1272,7 +1305,6 @@ function setupEnhancedEditorAndEffects() {
     if (el) el.remove();
   });
 
-  // 키보드 자판 홀드(꾹 누르기: ㅇㅇㅇㅇㅇㅇ) 연속 타이핑 보장 엔진
   let holdRepeatTimer = null;
   let holdLastKey = '';
   let holdNativeRepeatFired = false;
@@ -1324,8 +1356,7 @@ function setupEnhancedEditorAndEffects() {
     });
   });
 
-  // 휴대폰 가로모드 물리적 우측 끝 스크롤바(right: 3px)에 100% 일치하도록 보정된 반딧불이 파티클 엔진
-let lastFireflyAt = 0;
+  let lastFireflyAt = 0;
   function spawnFireflyParticlesAt(originX, originY, isHorizontal = false, burst = false, pinWindowRight = false) {
     const count = burst ? 3 : (Math.random() > 0.38 ? 1 : 2);
     for (let i = 0; i < count; i++) {
@@ -1366,7 +1397,6 @@ let lastFireflyAt = 0;
     if (!burst && now - lastFireflyAt < 75) return;
     lastFireflyAt = now;
 
-    // 1) 전체 윈도우 세로 스크롤: viewport-fit=cover와 결합하여 물리적 액정 맨 우측 끝(right: 2~5px)에 고정
     if (!target || target === document || target === document.documentElement || target === document.body || target === window) {
       const docEl = document.documentElement;
       const viewH = window.innerHeight;
@@ -1377,7 +1407,6 @@ let lastFireflyAt = 0;
       return;
     }
 
-    // 2) 개별 스크롤 컨테이너(카테고리 바, 가격 차트 가로 스크롤, 모달 내부 스크롤 등)
     if (target.getBoundingClientRect) {
       const rect = target.getBoundingClientRect();
       const canScrollX = target.scrollWidth > target.clientWidth + 4;
@@ -1788,6 +1817,9 @@ async function deletePost(id) {
   renderCommunityPosts();
 }
 
+/* ============================================================================
+   [SECTION 08] 마이페이지, 회원 인증(로그인/가입) & 어드민 대시보드 (Auth, MyPage & Admin)
+   ============================================================================ */
 function switchMyPageTab(tabName, el) {
   document.querySelectorAll('#myPageView .cat-chip').forEach(c => c.classList.remove('active'));
   if (el) el.classList.add('active');
@@ -2018,7 +2050,6 @@ async function handleLoginSubmit(e) {
   });
 }
 
-/* 중복 이메일 가입 사전 차단 및 안내 보강 */
 async function handleSignupSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('btnSignupSubmit');
@@ -2335,6 +2366,9 @@ function resolveAdminInquiry(inquiryId) {
   renderAdminDashboard();
 }
 
+/* ============================================================================
+   [SECTION 09] 앱 초기화 부트스트랩 (App Bootstrap)
+   ============================================================================ */
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const savedTheme = localStorage.getItem('plugazit_theme');

@@ -15,90 +15,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <link rel="stylesheet" href="style.css">
-  <style>
-    .hero-slogan-section .hero-title {
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
-      font-weight: 700 !important;
-      font-size: 2.35rem !important;
-      letter-spacing: -0.025em !important;
-      color: #f3efe6 !important;
-      line-height: 1.25 !important;
-    }
-    [data-theme="light"] .hero-slogan-section .hero-title {
-      color: #1c1e1c !important;
-    }
-    .hero-sub-desc {
-      margin-top: 0.45rem;
-      font-size: 0.88rem;
-      color: var(--text-secondary);
-      font-weight: 500;
-      letter-spacing: -0.01em;
-      word-break: keep-all;
-    }
-    .scroll-to-top-fab {
-      position: fixed;
-      right: max(1.5rem, env(safe-area-inset-right));
-      bottom: max(1.6rem, env(safe-area-inset-bottom));
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(22, 25, 23, 0.28);
-      border: 1px solid rgba(198, 174, 130, 0.22);
-      color: rgba(198, 174, 130, 0.78);
-      opacity: 0.75;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 1500;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
-      transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
-      padding: 0;
-    }
-    .scroll-to-top-fab:hover {
-      background: rgba(22, 25, 23, 0.72);
-      border-color: var(--accent-gold);
-      color: #fff;
-      opacity: 1;
-      transform: translateY(-3px);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
-    }
-    .scroll-to-top-fab:active {
-      transform: translateY(0) scale(0.94);
-    }
-    [data-theme="light"] .scroll-to-top-fab {
-      background: rgba(251, 249, 245, 0.32);
-      border-color: rgba(120, 97, 55, 0.2);
-      color: rgba(120, 97, 55, 0.78);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-    }
-    [data-theme="light"] .scroll-to-top-fab:hover {
-      background: rgba(251, 249, 245, 0.85);
-      color: var(--text-primary);
-      opacity: 1;
-    }
-    @media (max-width: 768px) {
-      .hero-slogan-section .hero-title {
-        font-size: 1.8rem !important;
-      }
-      .hero-sub-desc {
-        font-size: 0.8rem;
-        margin-top: 0.35rem;
-      }
-      .scroll-to-top-fab {
-        right: max(1rem, env(safe-area-inset-right));
-        bottom: max(1.2rem, env(safe-area-inset-bottom));
-        width: 40px;
-        height: 40px;
-      }
-    }
-  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
+  <!-- =========================================================
+       [HEADER] 상단 고정 네비게이션 바
+       ========================================================= -->
   <header role="banner">
     <a href="#" class="logo-container" onclick="resetToHome(); return false;" aria-label="PlugAzit 홈으로 이동">
       <img src="PlugAzit.png" alt="PlugAzit" class="brand-logo-img" />
@@ -130,13 +53,16 @@
     </div>
   </header>
 
+  <!-- =========================================================
+       [MAIN CONTAINER] 히어로 섹션 & 페이지 뷰 컨테이너
+       ========================================================= -->
   <main class="container" role="main">
     <div class="hero-slogan-section">
       <h1 class="hero-title">Right Near, Your Azit.</h1>
       <p class="hero-sub-desc">VST 플러그인 할인 정보 · 프로듀서 커뮤니티</p>
     </div>
 
-    <!-- DEALS VIEW -->
+    <!-- [VIEW 01] DEALS VIEW (VST 딜 스토어) -->
     <section id="dealsView" aria-label="VST 딜 스토어">
       <div class="category-section">
         <div class="main-cat-bar" role="tablist">
@@ -175,7 +101,7 @@
       <div class="deals-grid" id="dealsContainer"></div>
     </section>
 
-    <!-- COMMUNITY VIEW -->
+    <!-- [VIEW 02] COMMUNITY VIEW (프로듀서 커뮤니티) -->
     <section id="communityView" aria-label="프로듀서 커뮤니티">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
         <div>
@@ -219,7 +145,7 @@
       </div>
     </section>
 
-    <!-- POST WRITE / EDIT VIEW -->
+    <!-- [VIEW 03] POST WRITE / EDIT VIEW (게시글 작성 및 수정) -->
     <section id="postWriteView" aria-label="커뮤니티 게시글 작성">
       <div class="standalone-panel-box" style="max-width: 800px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.8rem;">
@@ -280,7 +206,7 @@
       </div>
     </section>
 
-    <!-- POST DETAIL & COMMENTS VIEW -->
+    <!-- [VIEW 04] POST DETAIL & COMMENTS VIEW (게시글 상세 및 댓글) -->
     <section id="postDetailView" aria-label="게시글 상세 보기">
       <div class="standalone-panel-box" style="max-width: 840px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:1px solid var(--border-color); padding-bottom:1.1rem; flex-wrap:wrap; gap:0.5rem;">
@@ -304,7 +230,7 @@
       </div>
     </section>
 
-    <!-- MY PAGE VIEW -->
+    <!-- [VIEW 05] MY PAGE VIEW (마이페이지) -->
     <section id="myPageView" aria-label="마이페이지">
       <div class="standalone-panel-box" style="max-width: 720px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.8rem; border-bottom:1px solid var(--border-color); padding-bottom:1.1rem;">
@@ -400,7 +326,7 @@
       </div>
     </section>
 
-    <!-- ADMIN VIEW -->
+    <!-- [VIEW 06] ADMIN VIEW (관리자 센터) -->
     <section id="adminView" aria-label="관리자 센터">
       <div class="standalone-panel-box" style="margin-bottom:2rem;">
         <h2 style="font-weight:700; font-size:1.35rem; margin-bottom:0.35rem; color:var(--accent-gold);">VST Deal Management (Admin)</h2>
@@ -474,6 +400,9 @@
     </section>
   </main>
 
+  <!-- =========================================================
+       [FOOTER] 하단 푸터 및 약관 링크
+       ========================================================= -->
   <footer role="contentinfo">
     <p>© 2026 PlugAzit. All rights reserved.  |  
        Contact: <a href="mailto:aftrdry@outlook.kr">aftrdry@outlook.kr</a>
@@ -487,7 +416,10 @@
     </div>
   </footer>
 
-  <!-- MODALS -->
+  <!-- =========================================================
+       [MODALS] 팝업 모달 8종
+       ========================================================= -->
+  <!-- 1. 플러그인 상세 정보 모달 -->
   <div class="modal-overlay" id="dealDetailModal" role="dialog" aria-modal="true" aria-label="플러그인 상세 정보" onclick="checkModalBackdropClose(event, 'dealDetailModal')">
     <div class="modal-box large-detail-modal" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('dealDetailModal')">×</button>
@@ -495,7 +427,7 @@
     </div>
   </div>
 
-  <!-- 게시물/댓글 신고 모달 -->
+  <!-- 2. 게시물/댓글 신고 모달 -->
   <div class="modal-overlay" id="reportModal" role="dialog" aria-modal="true" aria-label="게시물 신고" onclick="checkModalBackdropClose(event, 'reportModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('reportModal')">×</button>
@@ -521,7 +453,7 @@
     </div>
   </div>
 
-  <!-- 관리자 1:1 문의 모달 -->
+  <!-- 3. 관리자 1:1 문의 모달 -->
   <div class="modal-overlay" id="inquiryModal" role="dialog" aria-modal="true" aria-label="관리자 문의" onclick="checkModalBackdropClose(event, 'inquiryModal')">
     <div class="modal-box" style="max-width:520px;" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('inquiryModal')">×</button>
@@ -556,6 +488,7 @@
     </div>
   </div>
 
+  <!-- 4. 로그인 모달 -->
   <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-label="로그인" onclick="checkModalBackdropClose(event, 'loginModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('loginModal')">×</button>
@@ -581,6 +514,7 @@
     </div>
   </div>
 
+  <!-- 5. 비밀번호 재설정 모달 -->
   <div class="modal-overlay" id="resetPwModal" role="dialog" aria-modal="true" aria-label="비밀번호 재설정" onclick="checkModalBackdropClose(event, 'resetPwModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('resetPwModal')">×</button>
@@ -598,6 +532,7 @@
     </div>
   </div>
 
+  <!-- 6. 아이디 힌트 찾기 모달 -->
   <div class="modal-overlay" id="findEmailModal" role="dialog" aria-modal="true" aria-label="아이디 힌트 찾기" onclick="checkModalBackdropClose(event, 'findEmailModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('findEmailModal')">×</button>
@@ -615,6 +550,7 @@
     </div>
   </div>
 
+  <!-- 7. 회원가입 모달 -->
   <div class="modal-overlay" id="signupModal" role="dialog" aria-modal="true" aria-label="회원가입" onclick="checkModalBackdropClose(event, 'signupModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('signupModal')">×</button>
@@ -646,6 +582,7 @@
     </div>
   </div>
 
+  <!-- 8. 약관 및 개인정보 처리방침 모달 -->
   <div class="modal-overlay" id="termsModal" role="dialog" aria-modal="true" aria-label="약관 및 개인정보 처리방침" onclick="checkModalBackdropClose(event, 'termsModal')">
     <div class="modal-box" style="max-width: 620px;" onclick="event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="모달 닫기" onclick="closeModal('termsModal')">×</button>
