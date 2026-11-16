@@ -92,11 +92,13 @@ header {
 }
 
 .logo-container {
-  display: flex; align-items: center; text-decoration: none; cursor: pointer; height: 74px;
+  display: flex; align-items: center; text-decoration: none; cursor: pointer; height: 74px; flex-shrink: 0;
 }
 .brand-logo-img {
-  height: 68px; width: auto; display: block; object-fit: contain;
-  transition: filter 0.3s ease;
+  height: 76px; width: auto; display: block; object-fit: contain;
+  transform: scale(1.22);
+  transform-origin: left center;
+  transition: filter 0.3s ease, transform 0.25s ease;
 }
 [data-theme="dark"] .brand-logo-img { filter: invert(1); }
 [data-theme="light"] .brand-logo-img { filter: none; }
@@ -778,14 +780,18 @@ footer a:hover { color: var(--accent-gold); }
     z-index: 1000 !important;
   }
 
-  /* 1층 좌측: 로고 */
+  /* 1층 좌측: 로고 (박스 높이는 32px로 고정해 버튼 밀림을 막고 로고만 큼직하게 확대) */
   .logo-container {
     height: 32px !important;
     width: fit-content !important;
+    display: flex !important;
+    align-items: center !important;
   }
 
   .brand-logo-img {
-    height: 28px !important;
+    height: 34px !important;
+    transform: scale(1.28) !important;
+    transform-origin: left center !important;
   }
 
   /* 1층 우측 상단 고정: 로그인/회원가입 (또는 Admin Center/마이페이지/로그아웃) */
