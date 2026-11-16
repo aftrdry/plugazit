@@ -9,20 +9,95 @@
   <meta property="og:title" content="PlugAzit — Right Near, Your Azit.">
   <meta property="og:description" content="Right Near, Your Azit.">
   <meta property="og:url" content="https://plugazit.com">
-  <meta name="theme-color" content="#0b0d0c">
+  <meta name="theme-color" content="#101211">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <link rel="stylesheet" href="style.css">
+  <style>
+    .hero-slogan-section .hero-title {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
+      font-weight: 700 !important;
+      font-size: 2.35rem !important;
+      letter-spacing: -0.025em !important;
+      color: #f3efe6 !important;
+      line-height: 1.25 !important;
+    }
+    [data-theme="light"] .hero-slogan-section .hero-title {
+      color: #1c1e1c !important;
+    }
+    .hero-sub-desc {
+      margin-top: 0.45rem;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      word-break: keep-all;
+    }
+    .scroll-to-top-fab {
+      position: fixed;
+      right: max(1.5rem, env(safe-area-inset-right));
+      bottom: max(1.6rem, env(safe-area-inset-bottom));
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(22, 25, 23, 0.28);
+      border: 1px solid rgba(198, 174, 130, 0.22);
+      color: rgba(198, 174, 130, 0.78);
+      opacity: 0.75;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1500;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+      transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+      padding: 0;
+    }
+    .scroll-to-top-fab:hover {
+      background: rgba(22, 25, 23, 0.72);
+      border-color: var(--accent-gold);
+      color: #fff;
+      opacity: 1;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+    }
+    .scroll-to-top-fab:active {
+      transform: translateY(0) scale(0.94);
+    }
+    [data-theme="light"] .scroll-to-top-fab {
+      background: rgba(251, 249, 245, 0.32);
+      border-color: rgba(120, 97, 55, 0.2);
+      color: rgba(120, 97, 55, 0.78);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+    [data-theme="light"] .scroll-to-top-fab:hover {
+      background: rgba(251, 249, 245, 0.85);
+      color: var(--text-primary);
+      opacity: 1;
+    }
+    @media (max-width: 768px) {
+      .hero-slogan-section .hero-title {
+        font-size: 1.8rem !important;
+      }
+      .hero-sub-desc {
+        font-size: 0.8rem;
+        margin-top: 0.35rem;
+      }
+      .scroll-to-top-fab {
+        right: max(1rem, env(safe-area-inset-right));
+        bottom: max(1.2rem, env(safe-area-inset-bottom));
+        width: 40px;
+        height: 40px;
+      }
+    }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
-  <!-- 아날로그 스튜디오 그레인 텍스처 & 앰비언트 오로라 조명 -->
-  <div class="ambient-aurora-bg" aria-hidden="true"></div>
-  <div class="studio-grain-overlay" aria-hidden="true"></div>
 
   <header role="banner">
     <a href="#" class="logo-container" onclick="resetToHome(); return false;" aria-label="PlugAzit 홈으로 이동">
@@ -57,17 +132,8 @@
 
   <main class="container" role="main">
     <div class="hero-slogan-section">
-      <div class="hero-Slogan-left">
-        <div class="hero-status-pill">
-          <span class="status-pulse-dot"></span>
-          <span>AUDIO PLUGIN ARCHIVE & COMMUNITY</span>
-        </div>
-        <h1 class="hero-title">Right Near, Your Azit.</h1>
-        <p class="hero-sub-desc">VST 플러그인 할인 정보 · 프로듀서 커뮤니티</p>
-      </div>
-      <div class="hero-eq-visualizer" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      </div>
+      <h1 class="hero-title">Right Near, Your Azit.</h1>
+      <p class="hero-sub-desc">VST 플러그인 할인 정보 · 프로듀서 커뮤니티</p>
     </div>
 
     <!-- DEALS VIEW -->
@@ -634,20 +700,5 @@
   <canvas id="ambientDragCanvas" aria-hidden="true"></canvas>
 
   <script src="app.js"></script>
-  <!-- 카드 3D 마우스 스포트라이트 보더 & 스태거 모션 인터랙션 스크립트 -->
-  <script>
-    (function() {
-      document.addEventListener('mousemove', function(e) {
-        const cards = document.querySelectorAll('.deal-card, .comm-card, .standalone-panel-box');
-        for (let i = 0; i < cards.length; i++) {
-          const rect = cards[i].getBoundingClientRect();
-          if (e.clientY >= rect.top - 120 && e.clientY <= rect.bottom + 120) {
-            cards[i].style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
-            cards[i].style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
-          }
-        }
-      }, { passive: true });
-    })();
-  </script>
 </body>
 </html>
