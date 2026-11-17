@@ -166,35 +166,39 @@ nav {
 .nav-btn:hover,
 .nav-btn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
 
-/* Admin Center 버튼 가독성 및 강제 홀드(액티브 고정) 제거 교정 */
+/* Admin Center 버튼 가독성 및 호버 시 글자 사라짐 현상 완벽 방어 교정 */
 #navAdminBtn {
-  border-color: var(--border-strong);
-  color: var(--accent-gold);
-  transition: all 0.2s ease;
+  background: transparent !important;
+  border-color: var(--border-strong) !important;
+  color: var(--accent-gold) !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
 }
 
 [data-theme="light"] #navAdminBtn {
-  background: transparent;
-  border-color: rgba(120, 97, 55, 0.35);
-  color: #786137;
-  font-weight: 600;
+  background: transparent !important;
+  border-color: rgba(120, 97, 55, 0.4) !important;
+  color: #5c4826 !important;
 }
 
 [data-theme="light"] #navAdminBtn:hover,
 [data-theme="light"] #navAdminBtn.active {
-  background: #786137;
-  color: #fbf9f5;
+  background: #5c4826 !important;
+  color: #ffffff !important;
+  border-color: #5c4826 !important;
 }
 
 [data-theme="dark"] #navAdminBtn {
-  background: transparent;
-  color: var(--accent-gold);
+  background: transparent !important;
+  border-color: rgba(198, 174, 130, 0.4) !important;
+  color: #f1dfbc !important;
 }
 
 [data-theme="dark"] #navAdminBtn:hover,
 [data-theme="dark"] #navAdminBtn.active {
-  background: var(--accent-gold);
-  color: var(--bg-color);
+  background: #f1dfbc !important;
+  color: #111312 !important;
+  border-color: #f1dfbc !important;
 }
 
 /* =========================================================
