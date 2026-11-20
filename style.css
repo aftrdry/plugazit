@@ -29,6 +29,12 @@
   --text-primary: #f0ede6;
   --text-secondary: #8e9690;
   --modal-bg: #151816;
+  --scrollbar-track: rgba(17, 19, 18, 0.35);
+  --scrollbar-thumb-start: rgba(198, 174, 130, 0.28);
+  --scrollbar-thumb-mid: rgba(198, 174, 130, 0.55);
+  --scrollbar-thumb-hover-mid: rgba(218, 195, 150, 0.85);
+  --scrollbar-glow: rgba(198, 174, 130, 0.32);
+  --scrollbar-glow-hover: rgba(198, 174, 130, 0.6);
   --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-typewriter: 'Special Elite', serif;
 }
@@ -48,6 +54,12 @@
   --text-primary: #1c1e1c;
   --text-secondary: #666b67;
   --modal-bg: #fbf9f5;
+  --scrollbar-track: rgba(235, 230, 220, 0.6);
+  --scrollbar-thumb-start: rgba(125, 104, 64, 0.26);
+  --scrollbar-thumb-mid: rgba(125, 104, 64, 0.48);
+  --scrollbar-thumb-hover-mid: rgba(102, 84, 50, 0.75);
+  --scrollbar-glow: rgba(125, 104, 64, 0.16);
+  --scrollbar-glow-hover: rgba(125, 104, 64, 0.32);
 }
 
 * {
@@ -55,26 +67,26 @@
   margin: 0;
   padding: 0;
   scrollbar-width: thin;
-  scrollbar-color: rgba(212, 219, 226, 0.32) rgba(17, 19, 18, 0.25);
+  scrollbar-color: var(--scrollbar-thumb-mid) var(--scrollbar-track);
 }
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 4px;
+  width: 6px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(17, 19, 18, 0.35);
-  border-radius: 0;
+  background: var(--scrollbar-track);
+  border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, rgba(196, 204, 214, 0.24), rgba(226, 232, 240, 0.48), rgba(196, 204, 214, 0.24));
-  border-radius: 0;
-  box-shadow: 0 0 6px rgba(212, 219, 226, 0.22);
-  transition: background 0.25s ease, box-shadow 0.25s ease;
+  background: linear-gradient(90deg, var(--scrollbar-thumb-start), var(--scrollbar-thumb-mid), var(--scrollbar-thumb-start));
+  border-radius: 999px;
+  box-shadow: 0 0 8px var(--scrollbar-glow);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 ::-webkit-scrollbar-thumb:hover,
 ::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(90deg, rgba(212, 219, 226, 0.45), rgba(242, 246, 250, 0.78), rgba(212, 219, 226, 0.45));
-  box-shadow: 0 0 10px rgba(226, 232, 240, 0.4);
+  background: linear-gradient(90deg, var(--scrollbar-thumb-mid), var(--scrollbar-thumb-hover-mid), var(--scrollbar-thumb-mid));
+  box-shadow: 0 0 14px var(--scrollbar-glow-hover);
 }
 
 #ambientDragCanvas {
@@ -153,17 +165,17 @@ nav {
 }
 
 .toggle-switch {
-  position: relative; width: 44px; height: 22px;
-  background: var(--card-bg); border: 1px solid var(--silver-hairline); border-radius: 2px;
+  position: relative; width: 44px; height: 24px;
+  background: var(--card-bg); border: 1px solid var(--silver-hairline); border-radius: 999px;
   cursor: pointer; transition: border-color 0.2s ease, background-color 0.2s ease;
-  display: flex; align-items: center; padding: 2px; margin: 0 0.2rem;
+  display: flex; align-items: center; padding: 3px; margin: 0 0.15rem; flex-shrink: 0;
 }
 .toggle-switch:hover { border-color: var(--silver-hairline-hover); }
 .toggle-knob {
-  width: 16px; height: 16px; background: var(--text-primary); border-radius: 1px;
-  transition: 0.22s transform cubic-bezier(0.22, 1, 0.36, 1); transform: translateX(0); display: block;
+  width: 16px; height: 16px; background: var(--text-primary); border-radius: 50%;
+  transition: 0.25s transform cubic-bezier(0.22, 1, 0.36, 1); transform: translateX(0); display: block;
 }
-[data-theme="light"] .toggle-knob { transform: translateX(22px); }
+[data-theme="light"] .toggle-knob { transform: translateX(20px); }
 
 #authNav, #userNav { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; }
 #authNav[style*="none"], #userNav[style*="none"] { display: none !important; }
@@ -963,14 +975,14 @@ footer a:hover { color: var(--accent-gold); }
     transform-origin: left center !important;
   }
 
-  /* 1층 우측 상단 고정: 로그인/회원가입 (또는 Admin Center/마이페이지/로그아웃) */
+  /* 1층 우측 상단 고정: 로그인/회원가입 (또는 Admin Center/마이페이지/로그아웃) + 테마 토글 */
   .header-top-right {
     position: absolute !important;
     top: 0.68rem !important;
     right: 0.85rem !important;
     display: flex !important;
     align-items: center !important;
-    gap: 0.22rem !important;
+    gap: 0.25rem !important;
     z-index: 20 !important;
   }
 
@@ -997,7 +1009,21 @@ footer a:hover { color: var(--accent-gold); }
     font-size: 0.72rem !important;
   }
 
-  /* 2층 상단 고정: VST Vault, Community, Discord, Twitter + 다크/라이트 토글 */
+  .header-top-right .toggle-switch {
+    width: 36px !important;
+    height: 20px !important;
+    padding: 2px !important;
+    margin: 0 0 0 0.1rem !important;
+  }
+  .header-top-right .toggle-knob {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  [data-theme="light"] .header-top-right .toggle-knob {
+    transform: translateX(16px) !important;
+  }
+
+  /* 2층 상단 고정: VST Vault, Community, Discord, Twitter */
   nav {
     width: 100% !important;
     margin: 0 !important;
@@ -1015,11 +1041,6 @@ footer a:hover { color: var(--accent-gold); }
     flex-shrink: 0 !important;
     padding: 0.36rem 0.68rem !important;
     font-size: 0.8rem !important;
-  }
-
-  .toggle-switch {
-    flex-shrink: 0 !important;
-    margin: 0 0 0 auto !important;
   }
 
   .container {
